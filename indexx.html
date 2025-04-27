@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>LG 마곡 사이언스파크 강의 방문 안내</title>
+  
+  <!-- Tailwind CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet" />
+  <!-- FontAwesome -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" />
+  <!-- Google Fonts (Pretendard) -->
+  <link href="https://fonts.googleapis.com/css2?family=Pretendard&display=swap" rel="stylesheet">
+  <!-- AOS 애니메이션 -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.css"/>
+
+  <style>
+    body {
+      font-family: 'Pretendard', sans-serif;
+      background-color: #f8f9fb;
+      color: #212121;
+      line-height: 1.6;
+    }
+    .section {
+      background: #fff;
+      border-radius: 1rem;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.05);
+      padding: 2rem;
+      margin-bottom: 2rem;
+    }
+    .btn-main {
+      background-color: #a50034;
+      color: #fff;
+      padding: 0.75rem 1.5rem;
+      border-radius: 8px;
+      font-weight: 600;
+      transition: all 0.3s ease;
+    }
+    .btn-main:hover {
+      background-color: #8c002b;
+      transform: translateY(-2px);
+    }
+  </style>
+</head>
+<body class="max-w-3xl mx-auto px-4 py-10">
+<!-- 헤더 -->
+<header class="text-center mb-10" data-aos="fade-down">
+  <h1 class="text-3xl font-bold text-[#a50034] mb-2">LG 마곡 사이언스파크 외부 강사 방문 안내</h1>
+  <p class="text-gray-600">필수 준비사항을 확인하시고 방문해 주세요.</p>
+</header>
+
+<!-- 1. 링크 생성 공유 방법 -->
+<section class="section" data-aos="fade-up">
+  <h2 class="text-2xl font-bold text-[#a50034] mb-4">🔗 링크 생성 공유 방법</h2>
+  <ol class="list-decimal pl-5 space-y-2 text-gray-700">
+    <li>양식을 모두 작성 후 우측 하단 <b>링크 생성</b> 버튼 클릭</li>
+    <li>생성된 링크를 복사하여 담당자에게 메일로 회신</li>
+  </ol>
+</section>
+<!-- 2. 사전 확인 -->
+<section class="section" data-aos="fade-up">
+  <h2 class="text-2xl font-bold text-[#a50034] mb-4">📋 사전 확인</h2>
+  <div class="space-y-4">
+
+    <!-- 파일 업로드: 설치 파일 -->
+    <div>
+      <h3 class="font-semibold text-lg mb-2">💻 프로그램 설치 파일 공유</h3>
+      <input type="file" id="program-file" class="block w-full text-gray-700"/>
+    </div>
+
+    <!-- 교재 제공 방식 -->
+    <div>
+      <h3 class="font-semibold text-lg mb-2">📚 교재 제공 방식 선택</h3>
+      <div class="space-x-4">
+        <label><input type="checkbox" id="pdf-material"> PDF 교재</label>
+        <label><input type="checkbox" id="printed-material"> 인쇄본 교재</label>
+        <label><input type="checkbox" id="none-material"> 해당사항 없음</label>
+      </div>
+    </div>
+
+  </div>
+</section>
+<!-- 3. 출입 안내 -->
+<section class="section" data-aos="fade-up">
+  <h2 class="text-2xl font-bold text-[#a50034] mb-4">🚪 출입 안내</h2>
+  <ol class="list-decimal pl-5 space-y-2 text-gray-700">
+    <li>LG 방문 포털(visit.lg.com) 접속 후 비회원 예약</li>
+    <li>방문 장소: LG전자 마곡 사이언스파크 W10동</li>
+    <li>전자기기 반입 시 MAC 주소 등록 필수</li>
+    <li>당일 안내데스크에서 신분증 제시 후 방문증 수령</li>
+  </ol>
+</section>
+<!-- 4. 강사 정보 입력 -->
+<section class="section" data-aos="fade-up">
+  <h2 class="text-2xl font-bold text-[#a50034] mb-4">🧑‍🏫 강사 정보 입력</h2>
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <input type="text" class="border p-2 rounded" placeholder="업체명">
+    <input type="text" class="border p-2 rounded" placeholder="성함">
+    <input type="tel" class="border p-2 rounded" placeholder="연락처">
+  </div>
+</section>
+<!-- 5. 차량 및 장비 정보 -->
+<section class="section" data-aos="fade-up">
+  <h2 class="text-2xl font-bold text-[#a50034] mb-4">🚗 차량 및 장비 정보</h2>
+
+  <h3 class="font-semibold text-lg mb-2">차량 정보</h3>
+  <div class="flex flex-wrap gap-4 mb-6">
+    <input type="text" class="border p-2 rounded" placeholder="차종 (예: 아반떼)">
+    <input type="text" class="border p-2 rounded" placeholder="차량번호 (예: 12가 3456)">
+  </div>
+
+  <h3 class="font-semibold text-lg mb-2">장비 반입 정보</h3>
+  <table class="w-full border text-sm">
+    <thead class="bg-gray-100">
+      <tr>
+        <th class="p-2">장비명</th>
+        <th class="p-2">제조사</th>
+        <th class="p-2">MAC 주소</th>
+      </tr>
+    </thead>
+    <tbody id="equipment-tbody">
+      <tr>
+        <td class="border p-2"><input type="text" class="w-full p-1"></td>
+        <td class="border p-2"><input type="text" class="w-full p-1"></td>
+        <td class="border p-2"><input type="text" class="w-full p-1"></td>
+      </tr>
+    </tbody>
+  </table>
+</section>
+<!-- 링크 생성 버튼 -->
+<div class="fixed bottom-6 right-6">
+  <button class="btn-main shadow-lg">
+    🔗 링크 생성
+  </button>
+</div>
+
+<!-- AOS 스크립트 -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.js"></script>
+<script>
+  AOS.init({ once: true, duration: 800 });
+</script>
+
+</body>
+</html>
