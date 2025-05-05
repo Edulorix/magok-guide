@@ -3,190 +3,277 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>LG Science Park 방문 안내 시스템</title>
+  <title>LG Science Park 방문 안내</title>
+  
   <!-- Tailwind CSS -->
   <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-  <!-- Font Awesome Icons -->
-  <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet">
+  
+  <!-- Font Awesome -->
+  <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.2.1/css/all.min.css" rel="stylesheet">
+  
   <!-- Google Fonts -->
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
+  
   <style>
     :root {
       --lg-red: #B8202E;
-      --lg-light-red: #FFF1F1;
-      --lg-gray: #F5F5F7;
-      --lg-dark-gray: #6B7280;
+      --lg-red-light: #e63946;
+      --lg-red-dark: #96192a;
+      --lg-gray-100: #f8f9fa;
+      --lg-gray-200: #e9ecef;
+      --lg-gray-300: #dee2e6;
+      --lg-gray-400: #ced4da;
+      --lg-gray-500: #adb5bd;
+      --lg-gray-600: #6c757d;
+      --lg-gray-700: #495057;
+      --lg-gray-800: #343a40;
+      --lg-gray-900: #212529;
+      --lg-success: #28a745;
+      --lg-warning: #ffc107;
+      --lg-info: #17a2b8;
+      --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+      --shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+      --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+      --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+      --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+      --transition-default: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
     }
     
     body {
       font-family: 'Noto Sans KR', sans-serif;
-      background-color: #f9fafb;
-      color: #333;
+      background-color: var(--lg-gray-100);
+      color: var(--lg-gray-800);
+      line-height: 1.6;
+      letter-spacing: -0.01em;
+      min-height: 100vh;
     }
     
     .container {
-      max-width: 1000px;
+      max-width: 1200px;
       margin: 0 auto;
-      padding: 0 1rem;
-    }
-    
-    .lg-red {
-      color: var(--lg-red);
-    }
-    
-    .lg-bg-red {
-      background-color: var(--lg-red);
+      padding: 0 1.5rem;
     }
     
     .lg-card {
       background-color: white;
-      border-radius: 10px;
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-      padding: 1.5rem;
-      margin-bottom: 1.5rem;
-      transition: all 0.3s ease;
+      border-radius: 12px;
+      box-shadow: var(--shadow-md);
+      transition: var(--transition-default);
+      overflow: hidden;
     }
     
     .lg-card:hover {
-      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.08);
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-lg);
     }
     
     .lg-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
       background-color: var(--lg-red);
       color: white;
-      border-radius: 6px;
-      padding: 0.5rem 1rem;
       font-weight: 500;
-      transition: all 0.2s ease;
+      padding: 0.625rem 1.25rem;
+      border-radius: 0.5rem;
+      transition: var(--transition-default);
+      cursor: pointer;
+      box-shadow: var(--shadow-sm);
+      border: none;
+      outline: none;
     }
     
     .lg-btn:hover {
-      background-color: #a11d29;
+      background-color: var(--lg-red-light);
       transform: translateY(-1px);
+      box-shadow: var(--shadow);
+    }
+    
+    .lg-btn:active {
+      background-color: var(--lg-red-dark);
+      transform: translateY(0);
     }
     
     .lg-btn-secondary {
-      background-color: #f3f4f6;
-      color: #4b5563;
-      border-radius: 6px;
-      padding: 0.5rem 1rem;
-      font-weight: 500;
-      transition: all 0.2s ease;
+      background-color: white;
+      color: var(--lg-red);
+      border: 1px solid var(--lg-red);
     }
     
     .lg-btn-secondary:hover {
-      background-color: #e5e7eb;
-      transform: translateY(-1px);
+      background-color: var(--lg-gray-100);
+      color: var(--lg-red-dark);
     }
     
     .lg-form-control {
-      border: 1px solid #e5e7eb;
-      border-radius: 6px;
-      padding: 0.5rem 0.75rem;
       width: 100%;
-      transition: all 0.2s ease;
+      padding: 0.625rem 0.875rem;
+      border: 1.5px solid var(--lg-gray-300);
+      border-radius: 0.5rem;
+      transition: var(--transition-default);
+      font-size: 0.95rem;
     }
     
     .lg-form-control:focus {
       border-color: var(--lg-red);
-      box-shadow: 0 0 0 3px rgba(184, 32, 46, 0.1);
+      box-shadow: 0 0 0 3px rgba(184, 32, 46, 0.15);
       outline: none;
+    }
+    
+    .lg-form-label {
+      display: block;
+      font-weight: 500;
+      margin-bottom: 0.5rem;
+      color: var(--lg-gray-700);
+    }
+    
+    .lg-form-group {
+      margin-bottom: 1.5rem;
+    }
+    
+    .progress-container {
+      position: relative;
+      margin: 2rem 0;
+    }
+    
+    .progress-bar {
+      position: relative;
+      height: 4px;
+      background-color: var(--lg-gray-300);
+      border-radius: 2px;
+      overflow: hidden;
+      margin-bottom: 1.5rem;
+      z-index: 1;
+    }
+    
+    .progress-fill {
+      position: absolute;
+      top: 0;
+      left: 0;
+      height: 100%;
+      background-color: var(--lg-red);
+      transition: width 0.5s ease;
     }
     
     .step-indicator {
       display: flex;
       justify-content: space-between;
       position: relative;
-      margin-bottom: 2rem;
-    }
-    
-    .step-indicator::before {
-      content: '';
-      position: absolute;
-      top: 24px;
-      left: 0;
-      right: 0;
-      height: 2px;
-      background-color: #e5e7eb;
-      z-index: 1;
     }
     
     .step {
-      position: relative;
-      z-index: 2;
       display: flex;
       flex-direction: column;
       align-items: center;
-      text-align: center;
+      width: 25%;
     }
     
-    .step-circle {
-      width: 48px;
-      height: 48px;
-      border-radius: 50%;
+    .step-dot {
+      width: 24px;
+      height: 24px;
       background-color: white;
-      border: 2px solid #e5e7eb;
+      border: 2px solid var(--lg-gray-400);
+      border-radius: 50%;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-weight: bold;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--lg-gray-600);
+      position: relative;
+      z-index: 2;
       margin-bottom: 0.5rem;
       transition: all 0.3s ease;
     }
     
-    .step.active .step-circle {
+    .step.active .step-dot {
       background-color: var(--lg-red);
       border-color: var(--lg-red);
       color: white;
     }
     
-    .step.completed .step-circle {
+    .step.completed .step-dot {
       background-color: var(--lg-red);
       border-color: var(--lg-red);
       color: white;
     }
     
-    .fade-in {
-      animation: fadeIn 0.3s ease-in-out;
+    .step-label {
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: var(--lg-gray-600);
+      text-align: center;
+      transition: color 0.3s ease;
     }
     
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(10px); }
-      to { opacity: 1; transform: translateY(0); }
+    .step.active .step-label {
+      color: var(--lg-red);
+      font-weight: 600;
+    }
+    
+    .step.completed .step-label {
+      color: var(--lg-red);
     }
     
     .tab-section {
       display: none;
+      opacity: 0;
+      transform: translateY(10px);
+      transition: opacity 0.3s ease, transform 0.3s ease;
     }
     
     .tab-section.active {
       display: block;
+      opacity: 1;
+      transform: translateY(0);
       animation: fadeIn 0.3s ease-in-out;
     }
     
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    
+    .info-section {
+      background-color: var(--lg-gray-100);
+      border-left: 4px solid var(--lg-red);
+      padding: 1rem 1.5rem;
+      margin-bottom: 1.5rem;
+      border-radius: 0 0.5rem 0.5rem 0;
+    }
+    
     .drag-drop-area {
-      border: 2px dashed #cbd5e1;
-      border-radius: 8px;
-      padding: 2rem;
+      border: 2px dashed var(--lg-gray-400);
+      border-radius: 0.5rem;
+      padding: 2.5rem 1.5rem;
       text-align: center;
-      transition: all 0.2s ease;
-      background-color: #f8fafc;
+      transition: var(--transition-default);
+      background-color: var(--lg-gray-100);
+      cursor: pointer;
     }
     
-    .drag-drop-area:hover {
+    .drag-drop-area:hover,
+    .drag-drop-area.drag-over {
       border-color: var(--lg-red);
-      background-color: var(--lg-light-red);
+      background-color: rgba(184, 32, 46, 0.05);
     }
     
-    .equipment-row {
+    .equipment-row,
+    .vehicle-row {
       display: flex;
       flex-wrap: wrap;
-      gap: 1rem;
-      padding: 1rem;
-      border-radius: 8px;
-      border: 1px solid #e5e7eb;
+      gap: 0.75rem;
       margin-bottom: 1rem;
-      background-color: #f9fafb;
+      padding: 1rem;
+      background-color: var(--lg-gray-100);
+      border-radius: 0.5rem;
+      position: relative;
     }
     
     .equipment-col {
@@ -194,116 +281,282 @@
       min-width: 150px;
     }
     
-    .info-panel {
-      background-color: #f3f4f6;
-      border-left: 4px solid var(--lg-red);
-      padding: 1rem;
-      border-radius: 0 8px 8px 0;
-      margin-bottom: 1rem;
+    .remove-btn {
+      position: absolute;
+      top: 0.75rem;
+      right: 0.75rem;
+      color: var(--lg-gray-500);
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-size: 1rem;
+      transition: color 0.2s;
     }
     
-    .checkbox-container {
+    .remove-btn:hover {
+      color: var(--lg-red);
+    }
+    
+    .toast {
+      position: fixed;
+      bottom: 2rem;
+      right: 2rem;
+      background-color: var(--lg-gray-800);
+      color: white;
+      padding: 0.75rem 1.5rem;
+      border-radius: 0.5rem;
+      box-shadow: var(--shadow-lg);
+      display: none;
+      z-index: 9999;
+      animation: fadeIn 0.3s ease-in-out;
+    }
+    
+    .toast.show {
+      display: block;
+    }
+    
+    .custom-checkbox {
+      position: relative;
       display: flex;
-      align-items: flex-start;
-      margin-bottom: 0.5rem;
+      align-items: center;
+      cursor: pointer;
+      user-select: none;
+      padding-left: 2rem;
+      margin-bottom: 0.75rem;
     }
     
-    .checkbox-container input[type="checkbox"] {
-      margin-top: 0.25rem;
-      margin-right: 0.5rem;
+    .custom-checkbox input {
+      position: absolute;
+      opacity: 0;
+      cursor: pointer;
+      height: 0;
+      width: 0;
+    }
+    
+    .checkmark {
+      position: absolute;
+      left: 0;
+      top: 50%;
+      transform: translateY(-50%);
+      height: 20px;
+      width: 20px;
+      background-color: white;
+      border: 1.5px solid var(--lg-gray-400);
+      border-radius: 4px;
+      transition: var(--transition-default);
+    }
+    
+    .custom-checkbox:hover input ~ .checkmark {
+      border-color: var(--lg-gray-500);
+    }
+    
+    .custom-checkbox input:checked ~ .checkmark {
+      background-color: var(--lg-red);
+      border-color: var(--lg-red);
+    }
+    
+    .checkmark:after {
+      content: "";
+      position: absolute;
+      display: none;
+      left: 7px;
+      top: 3px;
+      width: 5px;
+      height: 10px;
+      border: solid white;
+      border-width: 0 2px 2px 0;
+      transform: rotate(45deg);
+    }
+    
+    .custom-checkbox input:checked ~ .checkmark:after {
+      display: block;
+    }
+    
+    .tab-navigation {
+      display: flex;
+      margin-bottom: 1.5rem;
+      border-bottom: 1px solid var(--lg-gray-300);
+    }
+    
+    .tab-button {
+      padding: 0.75rem 1.5rem;
+      border: none;
+      background: none;
+      cursor: pointer;
+      transition: var(--transition-default);
+      font-weight: 500;
+      color: var(--lg-gray-600);
+      position: relative;
+    }
+    
+    .tab-button:hover {
+      color: var(--lg-red);
+    }
+    
+    .tab-button.active {
+      color: var(--lg-red);
+      font-weight: 600;
+    }
+    
+    .tab-button.active::after {
+      content: '';
+      position: absolute;
+      bottom: -1px;
+      left: 0;
+      width: 100%;
+      height: 2px;
+      background-color: var(--lg-red);
     }
     
     @media (max-width: 768px) {
-      .step-indicator {
-        overflow-x: auto;
-        padding-bottom: 1rem;
+      .container {
+        padding: 0 1rem;
       }
       
-      .equipment-row {
+      .step-label {
+        font-size: 0.7rem;
+      }
+      
+      .equipment-row,
+      .vehicle-row {
         flex-direction: column;
+        gap: 0.5rem;
       }
       
       .equipment-col {
         width: 100%;
       }
+      
+      .tab-button {
+        padding: 0.75rem 0.5rem;
+        font-size: 0.9rem;
+      }
     }
     
-    .tab-button {
+    .file-preview {
+      display: flex;
+      align-items: center;
       padding: 0.75rem 1rem;
-      background-color: #f3f4f6;
-      border-radius: 6px;
-      margin-right: 0.5rem;
-      transition: all 0.2s ease;
+      background-color: var(--lg-gray-100);
+      border-radius: 0.5rem;
+      margin-top: 1rem;
     }
     
-    .tab-button.active {
-      background-color: var(--lg-red);
-      color: white;
+    .file-icon {
+      font-size: 1.5rem;
+      margin-right: 1rem;
+      color: var(--lg-red);
     }
     
-    .tab-button:hover:not(.active) {
-      background-color: #e5e7eb;
+    .file-info {
+      flex: 1;
+    }
+    
+    .file-name {
+      font-weight: 500;
+      margin-bottom: 0.25rem;
+    }
+    
+    .file-size {
+      font-size: 0.85rem;
+      color: var(--lg-gray-600);
+    }
+    
+    .file-remove {
+      color: var(--lg-gray-500);
+      cursor: pointer;
+      transition: color 0.2s;
+    }
+    
+    .file-remove:hover {
+      color: var(--lg-red);
+    }
+    
+    .summary-item {
+      margin-bottom: 1rem;
+    }
+    
+    .summary-label {
+      font-weight: 500;
+      color: var(--lg-gray-700);
+      margin-bottom: 0.25rem;
+    }
+    
+    .summary-value {
+      color: var(--lg-gray-900);
+    }
+    
+    .summary-value .empty {
+      color: var(--lg-gray-500);
+      font-style: italic;
     }
   </style>
 </head>
-<body>
-  <header class="py-6 bg-white shadow-sm">
+<body class="pb-20">
+  <header class="py-10 text-center">
     <div class="container">
-      <h1 class="text-2xl font-bold text-center lg-red">LG Science Park 방문 안내</h1>
-      <p class="text-center text-gray-600">강사님을 위한 방문 안내 시스템</p>
+      <h1 class="text-3xl font-bold text-lg-red mb-2">LG Science Park 방문 안내</h1>
+      <p class="text-lg text-lg-gray-600">강사님을 위한 방문 안내 시스템</p>
     </div>
   </header>
   
-  <main class="container py-6">
+  <main class="container">
     <!-- Progress Indicator -->
-    <div class="step-indicator mb-8">
-      <div class="step active" data-step="1">
-        <div class="step-circle">1</div>
-        <div class="step-name">기본정보</div>
+    <div class="progress-container">
+      <div class="progress-bar">
+        <div class="progress-fill" id="progress-fill" style="width: 25%;"></div>
       </div>
-      <div class="step" data-step="2">
-        <div class="step-circle">2</div>
-        <div class="step-name">장비정보</div>
-      </div>
-      <div class="step" data-step="3">
-        <div class="step-circle">3</div>
-        <div class="step-name">차량정보</div>
-      </div>
-      <div class="step" data-step="4">
-        <div class="step-circle">4</div>
-        <div class="step-name">제출</div>
+      <div class="step-indicator">
+        <div class="step active" data-step="1">
+          <div class="step-dot">1</div>
+          <div class="step-label">기본정보</div>
+        </div>
+        <div class="step" data-step="2">
+          <div class="step-dot">2</div>
+          <div class="step-label">장비정보</div>
+        </div>
+        <div class="step" data-step="3">
+          <div class="step-dot">3</div>
+          <div class="step-label">차량정보</div>
+        </div>
+        <div class="step" data-step="4">
+          <div class="step-dot">4</div>
+          <div class="step-label">제출</div>
+        </div>
       </div>
     </div>
     
     <!-- Tab Navigation -->
-    <div class="flex mb-6 overflow-x-auto pb-2">
+    <div class="tab-navigation">
       <button class="tab-button active" data-tab="1">1. 기본정보</button>
       <button class="tab-button" data-tab="2">2. 장비정보</button>
       <button class="tab-button" data-tab="3">3. 차량정보</button>
       <button class="tab-button" data-tab="4">4. 제출</button>
     </div>
     
-    <!-- Information Cards -->
-    <div class="lg-card mb-6">
-      <div class="flex items-start mb-4">
-        <i class="fas fa-info-circle text-lg lg-red mr-3 mt-1"></i>
+    <!-- Info Cards -->
+    <div class="lg-card p-6 mb-8">
+      <div class="flex items-start mb-6">
+        <div class="flex-shrink-0 text-lg-red mr-4">
+          <i class="fas fa-info-circle text-2xl"></i>
+        </div>
         <div>
-          <h3 class="font-bold mb-2 lg-red">방문포탈 접속 안내</h3>
-          <p class="text-gray-700 mb-2">LG Science Park 방문을 위해서는 반드시 <strong>방문포탈에서 출입 등록/예약</strong>을 사전에 완료해 주셔야 합니다.</p>
-          <p class="text-gray-700 mb-3">아래 버튼을 클릭하여 방문포탈로 이동하세요. 비회원으로도 예약이 가능합니다.</p>
-          <a href="https://visit.lg.com/" target="_blank" class="lg-btn inline-flex items-center">
+          <h3 class="text-lg font-semibold mb-2">방문포탈 접속 안내</h3>
+          <p class="mb-4">LG Science Park 방문을 위해서는 반드시 <strong>방문포탈에서 출입 등록/예약</strong>을 사전에 완료해 주셔야 합니다.</p>
+          <p>아래 버튼을 클릭하여 방문포탈로 이동하세요. 비회원으로도 예약이 가능합니다.</p>
+          <a href="https://visit.lg.com/" target="_blank" class="lg-btn mt-4">
             <i class="fas fa-external-link-alt mr-2"></i> 방문포탈 접속하기
           </a>
         </div>
       </div>
-    </div>
-    
-    <div class="lg-card mb-6">
+      
       <div class="flex items-start">
-        <i class="fas fa-car text-lg lg-red mr-3 mt-1"></i>
+        <div class="flex-shrink-0 text-lg-red mr-4">
+          <i class="fas fa-car text-2xl"></i>
+        </div>
         <div>
-          <h3 class="font-bold mb-2 lg-red">주차 안내</h3>
-          <ul class="list-disc list-inside text-gray-700">
+          <h3 class="text-lg font-semibold mb-2">주차 안내</h3>
+          <ul class="list-disc pl-5">
             <li>주차는 방문자 주차장(P3)을 이용해 주세요.</li>
           </ul>
         </div>
@@ -311,216 +564,206 @@
     </div>
     
     <!-- Tab Sections -->
-    <div id="tab-1" class="tab-section active">
-      <div class="lg-card">
-        <h3 class="text-lg font-bold mb-4 lg-red">기본 정보 입력</h3>
+    <section id="tab-1" class="tab-section active">
+      <div class="lg-card p-6 mb-8">
+        <h2 class="text-xl font-bold mb-6">기본 정보 입력</h2>
         
         <!-- 사전 설치 -->
-        <div class="mb-6">
-          <h4 class="font-bold mb-3">사전 설치</h4>
+        <div class="lg-form-group">
+          <h3 class="text-lg font-semibold mb-4">사전 설치</h3>
+          
           <div class="mb-4">
-            <label class="block mb-2 font-medium">파일/프로그램 공유</label>
-            <div class="drag-drop-area mb-3" id="program-drop-area">
+            <label class="lg-form-label">파일/프로그램 공유</label>
+            <div class="drag-drop-area" id="file-upload-area">
               <div class="flex flex-col items-center">
-                <i class="fas fa-file-upload text-3xl text-gray-400 mb-2"></i>
-                <p class="text-gray-500 mb-2">파일을 여기에 드래그하거나 클릭하여 업로드하세요</p>
-                <input type="file" id="program-file" class="hidden">
-                <button class="lg-btn-secondary" onclick="document.getElementById('program-file').click()">
-                  파일 선택
+                <i class="fas fa-cloud-upload-alt text-3xl text-lg-gray-400 mb-3"></i>
+                <p class="mb-2">파일을 이곳에 끌어다 놓거나</p>
+                <button type="button" class="lg-btn-secondary text-sm" id="file-upload-btn">
+                  파일 선택하기
                 </button>
+                <input type="file" id="file-upload" class="hidden">
+                <p class="text-sm text-lg-gray-500 mt-2">최대 파일 크기: 30MB</p>
               </div>
             </div>
-            <div id="program-file-info" class="hidden bg-gray-100 p-2 rounded text-sm"></div>
-            
-            <label class="block mb-2 font-medium mt-3">설치 프로그램명 설명</label>
-            <textarea class="lg-form-control" rows="2" placeholder="설치가 필요한 프로그램에 대한 설명을 입력하세요"></textarea>
+            <div id="file-preview-container"></div>
           </div>
           
-          <div class="checkbox-container">
-            <input type="checkbox" id="no-program">
-            <label for="no-program">해당사항 없음</label>
+          <div class="mb-4">
+            <label class="lg-form-label">또는 설치 프로그램명 설명 기재</label>
+            <textarea class="lg-form-control" rows="3" id="program-description" placeholder="설치가 필요한 프로그램명과 설명을 입력해주세요."></textarea>
           </div>
+          
+          <label class="custom-checkbox">
+            <input type="checkbox" id="no-installation">
+            <span class="checkmark"></span>
+            해당사항 없음
+          </label>
         </div>
         
         <!-- 교재 제공 방식 -->
-        <div class="mb-6">
-          <h4 class="font-bold mb-3">교재 제공 방식</h4>
+        <div class="lg-form-group">
+          <h3 class="text-lg font-semibold mb-4">교재 제공 방식</h3>
           
-          <div class="checkbox-container">
-            <input type="checkbox" id="pdf-material">
-            <label for="pdf-material">PDF 교재</label>
-          </div>
-          
-          <div id="pdf-upload-section" class="hidden mb-4 ml-6">
-            <div class="drag-drop-area" id="pdf-drop-area">
-              <div class="flex flex-col items-center">
-                <i class="fas fa-file-pdf text-3xl text-gray-400 mb-2"></i>
-                <p class="text-gray-500 mb-2">PDF 파일을 여기에 드래그하거나 클릭하여 업로드하세요</p>
-                <small class="text-gray-500 mb-2">(모든 파일 형식 지원, 알집 형식 포함)</small>
-                <input type="file" id="pdf-file" class="hidden">
-                <button class="lg-btn-secondary" onclick="document.getElementById('pdf-file').click()">
-                  파일 선택
-                </button>
+          <div class="mb-2">
+            <label class="custom-checkbox">
+              <input type="checkbox" id="pdf-material">
+              <span class="checkmark"></span>
+              PDF 교재
+            </label>
+            
+            <div id="pdf-upload-container" class="hidden mt-4">
+              <div class="drag-drop-area" id="pdf-upload-area">
+                <div class="flex flex-col items-center">
+                  <i class="fas fa-file-pdf text-3xl text-lg-gray-400 mb-3"></i>
+                  <p class="mb-2">PDF 파일을 이곳에 끌어다 놓거나</p>
+                  <button type="button" class="lg-btn-secondary text-sm" id="pdf-upload-btn">
+                    PDF 선택하기
+                  </button>
+                  <input type="file" id="pdf-upload" class="hidden" accept=".pdf,.zip,.rar">
+                  <p class="text-sm text-lg-gray-500 mt-2">PDF, ZIP, RAR 등 다양한 형식 지원</p>
+                </div>
               </div>
+              <div id="pdf-preview-container"></div>
             </div>
-            <div id="pdf-file-info" class="hidden bg-gray-100 p-2 rounded text-sm"></div>
           </div>
           
-          <div class="checkbox-container">
-            <input type="checkbox" id="paper-material">
-            <label for="paper-material">서면 교재</label>
-          </div>
-          
-          <div id="paper-info" class="hidden mb-4 ml-6">
-            <p class="text-gray-700 mb-2">
-              <strong>교재 배송지:</strong> 서울 강서구 마곡중앙로 10로 10, W10동 지하1층 메일센터
-              <a href="https://map.naver.com/p/search/LG%EC%82%AC%EC%9D%B4%EC%96%B8%EC%8A%A4%ED%8C%8C%ED%81%AC%20W10%EB%8F%99/place/1948693696?c=15.00,0,0,0,dh&isCorrectAnswer=true" 
-                 target="_blank" 
-                 class="text-blue-600 underline ml-2">
-                <i class="fas fa-map-marker-alt"></i> 지도보기
+          <div class="mb-2">
+            <label class="custom-checkbox">
+              <input type="checkbox" id="paper-material">
+              <span class="checkmark"></span>
+              서면 교재
+            </label>
+            
+            <div id="paper-info" class="hidden mt-4 p-4 bg-lg-gray-100 rounded-lg">
+              <p class="flex items-center mb-2">
+                <i class="fas fa-map-marker-alt text-lg-red mr-2"></i>
+                <span>교재 배송지: 서울 강서구 마곡중앙로 10로 10, W10동 지하1층 메일센터</span>
+              </p>
+              <a href="https://map.naver.com/p/search/LG%EC%82%AC%EC%9D%B4%EC%96%B8%EC%8A%A4%ED%8C%8C%ED%81%AC%20W10%EB%8F%99/place/1948693696?c=15.00,0,0,0,dh&isCorrectAnswer=true" target="_blank" class="lg-btn-secondary text-sm">
+                <i class="fas fa-map mr-1"></i> 지도보기
               </a>
-            </p>
+            </div>
           </div>
           
-          <div class="checkbox-container">
+          <label class="custom-checkbox">
             <input type="checkbox" id="no-material">
-            <label for="no-material">해당사항 없음</label>
-          </div>
+            <span class="checkmark"></span>
+            해당사항 없음
+          </label>
         </div>
         
         <!-- 출입안내 -->
-        <div class="mb-6">
-          <h4 class="font-bold mb-3">출입안내</h4>
-          <div class="info-panel">
-            <ul class="text-gray-700 space-y-2">
-              <li><i class="fas fa-check-circle text-green-600 mr-2"></i> 방문 포털 접속하여 <strong>비회원 방문 예약</strong>으로 진행해 주세요.</li>
-              <li><i class="fas fa-check-circle text-green-600 mr-2"></i> 노트북 등 기타 전자기기는 <strong>반입물품 정보에 필수 입력</strong>하셔야 합니다. (봉인 예외여부 체크 X)</li>
-              <li><i class="fas fa-check-circle text-green-600 mr-2"></i> LG 방문신청 서비스 약관: <strong>모두 동의</strong></li>
-              <li><i class="fas fa-check-circle text-green-600 mr-2"></i> 방문장소: <strong>LG전자 마곡</strong></li>
-              <li><i class="fas fa-check-circle text-green-600 mr-2"></i> 운영자 정보: 김미진, 선송이, 유지혜, 정하연 *교육서비스센터</li>
-              <li><i class="fas fa-check-circle text-green-600 mr-2"></i> 방문날짜: <strong>강의 기간으로 설정</strong> (사전 전검 필요한 경우 해당 기간 포함)</li>
+        <div class="lg-form-group">
+          <h3 class="text-lg font-semibold mb-4">출입안내</h3>
+          
+          <div class="info-section">
+            <ul class="space-y-2">
+              <li class="flex items-start">
+                <i class="fas fa-check-circle text-lg-red mt-1 mr-2"></i>
+                <span>방문 포털 접속하여 비회원 방문 예약으로 진행해 주세요.</span>
+              </li>
+              <li class="flex items-start">
+                <i class="fas fa-check-circle text-lg-red mt-1 mr-2"></i>
+                <span>노트북 등 기타 전자기기는 반입물품 정보에 필수 입력하셔야 합니다. (봉인 예외여부 체크 X)</span>
+              </li>
+              <li class="flex items-start">
+                <i class="fas fa-check-circle text-lg-red mt-1 mr-2"></i>
+                <span>LG 방문신청 서비스 약관: 모두 동의</span>
+              </li>
+              <li class="flex items-start">
+                <i class="fas fa-check-circle text-lg-red mt-1 mr-2"></i>
+                <span>방문장소: LG전자 마곡</span>
+              </li>
+              <li class="flex items-start">
+                <i class="fas fa-check-circle text-lg-red mt-1 mr-2"></i>
+                <span>운영자 정보: 김미진, 선송이, 유지혜, 정하연 *교육서비스센터</span>
+              </li>
+              <li class="flex items-start">
+                <i class="fas fa-check-circle text-lg-red mt-1 mr-2"></i>
+                <span>방문날짜: 강의 기간으로 설정 (사전 전검 필요한 경우 해당 기간 포함)</span>
+              </li>
             </ul>
           </div>
         </div>
         
         <!-- 강사 정보 -->
-        <div class="mb-6">
-          <h4 class="font-bold mb-3">강사 정보</h4>
-          <div class="flex flex-wrap gap-3 mb-4">
-            <div class="flex-1 min-w-[150px]">
-              <label class="block mb-2 text-sm font-medium">업체명 <span class="text-red-500">*</span></label>
-              <input type="text" class="lg-form-control" placeholder="예: LG전자">
+        <div class="lg-form-group">
+          <h3 class="text-lg font-semibold mb-4">강사 정보</h3>
+          
+          <div class="flex flex-wrap gap-4 mb-4">
+            <div class="flex-1 min-w-[200px]">
+              <label class="lg-form-label" for="company-name">업체명</label>
+              <input type="text" id="company-name" class="lg-form-control" placeholder="예: LG전자">
             </div>
-            <div class="flex-1 min-w-[150px]">
-              <label class="block mb-2 text-sm font-medium">성함 <span class="text-red-500">*</span></label>
-              <input type="text" class="lg-form-control" placeholder="예: 김엘지">
+            <div class="flex-1 min-w-[200px]">
+              <label class="lg-form-label" for="instructor-name">성함</label>
+              <input type="text" id="instructor-name" class="lg-form-control" placeholder="예: 김엘지">
             </div>
-            <div class="flex-1 min-w-[150px]">
-              <label class="block mb-2 text-sm font-medium">연락처 <span class="text-red-500">*</span></label>
-              <input type="text" class="lg-form-control" placeholder="예: 010-1234-5678">
+            <div class="flex-1 min-w-[200px]">
+              <label class="lg-form-label" for="phone-number">연락처</label>
+              <input type="text" id="phone-number" class="lg-form-control" placeholder="예: 010-1234-5678">
             </div>
           </div>
         </div>
         
-        <div class="flex justify-between mt-8">
-          <button class="lg-btn-secondary">이전</button>
-          <button class="lg-btn" onclick="goToTab(2)">다음</button>
+        <div class="text-right mt-8">
+          <button type="button" class="lg-btn next-tab" data-next="2">
+            다음 단계 <i class="fas fa-arrow-right ml-2"></i>
+          </button>
         </div>
       </div>
-    </div>
+    </section>
     
-    <div id="tab-2" class="tab-section">
-      <div class="lg-card">
-        <h3 class="text-lg font-bold mb-4 lg-red">장비 정보 입력</h3>
+    <section id="tab-2" class="tab-section">
+      <div class="lg-card p-6 mb-8">
+        <h2 class="text-xl font-bold mb-6">장비 정보 입력</h2>
         
-        <div class="info-panel mb-4">
-          <p class="mb-2"><i class="fas fa-wifi text-green-600 mr-2"></i> <strong>무선랜 게스트망 연결을 위해 MAC 주소 정보가 필수입니다.</strong></p>
-          <p class="text-sm">노트북의 MAC 주소는 cmd 창에서 'ipconfig /all'로 확인 가능합니다.</p>
+        <div class="info-section mb-6">
+          <p class="flex items-start mb-2">
+            <i class="fas fa-wifi text-lg-red mt-1 mr-2"></i>
+            <span>무선랜 게스트망 연결을 위해 MAC 주소 정보가 필수입니다.</span>
+          </p>
+          <p class="text-sm ml-6">노트북의 MAC 주소는 cmd 창에서 'ipconfig /all'로 확인 가능합니다.</p>
         </div>
         
-        <div class="info-panel mb-4">
-          <p><i class="fas fa-hdd text-red-500 mr-2"></i> <strong>외장하드 등 저장매체는 원칙상 반입이 불가합니다.</strong> 필요 시 아래 기입해주세요.</p>
+        <div class="info-section mb-6">
+          <p class="flex items-start">
+            <i class="fas fa-exclamation-triangle text-lg-red mt-1 mr-2"></i>
+            <span>외장하드 등 저장매체는 원칙상 반입이 불가합니다. 필요 시 아래 기입해주세요.</span>
+          </p>
         </div>
         
-        <div id="equipmentContainer">
-          <!-- 장비 정보 입력 영역 -->
-          <div class="equipment-row">
-            <div class="equipment-col">
-              <label class="block mb-2 text-sm font-medium">장비구분 <span class="text-red-500">*</span></label>
-              <select class="lg-form-control">
-                <option value="">선택하세요</option>
-                <option value="노트북">노트북</option>
-                <option value="네트워크장비">네트워크장비</option>
-                <option value="NAS">NAS</option>
-                <option value="데스크탑">데스크탑</option>
-                <option value="스마트패드">스마트패드</option>
-                <option value="샘플폰">샘플폰</option>
-                <option value="서버장비">서버장비</option>
-                <option value="태블릿PC">태블릿PC</option>
-                <option value="AP">AP</option>
-                <option value="CD">CD</option>
-                <option value="디지털카메라">디지털카메라</option>
-                <option value="DVD">DVD</option>
-                <option value="기타">기타</option>
-                <option value="HDD/SSD">HDD/SSD</option>
-                <option value="모바일폰">모바일폰</option>
-                <option value="메모리카드">메모리카드</option>
-                <option value="USB">USB</option>
-                <option value="워크스테이션">워크스테이션</option>
-              </select>
-            </div>
-            <div class="equipment-col">
-              <label class="block mb-2 text-sm font-medium">제조사</label>
-              <input type="text" class="lg-form-control" placeholder="예: LG전자">
-            </div>
-            <div class="equipment-col">
-              <label class="block mb-2 text-sm font-medium">기종</label>
-              <input type="text" class="lg-form-control" placeholder="예: Gram 2023">
-            </div>
-            <div class="equipment-col">
-              <label class="block mb-2 text-sm font-medium">수량</label>
-              <input type="number" class="lg-form-control" min="1" value="1">
-            </div>
-            <div class="equipment-col">
-              <label class="block mb-2 text-sm font-medium">MAC 주소</label>
-              <input type="text" class="lg-form-control" placeholder="예: 00-11-22-33-44-55">
-            </div>
-            <div class="equipment-col flex items-end">
-              <button class="lg-btn-secondary w-full" onclick="removeEquipment(this)">
-                <i class="fas fa-minus mr-1"></i> 제거
-              </button>
-            </div>
-          </div>
+        <div id="equipment-container">
+          <!-- 장비 정보 행이 여기에 추가됩니다 -->
         </div>
         
-        <button class="lg-btn-secondary mb-6" onclick="addEquipment()">
-          <i class="fas fa-plus mr-1"></i> 장비 추가
+        <button type="button" id="add-equipment-btn" class="lg-btn-secondary mt-4">
+          <i class="fas fa-plus mr-2"></i> 장비 추가
         </button>
         
-        <!-- USB 등 저장매체 -->
-        <div class="mb-6">
-          <div class="checkbox-container">
-            <input type="checkbox" id="storage-media">
-            <label for="storage-media">USB 등 저장매체 반입이 필요한 경우</label>
-          </div>
+        <div class="mt-8">
+          <label class="custom-checkbox">
+            <input type="checkbox" id="storage-media-checkbox">
+            <span class="checkmark"></span>
+            USB 등 저장매체 반입이 필요한 경우
+          </label>
           
-          <div id="storage-media-details" class="hidden ml-6 mt-2">
-            <label class="block mb-2 text-sm font-medium">저장매체 종류 및 개수, 반입 사유</label>
-            <textarea class="lg-form-control" rows="2" placeholder="저장매체 종류 및 개수, 반입 사유를 작성해주세요"></textarea>
+          <div id="storage-media-container" class="hidden mt-4">
+            <textarea class="lg-form-control" id="storage-media-reason" rows="3" placeholder="저장매체 종류 및 개수, 반입 사유를 작성해주세요."></textarea>
           </div>
         </div>
         
-        <!-- LAN Port 해제 -->
-        <div class="mb-6">
-          <div class="checkbox-container">
-            <input type="checkbox" id="lan-port">
-            <label for="lan-port">LAN Port 해제가 필요한 경우</label>
-          </div>
+        <div class="mt-6">
+          <label class="custom-checkbox">
+            <input type="checkbox" id="lan-port-checkbox">
+            <span class="checkmark"></span>
+            LAN Port 해제가 필요한 경우
+          </label>
           
-          <div id="lan-port-details" class="hidden ml-6 mt-2">
-            <div class="flex flex-wrap gap-3">
-              <div class="flex-1 min-w-[150px]">
-                <select class="lg-form-control">
+          <div id="lan-port-container" class="hidden mt-4">
+            <div class="flex flex-wrap gap-4">
+              <div class="w-full sm:w-auto">
+                <select class="lg-form-control" id="port-type">
                   <option value="">선택하세요</option>
                   <option value="USB">USB</option>
                   <option value="LAN">LAN</option>
@@ -529,402 +772,697 @@
                   <option value="기타">기타</option>
                 </select>
               </div>
-              <div class="flex-grow">
-                <input type="text" class="lg-form-control" placeholder="상세 내용을 입력하세요">
+              <div class="flex-1">
+                <input type="text" class="lg-form-control" id="port-reason" placeholder="사유를 입력해주세요">
               </div>
             </div>
           </div>
         </div>
         
         <div class="flex justify-between mt-8">
-          <button class="lg-btn-secondary" onclick="goToTab(1)">이전</button>
-          <button class="lg-btn" onclick="goToTab(3)">다음</button>
+          <button type="button" class="lg-btn-secondary prev-tab" data-prev="1">
+            <i class="fas fa-arrow-left mr-2"></i> 이전 단계
+          </button>
+          <button type="button" class="lg-btn next-tab" data-next="3">
+            다음 단계 <i class="fas fa-arrow-right ml-2"></i>
+          </button>
         </div>
       </div>
-    </div>
+    </section>
     
-    <div id="tab-3" class="tab-section">
-      <div class="lg-card">
-        <h3 class="text-lg font-bold mb-4 lg-red">차량 정보 입력</h3>
-        <p class="mb-4 text-gray-700">주차가 필요한 경우 차량 정보를 입력해 주세요.</p>
+    <section id="tab-3" class="tab-section">
+      <div class="lg-card p-6 mb-8">
+        <h2 class="text-xl font-bold mb-6">차량 정보 입력</h2>
         
-        <div class="checkbox-container mb-4">
-          <input type="checkbox" id="no-vehicle">
-          <label for="no-vehicle">해당사항 없음</label>
+        <p class="mb-6">주차가 필요한 경우 차량 정보를 입력해 주세요.</p>
+        
+        <div id="vehicle-container">
+          <!-- 차량 정보 행이 여기에 추가됩니다 -->
         </div>
         
-        <div id="vehicleContainer">
-          <!-- 차량 정보 입력 영역 -->
-          <div class="equipment-row">
-            <div class="equipment-col">
-              <label class="block mb-2 text-sm font-medium">차종</label>
-              <input type="text" class="lg-form-control" placeholder="예: 아반떼">
-            </div>
-            <div class="equipment-col">
-              <label class="block mb-2 text-sm font-medium">차량번호</label>
-              <input type="text" class="lg-form-control" placeholder="예: 12가 1234">
-            </div>
-            <div class="equipment-col flex items-end">
-              <button class="lg-btn-secondary w-full" onclick="removeVehicle(this)">
-                <i class="fas fa-minus mr-1"></i> 제거
-              </button>
-            </div>
-          </div>
+        <div class="flex gap-4 mt-4">
+          <button type="button" id="add-vehicle-btn" class="lg-btn-secondary">
+            <i class="fas fa-plus mr-2"></i> 차량 추가
+          </button>
+          <button type="button" id="no-vehicle-btn" class="lg-btn-secondary">
+            <i class="fas fa-times mr-2"></i> 해당사항 없음
+          </button>
         </div>
-        
-        <button class="lg-btn-secondary mb-6" onclick="addVehicle()">
-          <i class="fas fa-plus mr-1"></i> 차량 추가
-        </button>
         
         <div class="flex justify-between mt-8">
-          <button class="lg-btn-secondary" onclick="goToTab(2)">이전</button>
-          <button class="lg-btn" onclick="goToTab(4)">다음</button>
+          <button type="button" class="lg-btn-secondary prev-tab" data-prev="2">
+            <i class="fas fa-arrow-left mr-2"></i> 이전 단계
+          </button>
+          <button type="button" class="lg-btn next-tab" data-next="4">
+            다음 단계 <i class="fas fa-arrow-right ml-2"></i>
+          </button>
         </div>
       </div>
-    </div>
+    </section>
     
-    <div id="tab-4" class="tab-section">
-      <div class="lg-card">
-        <h3 class="text-lg font-bold mb-4 lg-red">정보 확인 및 제출</h3>
+    <section id="tab-4" class="tab-section">
+      <div class="lg-card p-6 mb-8">
+        <h2 class="text-xl font-bold mb-6">정보 확인 및 제출</h2>
         
         <div class="mb-6">
-          <h4 class="font-bold mb-3">입력 정보 요약</h4>
-          <div class="bg-gray-50 p-4 rounded-lg" id="summary-container">
-            <!-- 동적으로 채워질 영역 -->
-            <p class="text-gray-500 italic">입력한 정보가 여기에 표시됩니다.</p>
+          <h3 class="text-lg font-semibold mb-4">입력 정보 요약</h3>
+          
+          <div class="bg-lg-gray-100 p-4 rounded-lg">
+            <div id="summary-container">
+              <!-- 요약 정보가 여기에 표시됩니다 -->
+            </div>
           </div>
         </div>
         
-        <div class="mb-6">
-          <label class="block mb-2 font-medium">운영자 이메일 선택</label>
-          <select class="lg-form-control mb-3" id="operator-email">
+        <div class="lg-form-group">
+          <label class="lg-form-label">운영자 이메일 선택</label>
+          <select class="lg-form-control" id="operator-email">
+            <option value="">선택하세요</option>
             <option value="mijin1.kim@lgepartner.com">김미진 - mijin1.kim@lgepartner.com</option>
             <option value="songyi.seon@lge.com">선송이 - songyi.seon@lge.com</option>
             <option value="jihye.yoo@lgepartner.com">유지혜 - jihye.yoo@lgepartner.com</option>
             <option value="hayeon.jung@lgepartner.com">정하연 - hayeon.jung@lgepartner.com</option>
             <option value="custom">직접 입력</option>
           </select>
-          
-          <div id="custom-email-container" class="hidden">
-            <input type="email" class="lg-form-control" id="custom-email" placeholder="이메일 주소 직접 입력">
-          </div>
+          <input type="email" id="custom-email" class="lg-form-control mt-3 hidden" placeholder="이메일 주소 직접 입력">
         </div>
         
-        <div class="mb-6">
-          <label class="block mb-2 font-medium">추가 요청사항</label>
-          <textarea class="lg-form-control" rows="3" placeholder="추가 요청사항이 있으면 작성해 주세요"></textarea>
+        <div class="lg-form-group">
+          <label class="lg-form-label">추가 요청사항</label>
+          <textarea class="lg-form-control" id="additional-request" rows="3" placeholder="추가 요청사항이 있을 경우 작성해 주세요."></textarea>
         </div>
         
         <div class="flex justify-between mt-8">
-          <button class="lg-btn-secondary" onclick="goToTab(3)">이전</button>
-          <button class="lg-btn" id="submit-btn">
-            <i class="fas fa-paper-plane mr-1"></i> 이메일 전송
+          <button type="button" class="lg-btn-secondary prev-tab" data-prev="3">
+            <i class="fas fa-arrow-left mr-2"></i> 이전 단계
+          </button>
+          <button type="button" class="lg-btn" id="submit-btn">
+            <i class="fas fa-paper-plane mr-2"></i> 이메일 전송
           </button>
         </div>
       </div>
-    </div>
+    </section>
   </main>
   
-  <!-- Toast Message -->
-  <div id="toast" class="hidden fixed bottom-4 right-4 bg-green-500 text-white px-4 py-2 rounded shadow-lg">
-    <span id="toast-message"></span>
-  </div>
-  
-  <footer class="py-4 bg-gray-100">
-    <div class="container text-center text-gray-500 text-sm">
-      © 2023 LG Science Park. All rights reserved.
-    </div>
-  </footer>
+  <div class="toast" id="toast">메시지가 표시됩니다.</div>
   
   <script>
-    // 현재 탭 관리
-    let currentTab = 1;
+    // 전역 변수 및 요소 참조
+    const progressFill = document.getElementById('progress-fill');
+    const steps = document.querySelectorAll('.step');
+    const tabButtons = document.querySelectorAll('.tab-button');
+    const tabSections = document.querySelectorAll('.tab-section');
+    const nextButtons = document.querySelectorAll('.next-tab');
+    const prevButtons = document.querySelectorAll('.prev-tab');
+    const fileUploadArea = document.getElementById('file-upload-area');
+    const fileUploadBtn = document.getElementById('file-upload-btn');
+    const fileUpload = document.getElementById('file-upload');
+    const filePreviewContainer = document.getElementById('file-preview-container');
+    const pdfMaterial = document.getElementById('pdf-material');
+    const pdfUploadContainer = document.getElementById('pdf-upload-container');
+    const pdfUploadArea = document.getElementById('pdf-upload-area');
+    const pdfUploadBtn = document.getElementById('pdf-upload-btn');
+    const pdfUpload = document.getElementById('pdf-upload');
+    const pdfPreviewContainer = document.getElementById('pdf-preview-container');
+    const paperMaterial = document.getElementById('paper-material');
+    const paperInfo = document.getElementById('paper-info');
+    const equipmentContainer = document.getElementById('equipment-container');
+    const addEquipmentBtn = document.getElementById('add-equipment-btn');
+    const vehicleContainer = document.getElementById('vehicle-container');
+    const addVehicleBtn = document.getElementById('add-vehicle-btn');
+    const noVehicleBtn = document.getElementById('no-vehicle-btn');
+    const storageMediaCheckbox = document.getElementById('storage-media-checkbox');
+    const storageMediaContainer = document.getElementById('storage-media-container');
+    const lanPortCheckbox = document.getElementById('lan-port-checkbox');
+    const lanPortContainer = document.getElementById('lan-port-container');
+    const operatorEmail = document.getElementById('operator-email');
+    const customEmail = document.getElementById('custom-email');
+    const summaryContainer = document.getElementById('summary-container');
+    const submitBtn = document.getElementById('submit-btn');
+    const toast = document.getElementById('toast');
     
-    // 탭 전환 함수
-    function goToTab(tabNumber) {
-      // 모든 탭 숨기기
-      document.querySelectorAll('.tab-section').forEach(tab => {
-        tab.classList.remove('active');
+    // 기본 상수 정의
+    const equipmentTypes = [
+      '선택하세요', '노트북', '네트워크장비', 'NAS', '데스크탑', '스마트패드', '샘플폰', 
+      '서버장비', '태블릿PC', 'AP', 'CD', '디지털카메라', 'DVD', '기타', 
+      'HDD/SSD', '모바일폰', '메모리카드', 'USB', '워크스테이션'
+    ];
+    
+    // 초기화 함수
+    function init() {
+      // 장비 및 차량 정보 초기 행 추가
+      addEquipmentRow();
+      addVehicleRow();
+      
+      // 이벤트 리스너 등록
+      registerEventListeners();
+      
+      // 요약 정보 초기화
+      updateSummary();
+    }
+    
+    // 이벤트 리스너 등록
+    function registerEventListeners() {
+      // 탭 이동 이벤트
+      tabButtons.forEach(button => {
+        button.addEventListener('click', () => {
+          const tabIndex = button.dataset.tab;
+          goToTab(tabIndex);
+        });
       });
       
-      // 모든 탭 버튼 비활성화
-      document.querySelectorAll('.tab-button').forEach(btn => {
-        btn.classList.remove('active');
+      // 다음/이전 버튼 이벤트
+      nextButtons.forEach(button => {
+        button.addEventListener('click', () => {
+          const nextTab = button.dataset.next;
+          goToTab(nextTab);
+        });
       });
       
-      // 모든 스텝 비활성화
-      document.querySelectorAll('.step').forEach(step => {
-        step.classList.remove('active');
-        step.classList.remove('completed');
+      prevButtons.forEach(button => {
+        button.addEventListener('click', () => {
+          const prevTab = button.dataset.prev;
+          goToTab(prevTab);
+        });
       });
       
-      // 현재 탭 및 이전 탭 활성화
-      for (let i = 1; i <= 4; i++) {
-        const step = document.querySelector(`.step[data-step="${i}"]`);
-        if (i < tabNumber) {
-          step.classList.add('completed');
-        } else if (i === tabNumber) {
-          step.classList.add('active');
+      // 파일 업로드 이벤트
+      fileUploadBtn.addEventListener('click', () => fileUpload.click());
+      fileUpload.addEventListener('change', handleFileUpload);
+      
+      // 드래그 앤 드롭 이벤트
+      fileUploadArea.addEventListener('dragover', handleDragOver);
+      fileUploadArea.addEventListener('dragleave', handleDragLeave);
+      fileUploadArea.addEventListener('drop', handleFileDrop);
+      
+      // PDF 업로드 이벤트
+      pdfUploadBtn.addEventListener('click', () => pdfUpload.click());
+      pdfUpload.addEventListener('change', handlePdfUpload);
+      pdfUploadArea.addEventListener('dragover', handleDragOver);
+      pdfUploadArea.addEventListener('dragleave', handleDragLeave);
+      pdfUploadArea.addEventListener('drop', handlePdfDrop);
+      
+      // 체크박스 이벤트
+      pdfMaterial.addEventListener('change', () => {
+        pdfUploadContainer.classList.toggle('hidden', !pdfMaterial.checked);
+        if (pdfMaterial.checked) {
+          paperMaterial.checked = false;
+          noMaterial.checked = false;
+          paperInfo.classList.add('hidden');
         }
-      }
-      
-      // 현재 탭 표시
-      document.getElementById(`tab-${tabNumber}`).classList.add('active');
-      document.querySelector(`.tab-button[data-tab="${tabNumber}"]`).classList.add('active');
-      
-      // 현재 탭 번호 업데이트
-      currentTab = tabNumber;
-      
-      // 제출 탭인 경우 요약 정보 업데이트
-      if (tabNumber === 4) {
         updateSummary();
-      }
+      });
       
-      // 맨 위로 스크롤
+      paperMaterial.addEventListener('change', () => {
+        paperInfo.classList.toggle('hidden', !paperMaterial.checked);
+        if (paperMaterial.checked) {
+          pdfMaterial.checked = false;
+          noMaterial.checked = false;
+          pdfUploadContainer.classList.add('hidden');
+        }
+        updateSummary();
+      });
+      
+      document.getElementById('no-material').addEventListener('change', function() {
+        if (this.checked) {
+          pdfMaterial.checked = false;
+          paperMaterial.checked = false;
+          pdfUploadContainer.classList.add('hidden');
+          paperInfo.classList.add('hidden');
+        }
+        updateSummary();
+      });
+      
+      // 장비 및 차량 추가 버튼 이벤트
+      addEquipmentBtn.addEventListener('click', addEquipmentRow);
+      addVehicleBtn.addEventListener('click', addVehicleRow);
+      noVehicleBtn.addEventListener('click', () => {
+        vehicleContainer.innerHTML = '<p class="italic text-lg-gray-600 p-4">해당사항 없음</p>';
+        updateSummary();
+      });
+      
+      // 저장매체 및 LAN Port 체크박스 이벤트
+      storageMediaCheckbox.addEventListener('change', () => {
+        storageMediaContainer.classList.toggle('hidden', !storageMediaCheckbox.checked);
+        updateSummary();
+      });
+      
+      lanPortCheckbox.addEventListener('change', () => {
+        lanPortContainer.classList.toggle('hidden', !lanPortCheckbox.checked);
+        updateSummary();
+      });
+      
+      // 운영자 이메일 선택 이벤트
+      operatorEmail.addEventListener('change', () => {
+        customEmail.classList.toggle('hidden', operatorEmail.value !== 'custom');
+        updateSummary();
+      });
+      
+      // 제출 버튼 이벤트
+      submitBtn.addEventListener('click', handleSubmit);
+      
+      // 입력 필드 변경 시 요약 정보 업데이트
+      document.querySelectorAll('input, textarea, select').forEach(element => {
+        element.addEventListener('change', updateSummary);
+        element.addEventListener('input', updateSummary);
+      });
+    }
+    
+    // 탭 이동 함수
+    function goToTab(tabIndex) {
+      // 활성 탭 및 단계 업데이트
+      tabButtons.forEach(button => {
+        button.classList.toggle('active', button.dataset.tab === tabIndex);
+      });
+      
+      tabSections.forEach(section => {
+        section.classList.toggle('active', section.id === `tab-${tabIndex}`);
+      });
+      
+      steps.forEach(step => {
+        const stepIndex = step.dataset.step;
+        if (stepIndex < tabIndex) {
+          step.classList.add('completed');
+          step.classList.remove('active');
+        } else if (stepIndex === tabIndex) {
+          step.classList.add('active');
+          step.classList.remove('completed');
+        } else {
+          step.classList.remove('active', 'completed');
+        }
+      });
+      
+      // 진행 표시줄 업데이트
+      const progressPercentage = (parseInt(tabIndex) - 1) * 100 / 3;
+      progressFill.style.width = `${progressPercentage}%`;
+      
+      // 페이지 상단으로 스크롤
       window.scrollTo({
         top: 0,
         behavior: 'smooth'
       });
+      
+      // 요약 정보 업데이트
+      updateSummary();
     }
     
-    // 탭 버튼 이벤트 리스너
-    document.querySelectorAll('.tab-button').forEach(btn => {
-      btn.addEventListener('click', function() {
-        goToTab(parseInt(this.dataset.tab));
-      });
-    });
-    
-    // 장비 추가 함수
-    function addEquipment() {
-      const container = document.getElementById('equipmentContainer');
-      const template = document.querySelector('.equipment-row').cloneNode(true);
-      
-      // 입력값 초기화
-      template.querySelectorAll('input, select').forEach(input => {
-        if (input.type === 'number') {
-          input.value = 1;
-        } else {
-          input.value = '';
-        }
-      });
-      
-      container.appendChild(template);
+    // 드래그 앤 드롭 이벤트 핸들러
+    function handleDragOver(e) {
+      e.preventDefault();
+      this.classList.add('drag-over');
     }
     
-    // 장비 제거 함수
-    function removeEquipment(btn) {
-      const rows = document.querySelectorAll('.equipment-row');
-      if (rows.length > 1) {
-        btn.closest('.equipment-row').remove();
-      } else {
-        showToast('최소 1개 이상의 장비 정보가 필요합니다.');
+    function handleDragLeave(e) {
+      e.preventDefault();
+      this.classList.remove('drag-over');
+    }
+    
+    function handleFileDrop(e) {
+      e.preventDefault();
+      this.classList.remove('drag-over');
+      
+      if (e.dataTransfer.files.length > 0) {
+        fileUpload.files = e.dataTransfer.files;
+        handleFileUpload({ target: fileUpload });
       }
     }
     
-    // 차량 추가 함수
-    function addVehicle() {
-      const container = document.getElementById('vehicleContainer');
-      const template = container.querySelector('.equipment-row').cloneNode(true);
+    function handlePdfDrop(e) {
+      e.preventDefault();
+      this.classList.remove('drag-over');
       
-      // 입력값 초기화
-      template.querySelectorAll('input').forEach(input => {
-        input.value = '';
-      });
-      
-      container.appendChild(template);
-    }
-    
-    // 차량 제거 함수
-    function removeVehicle(btn) {
-      const rows = document.getElementById('vehicleContainer').querySelectorAll('.equipment-row');
-      if (rows.length > 1) {
-        btn.closest('.equipment-row').remove();
-      } else {
-        showToast('최소 1개 이상의 차량 정보가 필요합니다.');
+      if (e.dataTransfer.files.length > 0) {
+        pdfUpload.files = e.dataTransfer.files;
+        handlePdfUpload({ target: pdfUpload });
       }
     }
     
-    // 체크박스 이벤트
-    document.getElementById('pdf-material').addEventListener('change', function() {
-      document.getElementById('pdf-upload-section').classList.toggle('hidden', !this.checked);
-    });
-    
-    document.getElementById('paper-material').addEventListener('change', function() {
-      document.getElementById('paper-info').classList.toggle('hidden', !this.checked);
-    });
-    
-    document.getElementById('storage-media').addEventListener('change', function() {
-      document.getElementById('storage-media-details').classList.toggle('hidden', !this.checked);
-    });
-    
-    document.getElementById('lan-port').addEventListener('change', function() {
-      document.getElementById('lan-port-details').classList.toggle('hidden', !this.checked);
-    });
-    
-    document.getElementById('operator-email').addEventListener('change', function() {
-      document.getElementById('custom-email-container').classList.toggle('hidden', this.value !== 'custom');
-    });
-    
-    document.getElementById('no-vehicle').addEventListener('change', function() {
-      document.getElementById('vehicleContainer').style.display = this.checked ? 'none' : 'block';
-      document.querySelector('button[onclick="addVehicle()"]').style.display = this.checked ? 'none' : 'inline-flex';
-    });
-    
-    // 파일 업로드 관련 코드
-    ['program-file', 'pdf-file'].forEach(fileId => {
-      document.getElementById(fileId).addEventListener('change', function(e) {
-        const file = e.target.files[0];
-        if (file) {
-          const infoElement = document.getElementById(`${fileId}-info`);
-          infoElement.innerHTML = `<i class="fas fa-file mr-2"></i>${file.name} (${formatFileSize(file.size)})`;
-          infoElement.classList.remove('hidden');
-        }
-      });
-    });
-    
-    // 파일 크기 포맷팅
-    function formatFileSize(bytes) {
-      if (bytes < 1024) return bytes + ' bytes';
-      else if (bytes < 1048576) return (bytes / 1024).toFixed(1) + ' KB';
-      else return (bytes / 1048576).toFixed(1) + ' MB';
-    }
-    
-    // 드래그 앤 드롭 영역 설정
-    ['program-drop-area', 'pdf-drop-area'].forEach(areaId => {
-      const area = document.getElementById(areaId);
-      const fileId = areaId === 'program-drop-area' ? 'program-file' : 'pdf-file';
+    // 파일 업로드 처리
+    function handleFileUpload(e) {
+      const file = e.target.files[0];
+      if (!file) return;
       
-      // 드래그 오버 이벤트
-      area.addEventListener('dragover', (e) => {
-        e.preventDefault();
-        area.style.borderColor = 'var(--lg-red)';
-        area.style.backgroundColor = 'var(--lg-light-red)';
-      });
-      
-      // 드래그 리브 이벤트
-      area.addEventListener('dragleave', () => {
-        area.style.borderColor = '#cbd5e1';
-        area.style.backgroundColor = '#f8fafc';
-      });
-      
-      // 드롭 이벤트
-      area.addEventListener('drop', (e) => {
-        e.preventDefault();
-        area.style.borderColor = '#cbd5e1';
-        area.style.backgroundColor = '#f8fafc';
-        
-        const file = e.dataTransfer.files[0];
-        if (file) {
-          const fileInput = document.getElementById(fileId);
-          fileInput.files = e.dataTransfer.files;
-          
-          // 파일 변경 이벤트 발생
-          const event = new Event('change', { bubbles: true });
-          fileInput.dispatchEvent(event);
-        }
-      });
-    });
-    
-    // 요약 정보 업데이트
-    function updateSummary() {
-      const container = document.getElementById('summary-container');
-      
-      // 기본 정보
-      const companyName = document.querySelector('#tab-1 input[placeholder="예: LG전자"]').value || '(입력 필요)';
-      const instructorName = document.querySelector('#tab-1 input[placeholder="예: 김엘지"]').value || '(입력 필요)';
-      const phoneNumber = document.querySelector('#tab-1 input[placeholder="예: 010-1234-5678"]').value || '(입력 필요)';
-      
-      // 교재 제공 방식
-      let materialType = [];
-      if (document.getElementById('pdf-material').checked) materialType.push('PDF 교재');
-      if (document.getElementById('paper-material').checked) materialType.push('서면 교재');
-      if (document.getElementById('no-material').checked) materialType.push('해당사항 없음');
-      
-      // 장비 정보
-      let equipmentInfo = [];
-      document.querySelectorAll('#equipmentContainer .equipment-row').forEach(row => {
-        const type = row.querySelector('select').value;
-        if (type) {
-          equipmentInfo.push(type);
-        }
-      });
-      
-      // 차량 정보
-      let vehicleInfo = [];
-      if (document.getElementById('no-vehicle').checked) {
-        vehicleInfo.push('해당사항 없음');
-      } else {
-        document.querySelectorAll('#vehicleContainer .equipment-row').forEach(row => {
-          const carType = row.querySelector('input[placeholder="예: 아반떼"]').value;
-          const carNumber = row.querySelector('input[placeholder="예: 12가 1234"]').value;
-          if (carType || carNumber) {
-            vehicleInfo.push(`${carType || '(차종 미입력)'} - ${carNumber || '(차량번호 미입력)'}`);
-          }
-        });
-      }
-      
-      // HTML 생성
-      container.innerHTML = `
-        <div class="mb-4">
-          <h5 class="font-bold mb-2">기본 정보</h5>
-          <ul class="list-disc list-inside pl-2">
-            <li>업체명: ${companyName}</li>
-            <li>성함: ${instructorName}</li>
-            <li>연락처: ${phoneNumber}</li>
-            <li>교재 제공 방식: ${materialType.length > 0 ? materialType.join(', ') : '(선택 필요)'}</li>
-          </ul>
-        </div>
-        <div class="mb-4">
-          <h5 class="font-bold mb-2">장비 정보</h5>
-          <ul class="list-disc list-inside pl-2">
-            ${equipmentInfo.length > 0 ? 
-              equipmentInfo.map(item => `<li>${item}</li>`).join('') : 
-              '<li class="text-gray-500">(정보 없음)</li>'}
-          </ul>
-        </div>
-        <div>
-          <h5 class="font-bold mb-2">차량 정보</h5>
-          <ul class="list-disc list-inside pl-2">
-            ${vehicleInfo.length > 0 ? 
-              vehicleInfo.map(item => `<li>${item}</li>`).join('') : 
-              '<li class="text-gray-500">(정보 없음)</li>'}
-          </ul>
-        </div>
-      `;
-    }
-    
-    // 이메일 전송 이벤트
-    document.getElementById('submit-btn').addEventListener('click', function() {
-      const operatorEmail = document.getElementById('operator-email').value;
-      const customEmail = document.getElementById('custom-email').value;
-      const emailTo = operatorEmail === 'custom' ? customEmail : operatorEmail;
-      
-      if (operatorEmail === 'custom' && !customEmail) {
-        showToast('이메일 주소를 입력해주세요.');
+      // 파일 크기 확인 (30MB 제한)
+      if (file.size > 30 * 1024 * 1024) {
+        showToast('파일 크기가 30MB를 초과합니다.');
         return;
       }
       
-      // 실제 이메일 전송 대신 성공 메시지 표시
-      showToast('이메일이 성공적으로 전송되었습니다!');
-    });
-    
-    // 토스트 메시지 표시 함수
-    function showToast(message) {
-      const toast = document.getElementById('toast');
-      document.getElementById('toast-message').textContent = message;
+      // 파일 미리보기 생성
+      const fileSize = formatFileSize(file.size);
+      const fileExt = file.name.split('.').pop().toLowerCase();
+      let iconClass = 'fa-file';
       
-      toast.classList.remove('hidden');
+      if (['zip', 'rar', '7z'].includes(fileExt)) {
+        iconClass = 'fa-file-archive';
+      } else if (['pdf'].includes(fileExt)) {
+        iconClass = 'fa-file-pdf';
+      } else if (['doc', 'docx'].includes(fileExt)) {
+        iconClass = 'fa-file-word';
+      } else if (['xls', 'xlsx'].includes(fileExt)) {
+        iconClass = 'fa-file-excel';
+      } else if (['ppt', 'pptx'].includes(fileExt)) {
+        iconClass = 'fa-file-powerpoint';
+      } else if (['jpg', 'jpeg', 'png', 'gif'].includes(fileExt)) {
+        iconClass = 'fa-file-image';
+      } else if (['mp4', 'avi', 'mov'].includes(fileExt)) {
+        iconClass = 'fa-file-video';
+      }
+      
+      const filePreviewHTML = `
+        <div class="file-preview">
+          <div class="file-icon">
+            <i class="fas ${iconClass}"></i>
+          </div>
+          <div class="file-info">
+            <div class="file-name">${file.name}</div>
+            <div class="file-size">${fileSize}</div>
+          </div>
+          <div class="file-remove" onclick="removeFile('file-preview-container')">
+            <i class="fas fa-times"></i>
+          </div>
+        </div>
+      `;
+      
+      filePreviewContainer.innerHTML = filePreviewHTML;
+      showToast(`파일 '${file.name}'이 업로드되었습니다.`);
+      updateSummary();
+    }
+    
+    function handlePdfUpload(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+      
+      // 파일 미리보기 생성
+      const fileSize = formatFileSize(file.size);
+      const fileExt = file.name.split('.').pop().toLowerCase();
+      let iconClass = 'fa-file';
+      
+      if (['zip', 'rar', '7z'].includes(fileExt)) {
+        iconClass = 'fa-file-archive';
+      } else if (['pdf'].includes(fileExt)) {
+        iconClass = 'fa-file-pdf';
+      } else {
+        iconClass = 'fa-file';
+      }
+      
+      const filePreviewHTML = `
+        <div class="file-preview">
+          <div class="file-icon">
+            <i class="fas ${iconClass}"></i>
+          </div>
+          <div class="file-info">
+            <div class="file-name">${file.name}</div>
+            <div class="file-size">${fileSize}</div>
+          </div>
+          <div class="file-remove" onclick="removeFile('pdf-preview-container')">
+            <i class="fas fa-times"></i>
+          </div>
+        </div>
+      `;
+      
+      pdfPreviewContainer.innerHTML = filePreviewHTML;
+      showToast(`파일 '${file.name}'이 업로드되었습니다.`);
+      updateSummary();
+    }
+    
+    // 파일 크기 포맷
+    function formatFileSize(bytes) {
+      if (bytes === 0) return '0 Bytes';
+      
+      const k = 1024;
+      const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+      const i = Math.floor(Math.log(bytes) / Math.log(k));
+      
+      return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    }
+    
+    // 파일 제거
+    function removeFile(containerId) {
+      document.getElementById(containerId).innerHTML = '';
+      
+      if (containerId === 'file-preview-container') {
+        fileUpload.value = '';
+      } else if (containerId === 'pdf-preview-container') {
+        pdfUpload.value = '';
+      }
+      
+      updateSummary();
+    }
+    
+    // 장비 정보 행 추가
+    function addEquipmentRow() {
+      const equipmentRow = document.createElement('div');
+      equipmentRow.className = 'equipment-row';
+      
+      const equipmentTypeOptions = equipmentTypes.map(type => 
+        `<option value="${type}">${type}</option>`
+      ).join('');
+      
+      equipmentRow.innerHTML = `
+        <button type="button" class="remove-btn" onclick="removeEquipmentRow(this)">
+          <i class="fas fa-times"></i>
+        </button>
+        <div class="equipment-col">
+          <label class="lg-form-label">장비구분</label>
+          <select class="lg-form-control equipment-type">
+            ${equipmentTypeOptions}
+          </select>
+        </div>
+        <div class="equipment-col">
+          <label class="lg-form-label">제조사</label>
+          <input type="text" class="lg-form-control equipment-manufacturer" placeholder="예: LG전자">
+        </div>
+        <div class="equipment-col">
+          <label class="lg-form-label">기종</label>
+          <input type="text" class="lg-form-control equipment-model" placeholder="예: Gram 17">
+        </div>
+        <div class="equipment-col">
+          <label class="lg-form-label">수량</label>
+          <input type="number" class="lg-form-control equipment-quantity" value="1" min="1">
+        </div>
+        <div class="equipment-col">
+          <label class="lg-form-label">S/N & MAC주소</label>
+          <input type="text" class="lg-form-control equipment-mac" placeholder="예: 00:1A:2B:3C:4D:5E">
+        </div>
+      `;
+      
+      equipmentContainer.appendChild(equipmentRow);
+      
+      // 입력 필드 변경 이벤트 등록
+      equipmentRow.querySelectorAll('input, select').forEach(element => {
+        element.addEventListener('change', updateSummary);
+        element.addEventListener('input', updateSummary);
+      });
+      
+      updateSummary();
+    }
+    
+    // 장비 정보 행 제거
+    function removeEquipmentRow(button) {
+      const equipmentRows = document.querySelectorAll('.equipment-row');
+      
+      if (equipmentRows.length > 1) {
+        button.closest('.equipment-row').remove();
+      } else {
+        showToast('최소 1개의 장비 정보가 필요합니다.');
+      }
+      
+      updateSummary();
+    }
+    
+    // 차량 정보 행 추가
+    function addVehicleRow() {
+      vehicleContainer.innerHTML = '';
+      
+      const vehicleRow = document.createElement('div');
+      vehicleRow.className = 'flex flex-wrap gap-4 mb-4';
+      
+      vehicleRow.innerHTML = `
+        <div class="flex-1 min-w-[200px]">
+          <label class="lg-form-label">차종</label>
+          <input type="text" class="lg-form-control vehicle-type" placeholder="예: 아반떼">
+        </div>
+        <div class="flex-1 min-w-[200px]">
+          <label class="lg-form-label">차량번호</label>
+          <input type="text" class="lg-form-control vehicle-number" placeholder="예: 12가 1234">
+        </div>
+      `;
+      
+      vehicleContainer.appendChild(vehicleRow);
+      
+      // 입력 필드 변경 이벤트 등록
+      vehicleRow.querySelectorAll('input').forEach(element => {
+        element.addEventListener('change', updateSummary);
+        element.addEventListener('input', updateSummary);
+      });
+      
+      updateSummary();
+    }
+    
+    // 요약 정보 업데이트
+    function updateSummary() {
+      const companyName = document.getElementById('company-name').value || '(입력 필요)';
+      const instructorName = document.getElementById('instructor-name').value || '(입력 필요)';
+      const phoneNumber = document.getElementById('phone-number').value || '(입력 필요)';
+      const additionalRequest = document.getElementById('additional-request').value || '없음';
+      
+      // 사전 설치 정보
+      let preInstallationInfo = '';
+      if (document.getElementById('no-installation').checked) {
+        preInstallationInfo = '해당사항 없음';
+      } else {
+        const uploadedFile = filePreviewContainer.querySelector('.file-name');
+        const programDescription = document.getElementById('program-description').value;
+        
+        if (uploadedFile) {
+          preInstallationInfo += `파일: ${uploadedFile.textContent}<br>`;
+        }
+        
+        if (programDescription) {
+          preInstallationInfo += `설명: ${programDescription}`;
+        }
+        
+        if (!uploadedFile && !programDescription) {
+          preInstallationInfo = '(입력 필요)';
+        }
+      }
+      
+      // 교재 제공 방식
+      let materialInfo = '';
+      if (pdfMaterial.checked) {
+        const uploadedPdf = pdfPreviewContainer.querySelector('.file-name');
+        materialInfo = uploadedPdf ? `PDF 교재: ${uploadedPdf.textContent}` : 'PDF 교재 (파일 미첨부)';
+      } else if (paperMaterial.checked) {
+        materialInfo = '서면 교재 (배송 필요)';
+      } else if (document.getElementById('no-material').checked) {
+        materialInfo = '해당사항 없음';
+      } else {
+        materialInfo = '(선택 필요)';
+      }
+      
+      // 장비 정보
+      let equipmentInfo = '';
+      const equipmentRows = document.querySelectorAll('.equipment-row');
+      equipmentRows.forEach((row, index) => {
+        const type = row.querySelector('.equipment-type').value;
+        const manufacturer = row.querySelector('.equipment-manufacturer').value || '-';
+        const model = row.querySelector('.equipment-model').value || '-';
+        const quantity = row.querySelector('.equipment-quantity').value || '1';
+        const mac = row.querySelector('.equipment-mac').value || '-';
+        
+        if (type === '선택하세요') {
+          equipmentInfo += `장비 ${index + 1}: (입력 필요)<br>`;
+        } else {
+          equipmentInfo += `장비 ${index + 1}: ${type} / ${manufacturer} / ${model} / ${quantity}개 / ${mac}<br>`;
+        }
+      });
+      
+      // 저장매체 정보
+      if (storageMediaCheckbox.checked) {
+        const reason = document.getElementById('storage-media-reason').value || '(사유 미입력)';
+        equipmentInfo += `<br>저장매체 반입: ${reason}`;
+      }
+      
+      // LAN Port 해제 정보
+      if (lanPortCheckbox.checked) {
+        const portType = document.getElementById('port-type').value || '(선택 필요)';
+        const portReason = document.getElementById('port-reason').value || '(사유 미입력)';
+        equipmentInfo += `<br>LAN Port 해제: ${portType} / ${portReason}`;
+      }
+      
+      // 차량 정보
+      let vehicleInfo = '';
+      if (vehicleContainer.querySelector('.italic')) {
+        vehicleInfo = '해당사항 없음';
+      } else {
+        const vehicleType = document.querySelector('.vehicle-type')?.value || '(입력 필요)';
+        const vehicleNumber = document.querySelector('.vehicle-number')?.value || '(입력 필요)';
+        vehicleInfo = `${vehicleType} / ${vehicleNumber}`;
+      }
+      
+      // 운영자 정보
+      let selectedOperator = '(선택 필요)';
+      if (operatorEmail.value && operatorEmail.value !== 'custom') {
+        const operatorText = operatorEmail.options[operatorEmail.selectedIndex].text;
+        selectedOperator = operatorText;
+      } else if (operatorEmail.value === 'custom' && customEmail.value) {
+        selectedOperator = customEmail.value;
+      }
+      
+      // 요약 정보 HTML 생성
+      const summaryHTML = `
+        <div class="summary-item">
+          <div class="summary-label">업체명</div>
+          <div class="summary-value">${companyName === '(입력 필요)' ? '<span class="empty">' + companyName + '</span>' : companyName}</div>
+        </div>
+        <div class="summary-item">
+          <div class="summary-label">강사명</div>
+          <div class="summary-value">${instructorName === '(입력 필요)' ? '<span class="empty">' + instructorName + '</span>' : instructorName}</div>
+        </div>
+        <div class="summary-item">
+          <div class="summary-label">연락처</div>
+          <div class="summary-value">${phoneNumber === '(입력 필요)' ? '<span class="empty">' + phoneNumber + '</span>' : phoneNumber}</div>
+        </div>
+        <div class="summary-item">
+          <div class="summary-label">사전 설치</div>
+          <div class="summary-value">${preInstallationInfo === '(입력 필요)' ? '<span class="empty">' + preInstallationInfo + '</span>' : preInstallationInfo}</div>
+        </div>
+        <div class="summary-item">
+          <div class="summary-label">교재 제공 방식</div>
+          <div class="summary-value">${materialInfo === '(선택 필요)' ? '<span class="empty">' + materialInfo + '</span>' : materialInfo}</div>
+        </div>
+        <div class="summary-item">
+          <div class="summary-label">반입 장비</div>
+          <div class="summary-value">${equipmentInfo}</div>
+        </div>
+        <div class="summary-item">
+          <div class="summary-label">차량 정보</div>
+          <div class="summary-value">${vehicleInfo}</div>
+        </div>
+        <div class="summary-item">
+          <div class="summary-label">운영자</div>
+          <div class="summary-value">${selectedOperator === '(선택 필요)' ? '<span class="empty">' + selectedOperator + '</span>' : selectedOperator}</div>
+        </div>
+        <div class="summary-item">
+          <div class="summary-label">추가 요청사항</div>
+          <div class="summary-value">${additionalRequest}</div>
+        </div>
+      `;
+      
+      summaryContainer.innerHTML = summaryHTML;
+    }
+    
+    // 제출 처리
+    function handleSubmit() {
+      const operatorEmailValue = operatorEmail.value === 'custom' ? customEmail.value : operatorEmail.value;
+      
+      // 필수 입력 검증
+      if (!operatorEmailValue) {
+        showToast('운영자 이메일을 선택해주세요.');
+        return;
+      }
+      
+      // 이메일 발송 성공 메시지
+      showToast('이메일이 성공적으로 전송되었습니다!');
+      
+      // 실제 이메일 발송 기능은 서버 측 구현 필요
+      // EmailJS나 다른 서비스와 연동하여 구현 필요
+    }
+    
+    // 토스트 메시지 표시
+    function showToast(message) {
+      const toastElement = document.getElementById('toast');
+      toastElement.innerText = message;
+      toastElement.classList.add('show');
       
       setTimeout(() => {
-        toast.classList.add('hidden');
+        toastElement.classList.remove('show');
       }, 3000);
     }
     
-    // 페이지 로드 시 초기화
-    document.addEventListener('DOMContentLoaded', function() {
-      // 첫 번째 탭 활성화
-      goToTab(1);
-    });
+    // 초기화
+    document.addEventListener('DOMContentLoaded', init);
   </script>
 </body>
 </html>
