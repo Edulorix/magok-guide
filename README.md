@@ -1,1 +1,0 @@
-# magok-guide
