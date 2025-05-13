@@ -630,6 +630,90 @@
     </div>
   </div>
   
+  <!-- 플로팅 FAQ 버튼 -->
+  <div class="floating-faq">
+    <button type="button" class="floating-btn bg-lg-red text-white" id="open-faq">
+      <i class="fas fa-question text-xl"></i>
+    </button>
+  </div>
+  
+  <!-- FAQ 모달 -->
+  <div class="faq-modal" id="faq-modal">
+    <div class="modal-content">
+      <div class="flex justify-between items-center mb-4">
+        <h2 class="text-xl font-bold lg-red">자주 묻는 질문 (FAQ)</h2>
+        <button class="close-modal">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      
+      <div class="accordion">
+        <div class="accordion-item">
+          <div class="accordion-header" data-accordion="faq1">
+            <span>Q1. 노트북 외에도 태블릿도 MAC 등록이 필요한가요?</span>
+            <i class="fas fa-chevron-down"></i>
+          </div>
+          <div class="accordion-content" id="faq1">
+            <p>네, <strong>무선 연결이 필요한 장비는 모두 등록</strong>해 주셔야 합니다.</p>
+          </div>
+        </div>
+        
+        <div class="accordion-item">
+          <div class="accordion-header" data-accordion="faq2">
+            <span>Q2. 입차 등록은 필수인가요?</span>
+            <i class="fas fa-chevron-down"></i>
+          </div>
+          <div class="accordion-content" id="faq2">
+            <p>네. <strong>사전 등록되지 않으면 출입이 불가</strong>합니다.</p>
+          </div>
+        </div>
+        
+        <div class="accordion-item">
+          <div class="accordion-header" data-accordion="faq3">
+            <span>Q3. 장비 반입 목록은 언제까지 제출해야 하나요?</span>
+            <i class="fas fa-chevron-down"></i>
+          </div>
+          <div class="accordion-content" id="faq3">
+            <p><strong>최소 방문 3영업일 전까지</strong> 제출해 주시기 바랍니다.</p>
+          </div>
+        </div>
+        
+        <div class="accordion-item">
+          <div class="accordion-header" data-accordion="faq4">
+            <span>Q4. 방문증은 어떻게 반납하나요?</span>
+            <i class="fas fa-chevron-down"></i>
+          </div>
+          <div class="accordion-content" id="faq4">
+            <p><strong>받은 건물의 안내데스크에 반납</strong>해 주세요.</p>
+            <p class="text-sm text-gray-600 mt-1">예) W10동에서 수령 → W10동 안내데스크 반납</p>
+          </div>
+        </div>
+        
+        <div class="accordion-item">
+          <div class="accordion-header" data-accordion="faq5">
+            <span>추가 안내사항</span>
+            <i class="fas fa-chevron-down"></i>
+          </div>
+          <div class="accordion-content" id="faq5">
+            <ul class="list-disc ml-5">
+              <li class="mb-1"><strong>장비 점검이 필요한 경우</strong>, 교육 시작 30분 전까지 도착해주세요.</li>
+              <li class="mb-1"><strong>신분증 지참</strong>은 필수입니다.</li>
+              <li class="mb-1"><strong>방문증은 항상 패용</strong>해 주셔야 합니다.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      
+      <div class="contact-form">
+        <h3 class="font-medium mb-3">기타 문의사항</h3>
+        <textarea class="form-control mb-3" id="contact-message" rows="3" placeholder="추가 문의사항이 있으면 입력해 주세요"></textarea>
+        <button type="button" id="send-inquiry" class="btn btn-primary">
+          <i class="fas fa-paper-plane mr-2"></i>문의하기
+        </button>
+      </div>
+    </div>
+  </div>
+    
   <script src="https://cdn.jsdelivr.net/npm/emailjs-com@3.2.0/dist/email.min.js"></script>
   <script>
     document.addEventListener('DOMContentLoaded', function() {
