@@ -190,6 +190,93 @@
       width: 80px;
       text-align: center;
     }
+        
+    .floating-faq {
+      position: fixed;
+      left: 30px;
+      bottom: 30px;
+      z-index: 1000;
+    }
+    
+.floating-btn {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--lg-red); /* 배경색 설정 */
+  color: white; /* 아이콘 색상 */
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  opacity: 1; /* 완전 투명도 제거 */
+}
+
+.floating-btn:hover {
+  background-color: #8c002c; /* 호버 상태에서 배경색 변경 */
+  transform: translateY(-4px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+}
+    
+    .faq-modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0,0,0,0.5);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 1001;
+    }
+    
+    .modal-content {
+      background: white;
+      width: 90%;
+      max-width: 600px;
+      max-height: 80vh;
+      overflow-y: auto;
+      border-radius: 12px;
+      padding: 2rem;
+      position: relative;
+    }
+    
+    .close-modal {
+      position: absolute;
+      top: 1rem;
+      right: 1.5rem;
+      font-size: 1.5rem;
+      cursor: pointer;
+    }
+    
+    .accordion-item {
+      border-bottom: 1px solid #e2e8f0;
+    }
+    
+    .accordion-header {
+      padding: 1rem 0;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-weight: 500;
+    }
+    
+    .accordion-content {
+      padding: 0 0 1rem 0;
+      display: none;
+    }
+    
+    .accordion-content.active {
+      display: block;
+      animation: fadeIn 0.3s ease;
+    }
+    
+    .contact-form {
+      margin-top: 2rem;
+    }
     
     .drag-drop-area {
       border: 2px dashed var(--lg-gray);
@@ -630,12 +717,12 @@
     <div class="mt-6 mb-10"></div>
   </div>
   
-  <!-- 플로팅 FAQ 버튼 -->
-  <div class="floating-faq">
-    <button type="button" class="floating-btn bg-lg-red text-white" id="open-faq">
-      <i class="fas fa-question text-xl"></i>
-    </button>
-  </div>
+<!-- 플로팅 FAQ 버튼 -->
+<div class="floating-faq">
+  <button type="button" class="floating-btn bg-lg-red text-white" id="open-faq">
+    <i class="fas fa-question text-xl"></i>
+  </button>
+</div>
   
   <!-- FAQ 모달 -->
   <div class="faq-modal" id="faq-modal">
@@ -1141,7 +1228,77 @@
         });
         */
       });
+    // FAQ 모달
+    const openFaqBtn = document.getElementById('open-faq');
+    const faqModal = document.getElementById('faq-modal');
+    const closeModal = document.querySelector('.close-modal');
+    
+    openFaqBtn.addEventListener('click', function() {
+      faqModal.style.display = 'flex';
+      document.body.style.overflow = 'hidden';
+    });
+    
+    closeModal.addEventListener('click', function() {
+      faqModal.style.display = 'none';
+      document.body.style.overflow = '';
+    });
+    
+    faqModal.addEventListener('click', function(e) {
+      if (e.target === faqModal) {
+        faqModal.style.display = 'none';
+        document.body.style.overflow = '';
+      }
+    });
+    
+    // 아코디언
+    const accordionHeaders = document.querySelectorAll('.accordion-header');
+    
+    accordionHeaders.forEach(header => {
+      header.addEventListener('click', function() {
+        const accordionId = this.getAttribute('data-accordion');
+        const content = document.getElementById(accordionId);
+        
+        if (content.classList.contains('active')) {
+          content.classList.remove('active');
+          this.querySelector('i').classList.replace('fa-chevron-up', 'fa-chevron-down');
+        } else {
+          content.classList.add('active');
+          this.querySelector('i').classList.replace('fa-chevron-down', 'fa-chevron-up');
+        }
+      });
+    });
+    
+    // 기타 문의사항 전송
+    document.getElementById('send-inquiry').addEventListener('click', function() {
+      const message = document.getElementById('contact-message').value;
       
+      if (!message) {
+        alert('문의사항을 입력해주세요.');
+        return;
+      }
+      
+      this.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>전송 중...';
+      this.disabled = true;
+      
+      emailjs.send('ldd_Training Service', 'template_ajf77x7', {
+        to_email: 'mijin1.kim@lgepartner.com',
+        from_name: '방문 안내 사이트 문의',
+        message: message
+      })
+        .then(function(response) {
+          console.log('문의사항 전송 성공!', response.status, response.text);
+          alert('문의사항이 성공적으로 전송되었습니다!');
+          document.getElementById('contact-message').value = '';
+          document.getElementById('send-inquiry').innerHTML = '<i class="fas fa-paper-plane mr-2"></i>문의하기';
+          document.getElementById('send-inquiry').disabled = false;
+        }, function(error) {
+          console.log('문의사항 전송 실패...', error);
+          alert('문의사항 전송에 실패했습니다. 다시 시도해주세요.');
+          document.getElementById('send-inquiry').innerHTML = '<i class="fas fa-paper-plane mr-2"></i>문의하기';
+          document.getElementById('send-inquiry').disabled = false;
+        });
+    });
+          
       function getSelectedEmail() {
         const selected = document.getElementById('operator-email').value;
         return selected === 'custom' ? document.getElementById('custom-email').value : selected;
