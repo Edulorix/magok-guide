@@ -198,26 +198,33 @@
       z-index: 1000;
     }
     
-.floating-btn {
-  width: 56px;
-  height: 56px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background-color: var(--lg-red); /* 배경색 설정 */
-  color: white; /* 아이콘 색상 */
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  cursor: pointer;
-  transition: all 0.2s ease;
-  opacity: 1; /* 완전 투명도 제거 */
-}
+  .floating-btn {
+    width: auto;
+    height: 56px;
+    padding: 0 1.5rem; /* 텍스트를 위한 여유 공간 추가 */
+    border-radius: 28px; /* pill-shaped 버튼 */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #F3E5E5; /* 연한 핑크색, LG Red와 조화 */
+    color: #A50034; /* LG Red */
+    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2); /* 그림자 추가 */
+    font-size: 1rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
 
-.floating-btn:hover {
-  background-color: #8c002c; /* 호버 상태에서 배경색 변경 */
-  transform: translateY(-4px);
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
-}
+  .floating-btn:hover {
+    background-color: #C42F48; /* Heritage Red - 호버 시 강조 */
+    color: white; /* 텍스트 색상 반전 */
+    transform: scale(1.1); /* 살짝 확대 효과 */
+    box-shadow: 0 12px 20px rgba(0, 0, 0, 0.3); /* 강조된 그림자 */
+  }
+
+  .floating-btn i {
+    font-size: 1.5rem; /* 플로팅버튼 FAQ 아이콘 크기 */
+  }
     
     .faq-modal {
       position: fixed;
@@ -719,8 +726,8 @@
   
 <!-- 플로팅 FAQ 버튼 -->
 <div class="floating-faq">
-  <button type="button" class="floating-btn bg-lg-red text-white" id="open-faq">
-    <i class="fas fa-question text-xl"></i>
+  <button type="button" class="floating-btn">
+    FAQ
   </button>
 </div>
   
