@@ -198,32 +198,28 @@
       z-index: 1000;
     }
     
-.floating-btn {
-  width: 56px;
-  height: 56px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background-color: #F3E5E5; /* 연한 핑크색, LG Red와 조화 */
-  color: #A50034; /* LG Red */
-  box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2); /* 그림자 추가 */
-  font-size: 1.4rem;
-  font-weight: bold;
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
+    .floating-btn {
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background-color: var(--lg-red);
+      color: white;
+      box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
+      font-size: 0.875rem;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      border: none;
+    }
 
-.floating-btn:hover {
-  background-color: #8c002c; /* 호버 상태에서 배경색 변경 */
-  transform: translateY(-4px);
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
-}
-
-  .floating-btn i {
-    font-size: 1.5rem; /* 플로팅버튼 아이콘 크기 */
-}
-	  
+    .floating-btn:hover {
+      background-color: #8c002c;
+      transform: translateY(-4px);
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+    }
     
     .faq-modal {
       position: fixed;
@@ -494,8 +490,8 @@
           
           <div id="pdf-upload-container" class="drag-drop-area mt-4 hidden">
             <i class="fas fa-file-pdf text-4xl text-gray-400 mb-3"></i>
-            <p>PDF 교재를 이곳에 끌어다 놓거나 클릭하여 업로드하세요</p>
-            <p class="text-gray-500 text-sm mt-1">모든 파일 형식 지원 (알집 파일 포함)</p>
+            <p>PDF 교재를 이곳에 끌어다 놓거나 클릭하여 업로드하세요. 모든 파일 형식 지원 (알집 파일 포함)</p>
+            <p class="text-gray-500 text-sm mt-1">예시) 강사명_교재</p>
             <input type="file" id="pdf-upload" class="hidden">
           </div>
           
@@ -720,22 +716,24 @@
             </button>
           </div>
         </div>
-      
+      </div>
+    </div>
+    
     <div class="mt-6 mb-10"></div>
   </div>
   
-<!-- 플로팅 FAQ 버튼 -->
-<div class="floating-faq">
-  <button type="button" class="floating-btn bg-lg-red text-white" id="open-faq">
-    <i class="fas fa-question text-xl"></i>
-  </button>
-</div>
+  <!-- 플로팅 FAQ 버튼 -->
+  <div class="floating-faq">
+    <button type="button" class="floating-btn" id="open-faq">
+      FAQ
+    </button>
+  </div>
   
   <!-- FAQ 모달 -->
   <div class="faq-modal" id="faq-modal">
     <div class="modal-content">
       <div class="flex justify-between items-center mb-4">
-        <h2 class="text-xl font-bold lg-red">자주 묻는 질문 (FAQ)</h2>
+        <h2 class="text-xl font-bold" style="color: var(--lg-red);">자주 묻는 질문 (FAQ)</h2>
         <button class="close-modal">
           <i class="fas fa-times"></i>
         </button>
@@ -810,6 +808,11 @@
 
   <script src="https://cdn.jsdelivr.net/npm/emailjs-com@3.2.0/dist/email.min.js"></script>
   <script>
+    // EmailJS 초기화
+    (function(){
+      emailjs.init("lzOAWJz-68oZh9N5l"); // 실제 public key로 교체 필요
+    })();
+
     document.addEventListener('DOMContentLoaded', function() {
       // 탭 전환
       const tabButtons = document.querySelectorAll('.tab-button');
@@ -1182,9 +1185,79 @@
       
       // 제출 전 요약 업데이트
       document.getElementById('next-to-tab3').addEventListener('click', updateSummary);
+
+      // 선택된 이메일 주소 가져오기
+      function getSelectedEmail() {
+        const selected = document.getElementById('operator-email').value;
+        return selected === 'custom' ? document.getElementById('custom-email').value : selected;
+      }
+
+      // 이메일 본문 생성
+      function generateEmailBody() {
+        const company = document.getElementById('company-name').value;
+        const instructor = document.getElementById('instructor-name').value;
+        const phone = document.getElementById('phone-number').value;
+        const additionalComments = document.getElementById('additional-comments').value;
+        
+        let emailBody = `LG Science Park 방문 신청서\n\n`;
+        emailBody += `[기본 정보]\n`;
+        emailBody += `업체명: ${company}\n`;
+        emailBody += `강사명: ${instructor}\n`;
+        emailBody += `연락처: ${phone}\n\n`;
+        
+        // 장비 정보
+        emailBody += `[반입 장비 정보]\n`;
+        const equipmentRows = document.querySelectorAll('.equipment-row');
+        equipmentRows.forEach((row, index) => {
+          const type = row.querySelector('select').value;
+          const manufacturer = row.querySelectorAll('input')[0].value;
+          const model = row.querySelectorAll('input')[1].value;
+          const qty = row.querySelectorAll('input')[2].value;
+          const macAddress = row.querySelectorAll('input')[3].value;
+          
+          if (type) {
+            emailBody += `${index + 1}. ${type}`;
+            if (manufacturer) emailBody += ` / ${manufacturer}`;
+            if (model) emailBody += ` / ${model}`;
+            if (qty) emailBody += ` / 수량: ${qty}`;
+            if (macAddress) emailBody += ` / MAC: ${macAddress}`;
+            emailBody += `\n`;
+          }
+        });
+        
+        // 차량 정보
+        emailBody += `\n[차량 정보]\n`;
+        if (noVehicle.checked) {
+          emailBody += `해당사항 없음\n`;
+        } else {
+          const vehicleRows = vehicleContainer.children;
+          for (let i = 0; i < vehicleRows.length; i++) {
+            const inputs = vehicleRows[i].querySelectorAll('input');
+            const type = inputs[0]?.value;
+            const number = inputs[1]?.value;
+            
+            if (type && number) {
+              emailBody += `${type} - ${number}\n`;
+            }
+          }
+        }
+        
+        if (additionalComments) {
+          emailBody += `\n[추가 요청사항]\n${additionalComments}\n`;
+        }
+        
+        return emailBody;
+      }
       
       // 이메일 전송
       document.getElementById('submit-form').addEventListener('click', function() {
+        const selectedEmail = getSelectedEmail();
+        
+        if (!selectedEmail) {
+          alert('운영자 이메일을 선택해주세요.');
+          return;
+        }
+        
         const emailStatus = document.getElementById('email-status');
         emailStatus.classList.remove('hidden');
         emailStatus.className = 'p-4 rounded-lg bg-blue-100 text-blue-800 mb-4';
@@ -1195,27 +1268,16 @@
           </div>
         `;
         
-        // 데모용: 이메일 전송 성공 시뮬레이션
-        setTimeout(() => {
-          emailStatus.className = 'p-4 rounded-lg bg-green-100 text-green-800 mb-4';
-          emailStatus.innerHTML = `
-            <div class="flex items-center">
-              <i class="fas fa-check-circle mr-2"></i>
-              <span>이메일이 성공적으로 전송되었습니다!</span>
-            </div>
-          `;
-        }, 2000);
-        
-        // 실제 이메일 전송 코드는 아래와 같이 구현 가능 (EmailJS 서비스 연동 필요)
-        /* 
-        emailjs.send('YOUR_SERVICE_ID', 'YOUR_TEMPLATE_ID', {
-          to_email: getSelectedEmail(),
+        // EmailJS를 통한 실제 이메일 전송
+        emailjs.send('service_7hwh88t', 'template_ajf77x7', {
+          to_email: selectedEmail,
+          from_name: document.getElementById('instructor-name').value,
           company: document.getElementById('company-name').value,
-          instructor_name: document.getElementById('instructor-name').value,
           phone: document.getElementById('phone-number').value,
           message: generateEmailBody()
         })
         .then(function(response) {
+          console.log('이메일 전송 성공!', response.status, response.text);
           emailStatus.className = 'p-4 rounded-lg bg-green-100 text-green-800 mb-4';
           emailStatus.innerHTML = `
             <div class="flex items-center">
@@ -1225,96 +1287,88 @@
           `;
         })
         .catch(function(error) {
+          console.log('이메일 전송 실패...', error);
           emailStatus.className = 'p-4 rounded-lg bg-red-100 text-red-800 mb-4';
           emailStatus.innerHTML = `
             <div class="flex items-center">
               <i class="fas fa-exclamation-circle mr-2"></i>
-              <span>이메일 전송에 실패했습니다: ${error.message}</span>
+              <span>이메일 전송에 실패했습니다. 다시 시도해주세요.</span>
             </div>
           `;
         });
-        */
       });
-    // FAQ 모달
-    const openFaqBtn = document.getElementById('open-faq');
-    const faqModal = document.getElementById('faq-modal');
-    const closeModal = document.querySelector('.close-modal');
-    
-    openFaqBtn.addEventListener('click', function() {
-      faqModal.style.display = 'flex';
-      document.body.style.overflow = 'hidden';
-    });
-    
-    closeModal.addEventListener('click', function() {
-      faqModal.style.display = 'none';
-      document.body.style.overflow = '';
-    });
-    
-    faqModal.addEventListener('click', function(e) {
-      if (e.target === faqModal) {
+
+      // FAQ 모달
+      const openFaqBtn = document.getElementById('open-faq');
+      const faqModal = document.getElementById('faq-modal');
+      const closeModal = document.querySelector('.close-modal');
+      
+      openFaqBtn.addEventListener('click', function() {
+        faqModal.style.display = 'flex';
+        document.body.style.overflow = 'hidden';
+      });
+      
+      closeModal.addEventListener('click', function() {
         faqModal.style.display = 'none';
         document.body.style.overflow = '';
-      }
-    });
-    
-    // 아코디언
-    const accordionHeaders = document.querySelectorAll('.accordion-header');
-    
-    accordionHeaders.forEach(header => {
-      header.addEventListener('click', function() {
-        const accordionId = this.getAttribute('data-accordion');
-        const content = document.getElementById(accordionId);
-        
-        if (content.classList.contains('active')) {
-          content.classList.remove('active');
-          this.querySelector('i').classList.replace('fa-chevron-up', 'fa-chevron-down');
-        } else {
-          content.classList.add('active');
-          this.querySelector('i').classList.replace('fa-chevron-down', 'fa-chevron-up');
+      });
+      
+      faqModal.addEventListener('click', function(e) {
+        if (e.target === faqModal) {
+          faqModal.style.display = 'none';
+          document.body.style.overflow = '';
         }
       });
-    });
-    
-    // 기타 문의사항 전송
-    document.getElementById('send-inquiry').addEventListener('click', function() {
-      const message = document.getElementById('contact-message').value;
       
-      if (!message) {
-        alert('문의사항을 입력해주세요.');
-        return;
-      }
+      // 아코디언
+      const accordionHeaders = document.querySelectorAll('.accordion-header');
       
-      this.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>전송 중...';
-      this.disabled = true;
+      accordionHeaders.forEach(header => {
+        header.addEventListener('click', function() {
+          const accordionId = this.getAttribute('data-accordion');
+          const content = document.getElementById(accordionId);
+          
+          if (content.classList.contains('active')) {
+            content.classList.remove('active');
+            this.querySelector('i').classList.replace('fa-chevron-up', 'fa-chevron-down');
+          } else {
+            content.classList.add('active');
+            this.querySelector('i').classList.replace('fa-chevron-down', 'fa-chevron-up');
+          }
+        });
+      });
       
-      emailjs.send('ldd_Training Service', 'template_ajf77x7', {
-        to_email: 'mijin1.kim@lgepartner.com',
-        from_name: '방문 안내 사이트 문의',
-        message: message
-      })
+      // 기타 문의사항 전송
+      document.getElementById('send-inquiry').addEventListener('click', function() {
+        const message = document.getElementById('contact-message').value;
+        
+        if (!message) {
+          alert('문의사항을 입력해주세요.');
+          return;
+        }
+        
+        this.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>전송 중...';
+        this.disabled = true;
+        
+        emailjs.send('service_7hwh88t', 'template_ajf77x7', {
+          to_email: 'mijin1.kim@lgepartner.com',
+          from_name: '방문 안내 사이트 문의',
+          message: message
+        })
         .then(function(response) {
           console.log('문의사항 전송 성공!', response.status, response.text);
           alert('문의사항이 성공적으로 전송되었습니다!');
           document.getElementById('contact-message').value = '';
           document.getElementById('send-inquiry').innerHTML = '<i class="fas fa-paper-plane mr-2"></i>문의하기';
           document.getElementById('send-inquiry').disabled = false;
-        }, function(error) {
+        })
+        .catch(function(error) {
           console.log('문의사항 전송 실패...', error);
           alert('문의사항 전송에 실패했습니다. 다시 시도해주세요.');
           document.getElementById('send-inquiry').innerHTML = '<i class="fas fa-paper-plane mr-2"></i>문의하기';
           document.getElementById('send-inquiry').disabled = false;
         });
-    });
-          
-      function getSelectedEmail() {
-        const selected = document.getElementById('operator-email').value;
-        return selected === 'custom' ? document.getElementById('custom-email').value : selected;
-      }
-      
-      function generateEmailBody() {
-        // 이메일 본문 생성 로직...
-        return '';
-      }
+      });
       
       // 초기 요약 정보 업데이트
       updateSummary();
