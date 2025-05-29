@@ -190,7 +190,7 @@
       width: 80px;
       text-align: center;
     }
-        
+    
     .floating-faq {
       position: fixed;
       right: 30px;
@@ -208,11 +208,10 @@
       background-color: var(--lg-red);
       color: white;
       box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
-      font-size: 0.875rem;
+      font-size: 0.9rem;
       font-weight: bold;
       cursor: pointer;
       transition: all 0.3s ease;
-      border: none;
     }
 
     .floating-btn:hover {
@@ -286,11 +285,57 @@
       padding: 2rem;
       text-align: center;
       transition: all 0.2s;
+      background: linear-gradient(45deg, #f8f9fa 25%, transparent 25%, transparent 75%, #f8f9fa 75%, #f8f9fa),
+                  linear-gradient(45deg, #f8f9fa 25%, transparent 25%, transparent 75%, #f8f9fa 75%, #f8f9fa);
+      background-size: 20px 20px;
+      background-position: 0 0, 10px 10px;
     }
     
     .drag-drop-area:hover {
       border-color: var(--lg-accent);
       background-color: rgba(0, 165, 228, 0.05);
+    }
+    
+    .drag-drop-area.dragover {
+      border-color: var(--lg-red);
+      background-color: rgba(165, 0, 52, 0.05);
+      transform: scale(1.02);
+    }
+    
+    .upload-icon {
+      font-size: 3rem;
+      color: var(--lg-red);
+      margin-bottom: 1rem;
+      animation: bounce 2s infinite;
+    }
+    
+    @keyframes bounce {
+      0%, 20%, 50%, 80%, 100% {
+        transform: translateY(0);
+      }
+      40% {
+        transform: translateY(-10px);
+      }
+      60% {
+        transform: translateY(-5px);
+      }
+    }
+    
+    .file-preview {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      padding: 1rem;
+      background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+      border-radius: 8px;
+      border: 2px solid var(--lg-accent);
+    }
+    
+    .file-preview i {
+      color: var(--lg-red);
+      font-size: 2.5rem;
+      margin-bottom: 0.5rem;
     }
     
     .summary-item {
@@ -448,16 +493,16 @@
           <div class="mb-6">
             <label class="form-label">파일/프로그램 공유</label>
             <div id="upload-container" class="drag-drop-area">
-              <i class="fas fa-cloud-upload-alt text-4xl text-gray-400 mb-3"></i>
-              <p>파일을 이곳에 끌어다 놓거나 클릭하여 업로드하세요</p>
-              <p class="text-gray-500 text-sm mt-1">최대 파일 크기: 30MB</p>
+              <i class="fas fa-cloud-upload-alt upload-icon"></i>
+              <p class="text-lg font-medium mb-2">파일을 이곳에 끌어다 놓거나 클릭하여 업로드하세요</p>
+              <p class="text-gray-500 text-sm">최대 파일 크기: 30MB</p>
               <input type="file" id="file-upload" class="hidden">
             </div>
             
             <div class="mt-4">
               <label class="form-label">설치 프로그램명 설명</label>
-              <textarea id="program-desc" class="form-control" rows="3" placeholder="수업에 필요한 실습 프로그램, 코드 예제, 설치 파일 등을 업로드해 주세요.
-교육생이 사전에 다운로드해 실습 환경을 준비할 수 있습니다."></textarea>
+              <textarea id="program-desc" class="form-control" rows="3" placeholder="수업 중 사용할 실습용 프로그램, 코드 예제, 설치 파일 등을 업로드해주세요. 
+교육생들이 사전에 다운로드하여 실습 환경을 준비할 수 있습니다."></textarea>
             </div>
             
             <div class="mt-4 flex items-center">
@@ -489,9 +534,10 @@
           </div>
           
           <div id="pdf-upload-container" class="drag-drop-area mt-4 hidden">
-            <i class="fas fa-file-pdf text-4xl text-gray-400 mb-3"></i>
-            <p>PDF 교재를 이곳에 끌어다 놓거나 클릭하여 업로드하세요. 모든 파일 형식 지원 (알집 파일 포함)</p>
-            <p class="text-gray-500 text-sm mt-1">예시) 강사명_교재</p>
+            <i class="fas fa-file-pdf upload-icon"></i>
+            <p class="text-lg font-medium mb-2">PDF 교재를 이곳에 끌어다 놓거나 클릭하여 업로드하세요</p>
+            <p class="text-gray-500 text-sm mb-1">모든 파일 형식 지원 (알집 파일 포함)</p>
+            <p class="text-gray-400 text-xs">예시) 강사명_교재</p>
             <input type="file" id="pdf-upload" class="hidden">
           </div>
           
@@ -684,6 +730,11 @@
               <div class="summary-label">차량 정보</div>
               <div class="summary-value">(입력 필요)</div>
             </div>
+            
+            <div id="summary-inquiry" class="summary-item hidden">
+              <div class="summary-label">추가 문의사항</div>
+              <div class="summary-value" id="summary-inquiry-text"></div>
+            </div>
           </div>
           
           <div class="mb-6">
@@ -799,8 +850,8 @@
       <div class="contact-form">
         <h3 class="font-medium mb-3">기타 문의사항</h3>
         <textarea class="form-control mb-3" id="contact-message" rows="3" placeholder="추가 문의사항이 있으면 입력해 주세요"></textarea>
-        <button type="button" id="send-inquiry" class="btn btn-primary">
-          <i class="fas fa-paper-plane mr-2"></i>문의하기
+        <button type="button" id="save-inquiry" class="btn btn-primary">
+          <i class="fas fa-save mr-2"></i>저장하기
         </button>
       </div>
     </div>
@@ -808,12 +859,13 @@
 
   <script src="https://cdn.jsdelivr.net/npm/emailjs-com@3.2.0/dist/email.min.js"></script>
   <script>
-    // EmailJS 초기화
-    (function(){
-      emailjs.init("lzOAWJz-68oZh9N5l"); // 실제 public key로 교체 필요
-    })();
-
+    // 전역 변수
+    let savedInquiry = '';
+    
     document.addEventListener('DOMContentLoaded', function() {
+      // EmailJS 초기화
+      emailjs.init("ldd_Training Service");
+      
       // 탭 전환
       const tabButtons = document.querySelectorAll('.tab-button');
       const tabContents = document.querySelectorAll('.tab-content');
@@ -834,6 +886,11 @@
             content.classList.remove('active');
           }
         });
+        
+        // 탭 3로 이동할 때 요약 정보 업데이트
+        if (tabId === 'tab3') {
+          updateSummary();
+        }
         
         // 스크롤을 페이지 상단으로 이동
         window.scrollTo({top: 0, behavior: 'smooth'});
@@ -1038,13 +1095,13 @@
       
       ['dragenter', 'dragover'].forEach(eventName => {
         uploadArea.addEventListener(eventName, () => {
-          uploadArea.classList.add('bg-gray-100');
+          uploadArea.classList.add('dragover');
         });
       });
       
       ['dragleave', 'drop'].forEach(eventName => {
         uploadArea.addEventListener(eventName, () => {
-          uploadArea.classList.remove('bg-gray-100');
+          uploadArea.classList.remove('dragover');
         });
       });
       
@@ -1061,9 +1118,11 @@
         const files = e.target.files;
         if (files.length) {
           uploadArea.innerHTML = `
-            <i class="fas fa-file-upload text-4xl text-green-500 mb-3"></i>
-            <p>${files[0].name}</p>
-            <p class="text-gray-500 text-sm mt-1">${formatFileSize(files[0].size)}</p>
+            <div class="file-preview">
+              <i class="fas fa-file-upload"></i>
+              <p class="font-medium">${files[0].name}</p>
+              <p class="text-gray-500 text-sm">${formatFileSize(files[0].size)}</p>
+            </div>
           `;
         }
       }
@@ -1086,13 +1145,13 @@
       
       ['dragenter', 'dragover'].forEach(eventName => {
         pdfUploadArea.addEventListener(eventName, () => {
-          pdfUploadArea.classList.add('bg-gray-100');
+          pdfUploadArea.classList.add('dragover');
         });
       });
       
       ['dragleave', 'drop'].forEach(eventName => {
         pdfUploadArea.addEventListener(eventName, () => {
-          pdfUploadArea.classList.remove('bg-gray-100');
+          pdfUploadArea.classList.remove('dragover');
         });
       });
       
@@ -1109,9 +1168,11 @@
         const files = e.target.files;
         if (files.length) {
           pdfUploadArea.innerHTML = `
-            <i class="fas fa-file-pdf text-4xl text-green-500 mb-3"></i>
-            <p>${files[0].name}</p>
-            <p class="text-gray-500 text-sm mt-1">${formatFileSize(files[0].size)}</p>
+            <div class="file-preview">
+              <i class="fas fa-file-pdf"></i>
+              <p class="font-medium">${files[0].name}</p>
+              <p class="text-gray-500 text-sm">${formatFileSize(files[0].size)}</p>
+            </div>
           `;
         }
       }
@@ -1176,6 +1237,13 @@
           document.getElementById('summary-vehicle').querySelector('.summary-value').innerHTML = 
             vehicleSummary || '(입력 필요)';
         }
+        
+        // FAQ 문의사항 요약에 추가
+        if (savedInquiry) {
+          const summaryInquiry = document.getElementById('summary-inquiry');
+          summaryInquiry.classList.remove('hidden');
+          document.getElementById('summary-inquiry-text').textContent = savedInquiry;
+        }
       }
       
       // 입력 필드 변경 시 요약 업데이트
@@ -1183,81 +1251,27 @@
         el.addEventListener('change', updateSummary);
       });
       
-      // 제출 전 요약 업데이트
-      document.getElementById('next-to-tab3').addEventListener('click', updateSummary);
-
-      // 선택된 이메일 주소 가져오기
-      function getSelectedEmail() {
-        const selected = document.getElementById('operator-email').value;
-        return selected === 'custom' ? document.getElementById('custom-email').value : selected;
-      }
-
-      // 이메일 본문 생성
-      function generateEmailBody() {
-        const company = document.getElementById('company-name').value;
-        const instructor = document.getElementById('instructor-name').value;
-        const phone = document.getElementById('phone-number').value;
-        const additionalComments = document.getElementById('additional-comments').value;
+      // MS Forms 연동 함수
+      function submitToMSForms(data) {
+        // MS Forms 웹훅 URL (실제 연동 시 수정 필요)
+        const msFormsWebhookUrl = 'https://forms.microsoft.com/Pages/ResponsePage.aspx?id=YOUR_FORM_ID';
         
-        let emailBody = `LG Science Park 방문 신청서\n\n`;
-        emailBody += `[기본 정보]\n`;
-        emailBody += `업체명: ${company}\n`;
-        emailBody += `강사명: ${instructor}\n`;
-        emailBody += `연락처: ${phone}\n\n`;
-        
-        // 장비 정보
-        emailBody += `[반입 장비 정보]\n`;
-        const equipmentRows = document.querySelectorAll('.equipment-row');
-        equipmentRows.forEach((row, index) => {
-          const type = row.querySelector('select').value;
-          const manufacturer = row.querySelectorAll('input')[0].value;
-          const model = row.querySelectorAll('input')[1].value;
-          const qty = row.querySelectorAll('input')[2].value;
-          const macAddress = row.querySelectorAll('input')[3].value;
-          
-          if (type) {
-            emailBody += `${index + 1}. ${type}`;
-            if (manufacturer) emailBody += ` / ${manufacturer}`;
-            if (model) emailBody += ` / ${model}`;
-            if (qty) emailBody += ` / 수량: ${qty}`;
-            if (macAddress) emailBody += ` / MAC: ${macAddress}`;
-            emailBody += `\n`;
-          }
+        // Power Automate를 통한 MS Forms 연동
+        fetch(msFormsWebhookUrl, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(data)
+        }).then(response => {
+          console.log('MS Forms에 데이터 전송 완료:', response);
+        }).catch(error => {
+          console.error('MS Forms 전송 실패:', error);
         });
-        
-        // 차량 정보
-        emailBody += `\n[차량 정보]\n`;
-        if (noVehicle.checked) {
-          emailBody += `해당사항 없음\n`;
-        } else {
-          const vehicleRows = vehicleContainer.children;
-          for (let i = 0; i < vehicleRows.length; i++) {
-            const inputs = vehicleRows[i].querySelectorAll('input');
-            const type = inputs[0]?.value;
-            const number = inputs[1]?.value;
-            
-            if (type && number) {
-              emailBody += `${type} - ${number}\n`;
-            }
-          }
-        }
-        
-        if (additionalComments) {
-          emailBody += `\n[추가 요청사항]\n${additionalComments}\n`;
-        }
-        
-        return emailBody;
       }
       
       // 이메일 전송
       document.getElementById('submit-form').addEventListener('click', function() {
-        const selectedEmail = getSelectedEmail();
-        
-        if (!selectedEmail) {
-          alert('운영자 이메일을 선택해주세요.');
-          return;
-        }
-        
         const emailStatus = document.getElementById('email-status');
         emailStatus.classList.remove('hidden');
         emailStatus.className = 'p-4 rounded-lg bg-blue-100 text-blue-800 mb-4';
@@ -1268,13 +1282,27 @@
           </div>
         `;
         
-        // EmailJS를 통한 실제 이메일 전송
-        emailjs.send('service_7hwh88t', 'template_ajf77x7', {
-          to_email: selectedEmail,
-          from_name: document.getElementById('instructor-name').value,
+        // 폼 데이터 수집
+        const formData = {
           company: document.getElementById('company-name').value,
+          instructor: document.getElementById('instructor-name').value,
           phone: document.getElementById('phone-number').value,
-          message: generateEmailBody()
+          inquiry: savedInquiry,
+          additional_comments: document.getElementById('additional-comments').value,
+          timestamp: new Date().toISOString()
+        };
+        
+        // MS Forms에 데이터 전송
+        submitToMSForms(formData);
+        
+        // EmailJS를 통한 이메일 전송
+        emailjs.send('ldd_Training Service', 'template_ajf77x7', {
+          to_email: getSelectedEmail(),
+          company: formData.company,
+          instructor_name: formData.instructor,
+          phone: formData.phone,
+          message: generateEmailBody(),
+          inquiry: formData.inquiry
         })
         .then(function(response) {
           console.log('이메일 전송 성공!', response.status, response.text);
@@ -1297,7 +1325,7 @@
           `;
         });
       });
-
+      
       // FAQ 모달
       const openFaqBtn = document.getElementById('open-faq');
       const faqModal = document.getElementById('faq-modal');
@@ -1338,8 +1366,8 @@
         });
       });
       
-      // 기타 문의사항 전송
-      document.getElementById('send-inquiry').addEventListener('click', function() {
+      // FAQ 문의사항 저장
+      document.getElementById('save-inquiry').addEventListener('click', function() {
         const message = document.getElementById('contact-message').value;
         
         if (!message) {
@@ -1347,28 +1375,39 @@
           return;
         }
         
-        this.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>전송 중...';
+        savedInquiry = message;
+        
+        this.innerHTML = '<i class="fas fa-check mr-2"></i>저장 완료!';
         this.disabled = true;
         
-        emailjs.send('service_7hwh88t', 'template_ajf77x7', {
-          to_email: 'mijin1.kim@lgepartner.com',
-          from_name: '방문 안내 사이트 문의',
-          message: message
-        })
-        .then(function(response) {
-          console.log('문의사항 전송 성공!', response.status, response.text);
-          alert('문의사항이 성공적으로 전송되었습니다!');
-          document.getElementById('contact-message').value = '';
-          document.getElementById('send-inquiry').innerHTML = '<i class="fas fa-paper-plane mr-2"></i>문의하기';
-          document.getElementById('send-inquiry').disabled = false;
-        })
-        .catch(function(error) {
-          console.log('문의사항 전송 실패...', error);
-          alert('문의사항 전송에 실패했습니다. 다시 시도해주세요.');
-          document.getElementById('send-inquiry').innerHTML = '<i class="fas fa-paper-plane mr-2"></i>문의하기';
-          document.getElementById('send-inquiry').disabled = false;
-        });
+        setTimeout(() => {
+          this.innerHTML = '<i class="fas fa-save mr-2"></i>저장하기';
+          this.disabled = false;
+          faqModal.style.display = 'none';
+          document.body.style.overflow = '';
+          
+          // 요약 탭으로 이동할 때 문의사항이 포함되도록 업데이트
+          updateSummary();
+        }, 1500);
       });
+      
+      function getSelectedEmail() {
+        const selected = document.getElementById('operator-email').value;
+        return selected === 'custom' ? document.getElementById('custom-email').value : selected;
+      }
+      
+      function generateEmailBody() {
+        // 이메일 본문 생성 로직
+        return `
+강사 정보:
+- 업체명: ${document.getElementById('company-name').value}
+- 성함: ${document.getElementById('instructor-name').value}
+- 연락처: ${document.getElementById('phone-number').value}
+
+추가 문의사항: ${savedInquiry}
+추가 요청사항: ${document.getElementById('additional-comments').value}
+        `;
+      }
       
       // 초기 요약 정보 업데이트
       updateSummary();
