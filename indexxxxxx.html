@@ -893,7 +893,7 @@
     document.addEventListener('DOMContentLoaded', function() {
       // EmailJS 초기화 - 올바른 Public Key로 교체하세요
       emailjs.init({
-        publicKey: "YOUR_PUBLIC_KEY_HERE", // 실제 Public Key로 교체 필요
+        publicKey: "C56kGCzPtfgWVEKoO", // 실제 Public Key로 교체 필요
         // 추가 옵션
         limitRate: {
           throttle: 10000, // 10초마다 한 번씩만 요청 허용
@@ -1362,7 +1362,7 @@
         };
 
         // 실제 Service ID와 Template ID로 교체하세요
-        emailjs.send('YOUR_SERVICE_ID', 'YOUR_TEMPLATE_ID', templateParams)
+        emailjs.send('ldd_Training Service', 'template_ajf77x7', templateParams)
         .then(function(response) {
           console.log('이메일 전송 성공!', response.status, response.text);
           emailStatus.className = 'p-4 rounded-lg bg-green-100 text-green-800 mb-4';
