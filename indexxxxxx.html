@@ -1821,29 +1821,53 @@
         }
       }
 
-      // file.io 업로드 함수
-      async function uploadToFileIO(file) {
-        const formData = new FormData();
-        formData.append('file', file);
-       
-        try {
-          const response = await fetch('https://file.io', {
-            method: 'POST',
-            body: formData
-          });
-         
-          const result = await response.json();
-         
-          if (result.success) {
-            return result.link;
-          } else {
-            throw new Error('파일 업로드 실패');
-          }
-        } catch (error) {
-          console.error('File.io 업로드 오류:', error);
-          throw error;
-        }
-      }
+      // 기존 file.io 업로드 함수를 다음으로 교체
+async function uploadToFileIO(file) {
+  const formData = new FormData();
+  formData.append('file', file);
+ 
+  try {
+    // tmpfiles.org 사용 (24시간 보관)
+    const response = await fetch('https://tmpfiles.org/api/v1/upload', {
+      method: 'POST',
+      body: formData
+    });
+   
+    const result = await response.json();
+   
+    if (result.status === 'success') {
+      // tmpfiles.org는 다운로드 링크 형태로 반환
+      const downloadLink = result.data.url.replace('tmpfiles.org/', 'tmpfiles.org/dl/');
+      return downloadLink;
+    } else {
+      throw new Error('파일 업로드 실패');
+    }
+  } catch (error) {
+    console.error('Tmpfiles 업로드 오류:', error);
+    // 백업 옵션: 다른 서비스 시도
+    return await uploadToBackupService(file);
+  }
+}
+
+// 백업 업로드 서비스 추가
+async function uploadToBackupService(file) {
+  const formData = new FormData();
+  formData.append('file', file);
+ 
+  try {
+    // 0x0.st 사용 (365일 보관)
+    const response = await fetch('https://0x0.st', {
+      method: 'POST',
+      body: formData
+    });
+   
+    const downloadLink = await response.text();
+    return downloadLink.trim();
+  } catch (error) {
+    console.error('백업 업로드 오류:', error);
+    throw new Error('모든 업로드 서비스 실패');
+  }
+}
 
       async function processFiles(files, fileArrayKey, uploadArea) {
         const validFiles = files.filter(file => file.size > 0);
@@ -1901,19 +1925,35 @@
         }
       }
 
-      function updateFileDisplay(fileArrayKey, uploadArea) {
-        const files = uploadedFiles[fileArrayKey];
-        const fileList = files.map((item, index) =>
-          `<div class="flex items-center justify-between p-2 bg-gray-100 rounded mb-2">
-            <div class="flex items-center">
-              <i class="fas fa-file mr-2"></i>
-              <span class="text-sm">${item.file.name} (${formatFileSize(item.file.size)})</span>
-            </div>
-            <button type="button" class="text-red-500 hover:text-red-700" onclick="removeFile('${fileArrayKey}', ${index})">
-              <i class="fas fa-times"></i>
-            </button>
-          </div>`
-        ).join('');
+// processFiles 함수 내부에서 파일 링크 생성 부분 수정
+function updateFileDisplay(fileArrayKey, uploadArea) {
+  const files = uploadedFiles[fileArrayKey];
+  const fileList = files.map((item, index) =>
+    `<div class="flex items-center justify-between p-2 bg-gray-100 rounded mb-2">
+      <div class="flex items-center">
+        <i class="fas fa-file mr-2"></i>
+        <span class="text-sm">${item.file.name} (${formatFileSize(item.file.size)})</span>
+      </div>
+      <div class="flex items-center space-x-2">
+        <a href="${item.link}" target="_blank" class="text-blue-500 hover:text-blue-700 text-sm">
+          <i class="fas fa-download"></i> 테스트
+        </a>
+        <button type="button" class="text-red-500 hover:text-red-700" onclick="removeFile('${fileArrayKey}', ${index})">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+    </div>`
+  ).join('');
+ 
+  uploadArea.innerHTML = `
+    <div class="file-preview">
+      <i class="fas fa-file-upload"></i>
+      <p class="font-medium mb-2">${files.length}개 파일 업로드 완료</p>
+      <div class="w-full text-left">${fileList}</div>
+      <p class="text-gray-500 text-sm mt-2">추가 파일을 드래그하거나 클릭하세요</p>
+    </div>
+  `;
+}
        
         uploadArea.innerHTML = `
           <div class="file-preview">
