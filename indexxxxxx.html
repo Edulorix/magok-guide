@@ -1944,16 +1944,6 @@ function updateFileDisplay(fileArrayKey, uploadArea) {
       </div>
     </div>`
   ).join('');
- 
-  uploadArea.innerHTML = `
-    <div class="file-preview">
-      <i class="fas fa-file-upload"></i>
-      <p class="font-medium mb-2">${files.length}개 파일 업로드 완료</p>
-      <div class="w-full text-left">${fileList}</div>
-      <p class="text-gray-500 text-sm mt-2">추가 파일을 드래그하거나 클릭하세요</p>
-    </div>
-  `;
-}
        
         uploadArea.innerHTML = `
           <div class="file-preview">
