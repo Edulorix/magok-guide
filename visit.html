@@ -505,14 +505,14 @@
   <div class="container mx-auto px-4 py-8 mt-4">
     <!-- 상단 여백 및 제목 -->
     <h1 class="page-title text-3xl md:text-4xl font-bold text-center mb-2">LG Science Park 방문 안내</h1>
-    <p class="subtitle text-center text-lg mb-12">강사님을 위한 방문 안내 시스템</p>
+    <p class="subtitle text-center text-lg mb-12">강사용 방문 가이드</p>
    
     <!-- 탭 네비게이션 -->
     <div class="flex justify-center mb-8">
       <div class="inline-flex p-1 bg-white rounded-full shadow">
-        <button class="tab-button active" data-tab="tab1">1. 기본정보</button>
-        <button class="tab-button" data-tab="tab2">2. 장비/차량정보</button>
-        <button class="tab-button" data-tab="tab3">3. 제출</button>
+        <button class="tab-button active" data-tab="tab1">기본정보</button>
+        <button class="tab-button" data-tab="tab2">장비·차량</button>
+        <button class="tab-button" data-tab="tab3">제출</button>
       </div>
     </div>
    
@@ -564,14 +564,14 @@
               <div id="upload-container" class="drag-drop-area">
                 <i class="fas fa-cloud-upload-alt upload-icon"></i>
                 <p class="text-lg font-medium mb-2">파일을 이곳에 끌어다 놓거나 클릭하여 업로드하세요</p>
-                <p class="text-gray-500 text-sm">용량 제한 없음 · 다중 파일 업로드 지원 · 모든 파일 형식 지원 (알집 포함)</p>
+                <p class="text-gray-500 text-sm">용량 제한 없음 · 모든 파일 형식 지원 (알집 파일 포함)</p>
                 <input type="file" id="file-upload" class="hidden" multiple accept="*/*">
               </div>
              
               <div class="mt-4">
                 <label class="form-label">설치 프로그램명 설명</label>
-                <textarea id="program-desc" name="program_description" class="form-control" rows="3" placeholder="수업 중 사용할 실습용 프로그램, 코드 예제, 설치 파일 등을 업로드해주세요.&#10;교육생들이 사전에 다운로드하여 실습 환경을 준비할 수 있습니다."></textarea>
-              </div>
+                <textarea id="program-desc" name="program_description" class="form-control" rows="3" placeholder="설치 프로그램명, 실습예제(코드) 및 설명 입력"></textarea>
+			  </div>
              
               <div class="mt-4 flex items-center">
                 <input type="checkbox" id="no-installation" class="mr-2">
@@ -848,10 +848,17 @@
            
             <input type="email" id="custom-email" name="custom_email" class="form-control mt-4 hidden" placeholder="운영자 이메일 직접 입력">
             
-            <div class="cc-info">
-              <i class="fas fa-info-circle"></i>
-              <strong>참조자 자동 포함:</strong> DL-TSC@lge.com이 모든 이메일에 자동으로 참조됩니다.
-            </div>
+            <div class="mb-6">
+<label class="form-label">참조자 이메일 (선택사항)</label>
+<textarea id="additional-cc" name="additional_cc" class="form-control" rows="2"
+placeholder="예: ABC@lge.com, 123@lge.com"></textarea>
+<i class="fas fa-info-circle"></i> 메일마다 쉼표(,)로 구분해 입력하세요.
+</div>
+
+ <div class="cc-info">
+  <i class="fas fa-info-circle"></i>
+  <strong>참조:</strong> DL-TSC@lge.com (필수) + 추가 CC
+</div>
           </div>
          
           <div class="mb-6">
@@ -1449,7 +1456,7 @@ async function uploadToBackupService(file) {
         document.getElementById('upload-container').innerHTML = `
           <i class="fas fa-cloud-upload-alt upload-icon"></i>
           <p class="text-lg font-medium mb-2">파일을 이곳에 끌어다 놓거나 클릭하여 업로드하세요</p>
-          <p class="text-gray-500 text-sm">용량 제한 없음 · 다중 파일 업로드 지원 · 모든 파일 형식 지원 (알집 포함)</p>
+          <p class="text-gray-500 text-sm">용량 제한 없음 · 모든 파일 형식 지원 (알집 파일 포함)</p>
           <input type="file" id="file-upload" class="hidden" multiple accept="*/*">
         `;
         setupFileUpload('upload-container', 'file-upload', 'program');
@@ -1650,7 +1657,7 @@ async function uploadToBackupService(file) {
           // 이메일 템플릿 파라미터 준비 (필수 참조자 포함)
           const templateParams = {
   to_email: getSelectedEmail(),
-  cc_email: 'DL-TSC@lge.com',
+  cc_email: getCcEmails(),
             cc_email: 'DL-TSC@lge.com', // 필수 참조자 추가
             company: document.getElementById('company-name').value,
             instructor_name: document.getElementById('instructor-name').value,
@@ -1840,6 +1847,16 @@ async function uploadToBackupService(file) {
       }
      
       // 초기 요약 정보 업데이트
+	  function getCcEmails() {
+  const additionalCc = document.getElementById('additional-cc').value.trim();
+  let ccEmails = 'DL-TSC@lge.com';
+  
+  if (additionalCc) {
+    ccEmails += ', ' + additionalCc;
+  }
+  
+  return ccEmails;
+}
       updateSummary();
     });
   </script>
