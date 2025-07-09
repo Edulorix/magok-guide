@@ -605,34 +605,136 @@
       background: #c82333;
       transform: scale(1.1);
     }
-   
-    .summary-item {
-      margin-bottom: 1rem;
-      padding: 1.5rem;
-      background: var(--card-bg);
-      border-radius: 12px;
-      border-left: 4px solid var(--lg-red);
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+
+    /* 개선된 입력 정보 요약 디자인 */
+    .summary-section {
+      background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+      border-radius: 20px;
+      padding: 2rem;
+      margin-bottom: 2rem;
+      border: 1px solid var(--border-color);
     }
 
-    [data-theme="dark"] .summary-item {
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    [data-theme="dark"] .summary-section {
+      background: linear-gradient(135deg, #2d3748, #4a5568);
     }
-   
-    .summary-item:last-child {
-      border-bottom: none;
+
+    .summary-header {
+      text-align: center;
+      margin-bottom: 2rem;
+      padding-bottom: 1rem;
+      border-bottom: 2px solid var(--lg-red);
     }
-   
+
+    .summary-header h3 {
+      color: var(--lg-red);
+      font-size: 1.5rem;
+      font-weight: 700;
+      margin: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+    }
+
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 1.5rem;
+    }
+
+    .summary-item {
+      background: var(--card-bg);
+      border-radius: 16px;
+      padding: 1.5rem;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+      border: 1px solid var(--border-color);
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .summary-item:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+    }
+
+    .summary-item::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 4px;
+      height: 100%;
+      background: linear-gradient(135deg, var(--lg-red), #8c002c);
+    }
+
     .summary-label {
       font-weight: 700;
-      margin-bottom: 0.5rem;
       color: var(--lg-red);
-      font-size: 1.1rem;
+      font-size: 1rem;
+      margin-bottom: 0.75rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
     }
-   
+
     .summary-value {
-      color: var(--text-secondary);
+      color: var(--text-primary);
+      font-size: 0.95rem;
       line-height: 1.6;
+      background: var(--lg-light);
+      padding: 1rem;
+      border-radius: 8px;
+      border: 1px solid var(--border-color);
+    }
+
+    .summary-value p {
+      margin: 0 0 0.5rem 0;
+    }
+
+    .summary-value p:last-child {
+      margin-bottom: 0;
+    }
+
+    .summary-status {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25rem;
+      font-size: 0.85rem;
+      font-weight: 500;
+      padding: 0.25rem 0.75rem;
+      border-radius: 12px;
+    }
+
+    .summary-status.complete {
+      background: #d4edda;
+      color: #155724;
+    }
+
+    .summary-status.incomplete {
+      background: #f8d7da;
+      color: #721c24;
+    }
+
+    .summary-status.optional {
+      background: #fff3cd;
+      color: #856404;
+    }
+
+    [data-theme="dark"] .summary-status.complete {
+      background: #155724;
+      color: #d4edda;
+    }
+
+    [data-theme="dark"] .summary-status.incomplete {
+      background: #721c24;
+      color: #f8d7da;
+    }
+
+    [data-theme="dark"] .summary-status.optional {
+      background: #856404;
+      color: #fff3cd;
     }
    
     .email-section {
@@ -796,6 +898,7 @@
       font-weight: 500;
     }
 
+    /* 해당사항 없음 처리 개선 */
     .section-disabled {
       opacity: 0.4;
       pointer-events: none;
@@ -898,7 +1001,11 @@
       }
 
       .form-control {
-        font-size: 16px;
+        font-size: 16px; /* 모바일 줌 방지 */
+      }
+
+      .summary-grid {
+        grid-template-columns: 1fr;
       }
     }
 
@@ -1220,74 +1327,103 @@
             <i class="fas fa-clipboard-check"></i> 정보 확인 및 제출
           </h2>
          
-          <div class="p-4 rounded-lg mb-6" style="background: var(--lg-light);">
-            <h3 class="font-bold text-lg mb-4">입력 정보 요약</h3>
+          <div class="summary-section">
+            <div class="summary-header">
+              <h3><i class="fas fa-clipboard-list"></i> 입력 정보 요약</h3>
+            </div>
            
-            <div class="summary-item">
-              <div class="summary-label">기본 정보</div>
-              <div class="summary-value">
-                <p>업체명: <span id="summary-company">(입력 필요)</span></p>
-                <p>강사명: <span id="summary-instructor">(입력 필요)</span></p>
-                <p>연락처: <span id="summary-phone">(입력 필요)</span></p>
+            <div class="summary-grid">
+              <div class="summary-item">
+                <div class="summary-label">
+                  <i class="fas fa-user-tie"></i> 기본 정보
+                </div>
+                <div class="summary-value">
+                  <p><strong>업체명:</strong> <span id="summary-company">(입력 필요)</span></p>
+                  <p><strong>강사명:</strong> <span id="summary-instructor">(입력 필요)</span></p>
+                  <p><strong>연락처:</strong> <span id="summary-phone">(입력 필요)</span></p>
+                </div>
               </div>
-            </div>
 
-            <div id="summary-program" class="summary-item hidden">
-              <div class="summary-label">설치 프로그램 설명</div>
-              <div class="summary-value" id="summary-program-text"></div>
-            </div>
+              <div id="summary-program" class="summary-item hidden">
+                <div class="summary-label">
+                  <i class="fas fa-cogs"></i> 프로그램 설명
+                </div>
+                <div class="summary-value" id="summary-program-text"></div>
+              </div>
 
-            <div id="summary-files" class="summary-item hidden">
-              <div class="summary-label">업로드된 파일</div>
-              <div class="summary-value" id="summary-files-text"></div>
-            </div>
-           
-            <div class="summary-item">
-              <div class="summary-label">교재 제공 방식</div>
-              <div class="summary-value" id="summary-material-text">(선택 필요)</div>
-            </div>
-           
-            <div class="summary-item">
-              <div class="summary-label">반입 장비 정보</div>
-              <div class="summary-value" id="summary-equipment-text">(입력 필요)</div>
-            </div>
+              <div id="summary-files" class="summary-item hidden">
+                <div class="summary-label">
+                  <i class="fas fa-file-upload"></i> 업로드 파일
+                </div>
+                <div class="summary-value" id="summary-files-text"></div>
+              </div>
+             
+              <div class="summary-item">
+                <div class="summary-label">
+                  <i class="fas fa-book"></i> 교재 제공 방식
+                </div>
+                <div class="summary-value" id="summary-material-text">(선택 필요)</div>
+              </div>
+             
+              <div class="summary-item">
+                <div class="summary-label">
+                  <i class="fas fa-laptop"></i> 반입 장비
+                </div>
+                <div class="summary-value" id="summary-equipment-text">(입력 필요)</div>
+              </div>
 
-            <div id="summary-storage" class="summary-item hidden">
-              <div class="summary-label">저장매체 반입 정보</div>
-              <div class="summary-value" id="summary-storage-text"></div>
-            </div>
+              <div id="summary-storage" class="summary-item hidden">
+                <div class="summary-label">
+                  <i class="fas fa-usb-drive"></i> 저장매체 반입
+                </div>
+                <div class="summary-value" id="summary-storage-text"></div>
+              </div>
 
-            <div id="summary-lanport" class="summary-item hidden">
-              <div class="summary-label">LAN Port 해제 정보</div>
-              <div class="summary-value" id="summary-lanport-text"></div>
-            </div>
+              <div id="summary-lanport" class="summary-item hidden">
+                <div class="summary-label">
+                  <i class="fas fa-ethernet"></i> LAN Port 해제
+                </div>
+                <div class="summary-value" id="summary-lanport-text"></div>
+              </div>
 
-            <div class="summary-item">
-              <div class="summary-label">차량 정보</div>
-              <div class="summary-value" id="summary-vehicle-text">(입력 선택)</div>
-            </div>
+              <div class="summary-item">
+                <div class="summary-label">
+                  <i class="fas fa-car"></i> 차량 정보
+                </div>
+                <div class="summary-value" id="summary-vehicle-text">(입력 선택)</div>
+              </div>
 
-            <div class="summary-item">
-              <div class="summary-label">수신자</div>
-              <div class="summary-value" id="summary-recipients">(선택 필요)</div>
-            </div>
+              <div class="summary-item">
+                <div class="summary-label">
+                  <i class="fas fa-envelope"></i> 수신자
+                </div>
+                <div class="summary-value" id="summary-recipients">(선택 필요)</div>
+              </div>
 
-            <div id="summary-cc-section" class="summary-item hidden">
-              <div class="summary-label">참조자</div>
-              <div class="summary-value" id="summary-cc"></div>
-            </div>
+              <div id="summary-cc-section" class="summary-item hidden">
+                <div class="summary-label">
+                  <i class="fas fa-users"></i> 참조자
+                </div>
+                <div class="summary-value" id="summary-cc"></div>
+              </div>
 
-            <div id="summary-general-inquiry" class="summary-item hidden">
-              <div class="summary-label">추가 문의사항</div>
-              <div class="summary-value" id="summary-general-inquiry-text"></div>
-            </div>
+              <div id="summary-general-inquiry" class="summary-item hidden">
+                <div class="summary-label">
+                  <i class="fas fa-question-circle"></i> 추가 문의사항
+                </div>
+                <div class="summary-value" id="summary-general-inquiry-text"></div>
+              </div>
 
-            <div id="summary-faq-inquiry" class="summary-item hidden">
-              <div class="summary-label">기타 문의사항 (FAQ)</div>
-              <div class="summary-value" id="summary-faq-inquiry-text"></div>
+              <div id="summary-faq-inquiry" class="summary-item hidden">
+                <div class="summary-label">
+                  <i class="fas fa-comments"></i> 기타 문의사항
+                </div>
+                <div class="summary-value" id="summary-faq-inquiry-text"></div>
+              </div>
             </div>
           </div>
 
+          <!-- 수신자 관리 -->
           <div class="email-section">
             <div class="section-header">
               <i class="fas fa-envelope"></i>
@@ -1319,6 +1455,7 @@
             </div>
           </div>
 
+          <!-- 참조자 관리 -->
           <div class="email-section">
             <div class="section-header">
               <i class="fas fa-users"></i>
@@ -1367,6 +1504,7 @@
     </div>
   </div>
 
+  <!-- 플로팅 버튼들 -->
   <div class="floating-controls">
     <button type="button" class="floating-btn theme" id="theme-toggle">
       <i class="fas fa-moon" id="theme-icon"></i>
@@ -1376,6 +1514,7 @@
     </button>
   </div>
  
+  <!-- FAQ 모달 -->
   <div class="modal" id="faq-modal">
     <div class="modal-content">
       <div class="flex justify-between items-center mb-4">
@@ -1461,17 +1600,21 @@
   </div>
 
   <script>
-    emailjs.init('C56kGCzPtfgWVEKo');
+    // EmailJS 초기화 (수정된 Public Key 사용)
+    emailjs.init('C56kGCzPtfgWVEKoO');
 
+    // 전역 변수 - 별도 저장
     let uploadedFiles = { program: [], pdf: [] };
-    let generalInquiry = '';
-    let faqInquiry = '';
+    let generalInquiry = '';  // 추가 문의사항 (제출 탭)
+    let faqInquiry = '';      // 기타 문의사항 (FAQ 모달)
     let receiverEmails = [];
     let ccEmails = [];
 
+    // 다크모드 관리
     const themeToggle = document.getElementById('theme-toggle');
     const themeIcon = document.getElementById('theme-icon');
    
+    // 저장된 테마 불러오기
     const savedTheme = localStorage.getItem('theme') || 'light';
     document.documentElement.setAttribute('data-theme', savedTheme);
     updateThemeIcon(savedTheme);
@@ -1489,6 +1632,7 @@
       themeIcon.className = theme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
     }
 
+    // 자동 저장 기능
     function showAutoSaveIndicator() {
       const indicator = document.getElementById('auto-save-indicator');
       indicator.classList.add('show');
@@ -1504,8 +1648,8 @@
         phone: document.getElementById('phone-number')?.value || '',
         programDesc: document.getElementById('program-desc')?.value || '',
         uploadedFiles: uploadedFiles,
-        generalInquiry: generalInquiry,
-        faqInquiry: faqInquiry,
+        generalInquiry: generalInquiry,  // 추가 문의사항
+        faqInquiry: faqInquiry,          // 기타 문의사항 (FAQ)
         receiverEmails: receiverEmails,
         ccEmails: ccEmails,
         timestamp: new Date().toISOString()
@@ -1515,8 +1659,10 @@
       showAutoSaveIndicator();
     }
 
+    // 1분마다 자동 저장
     setInterval(autoSave, 60000);
 
+    // 폼 데이터 복원
     function loadSavedData() {
       const savedData = localStorage.getItem('visitFormData');
       if (savedData) {
@@ -1532,6 +1678,7 @@
           receiverEmails = data.receiverEmails || [];
           ccEmails = data.ccEmails || [];
          
+          // 복원된 문의사항 표시
           if (generalInquiry) {
             document.getElementById('contact-message').value = generalInquiry;
           }
@@ -1544,8 +1691,10 @@
       }
     }
 
+    // 페이지 로드 시 데이터 복원
     loadSavedData();
 
+    // 연락처 자동 포맷팅
     document.getElementById('phone-number')?.addEventListener('input', function(e) {
       let value = e.target.value.replace(/\D/g, '');
       if (value.length <= 3) {
@@ -1557,6 +1706,7 @@
       }
     });
 
+    // 탭 관리
     const tabButtons = document.querySelectorAll('.tab-button');
     const tabContents = document.querySelectorAll('.tab-content');
 
@@ -1564,9 +1714,11 @@
       button.addEventListener('click', function() {
         const tabId = this.getAttribute('data-tab');
        
+        // 모든 탭 비활성화
         tabButtons.forEach(btn => btn.classList.remove('active'));
         tabContents.forEach(content => content.classList.remove('active'));
        
+        // 선택된 탭 활성화
         this.classList.add('active');
         document.getElementById(tabId).classList.add('active');
        
@@ -1574,6 +1726,7 @@
       });
     });
 
+    // 다음/이전 버튼
     document.getElementById('next-to-tab2')?.addEventListener('click', function() {
       if (validateTab1()) {
         switchToTab('tab2');
@@ -1601,6 +1754,7 @@
       document.getElementById(tabId).classList.add('active');
     }
 
+    // 탭1 검증
     function validateTab1() {
       let isValid = true;
      
@@ -1632,15 +1786,18 @@
       return isValid;
     }
 
+    // 해당사항 없음 처리 - 완전한 토글 기능
     document.getElementById('no-installation')?.addEventListener('change', function() {
       const programSection = document.getElementById('program-upload-section');
       const uploadContainer = document.getElementById('upload-container');
       const programDesc = document.getElementById('program-desc');
      
       if (this.checked) {
+        // 해당사항 없음 선택 시
         uploadContainer.classList.add('disabled');
         programDesc.classList.add('section-disabled');
       } else {
+        // 해당사항 없음 해제 시
         uploadContainer.classList.remove('disabled');
         programDesc.classList.remove('section-disabled');
       }
@@ -1654,11 +1811,13 @@
       const paperCheckbox = document.getElementById('material-paper');
      
       if (this.checked) {
+        // 해당사항 없음 선택 시 - 다른 체크박스 해제하고 관련 섹션 숨김
         pdfCheckbox.checked = false;
         paperCheckbox.checked = false;
         pdfContainer.classList.add('hidden');
         paperInfo.classList.add('hidden');
       }
+      // 해제 시에는 아무것도 하지 않음 (사용자가 다시 선택할 수 있도록)
       updateSummary();
     });
 
@@ -1668,21 +1827,25 @@
       const addVehicleBtn = document.getElementById('add-vehicle');
      
       if (this.checked) {
+        // 해당사항 없음 선택 시
         vehicleContainer.classList.add('section-disabled');
         addVehicleBtn.classList.add('section-disabled');
       } else {
+        // 해당사항 없음 해제 시
         vehicleContainer.classList.remove('section-disabled');
         addVehicleBtn.classList.remove('section-disabled');
       }
       updateSummary();
     });
 
+    // 교재 유형 체크박스 - 상호 배타적 처리
     document.getElementById('material-pdf')?.addEventListener('change', function() {
       const container = document.getElementById('pdf-upload-container');
       const noneCheckbox = document.getElementById('material-none');
      
       if (this.checked) {
         container.classList.remove('hidden');
+        // PDF 선택 시 "해당사항 없음" 해제
         noneCheckbox.checked = false;
       } else {
         container.classList.add('hidden');
@@ -1696,6 +1859,7 @@
      
       if (this.checked) {
         container.classList.remove('hidden');
+        // 서면 선택 시 "해당사항 없음" 해제
         noneCheckbox.checked = false;
       } else {
         container.classList.add('hidden');
@@ -1703,6 +1867,7 @@
       updateSummary();
     });
 
+    // 저장매체 체크박스 - 2번 HTML 스타일 적용
     document.getElementById('storage-media-check')?.addEventListener('change', function() {
       const textarea = document.getElementById('storage-media-info');
       if (this.checked) {
@@ -1712,6 +1877,7 @@
       }
     });
 
+    // LAN Port 체크박스 - 2번 HTML 스타일 적용
     document.getElementById('lan-port-check')?.addEventListener('change', function() {
       const fields = document.getElementById('lan-port-fields');
       if (this.checked) {
@@ -1721,6 +1887,7 @@
       }
     });
 
+    // 파일 업로드 처리
     function formatFileSize(bytes) {
       if (bytes === 0) return '0 Bytes';
       const k = 1024;
@@ -1821,9 +1988,11 @@
       updateSummary();
     }
 
+    // 파일 업로드 초기화
     setupFileUpload('upload-container', 'file-upload', 'program');
     setupFileUpload('pdf-upload-container', 'pdf-upload', 'pdf');
 
+    // 수신자/참조자 관리
     function validateEmail(email) {
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       return emailRegex.test(email);
@@ -1839,6 +2008,7 @@
       }
     }
 
+    // 수신자 이메일 추가
     function addReceiverEmail(email) {
       if (!validateEmail(email)) {
         showValidationMessage('receiver-validation-message', '올바른 이메일 형식이 아닙니다.', false);
@@ -1897,6 +2067,7 @@
       }
     });
 
+    // 참조자 이메일 추가
     function addCcEmail(email) {
       if (!validateEmail(email)) {
         showValidationMessage('cc-validation-message', '올바른 이메일 형식이 아닙니다.', false);
@@ -1955,6 +2126,7 @@
       }
     });
 
+    // 교육서비스센터 담당자 추가
     document.getElementById('cc-operator-select')?.addEventListener('change', function() {
       const email = this.value;
       if (email && !ccEmails.includes(email)) {
@@ -1965,17 +2137,20 @@
       this.value = '';
     });
 
+    // 운영자 선택
     document.getElementById('operator-email')?.addEventListener('change', function() {
       const value = this.value;
       if (value === 'custom') {
         // 직접 입력 모드
       } else if (value) {
+        // 운영자 선택됨 - 기존 수신자 리스트 초기화하고 새로 추가
         receiverEmails = [value];
         updateReceiverTags();
         updateSummary();
       }
     });
 
+    // 장비 추가
     document.getElementById('add-equipment')?.addEventListener('click', function() {
       const container = document.getElementById('equipment-container');
       const newRow = document.createElement('div');
@@ -2012,6 +2187,7 @@
       `;
       container.appendChild(newRow);
      
+      // 삭제 버튼 이벤트 추가
       newRow.querySelector('.equipment-remove').addEventListener('click', function() {
         if (container.children.length > 1) {
           newRow.remove();
@@ -2019,6 +2195,7 @@
       });
     });
 
+    // 기존 장비 삭제 버튼
     document.querySelectorAll('.equipment-remove').forEach(btn => {
       btn.addEventListener('click', function() {
         const container = document.getElementById('equipment-container');
@@ -2028,6 +2205,7 @@
       });
     });
 
+    // 차량 추가
     document.getElementById('add-vehicle')?.addEventListener('click', function() {
       const container = document.getElementById('vehicle-container');
       const newVehicle = document.createElement('div');
@@ -2049,11 +2227,13 @@
       `;
       container.appendChild(newVehicle);
      
+      // 삭제 버튼 이벤트 추가
       newVehicle.querySelector('.vehicle-remove').addEventListener('click', function() {
         newVehicle.remove();
       });
     });
 
+    // FAQ 모달
     const faqModal = document.getElementById('faq-modal');
     const openFaqBtn = document.getElementById('open-faq');
     const closeFaqBtn = document.querySelector('.close-modal');
@@ -2074,12 +2254,14 @@
       faqModal.classList.remove('show');
     }
    
+    // 아코디언
     document.querySelectorAll('.accordion-header').forEach(header => {
       header.addEventListener('click', function() {
         const targetId = this.dataset.accordion;
         const content = document.getElementById(targetId);
         const icon = this.querySelector('i');
        
+        // 모든 아코디언 닫기
         document.querySelectorAll('.accordion-content').forEach(c => {
           if (c !== content) {
             c.classList.remove('active');
@@ -2091,16 +2273,18 @@
           }
         });
        
+        // 현재 아코디언 토글
         content.classList.toggle('active');
         icon.className = content.classList.contains('active') ?
           'fas fa-chevron-up' : 'fas fa-chevron-down';
       });
     });
 
+    // 문의사항 저장 (FAQ 모달에서)
     document.getElementById('faq-save-inquiry').addEventListener('click', function() {
       const message = document.getElementById('faq-contact-message').value.trim();
       if (message) {
-        faqInquiry = message;
+        faqInquiry = message;  // FAQ 문의사항 별도 저장
         alert('기타 문의사항이 저장되었습니다.');
         document.getElementById('faq-contact-message').value = '';
         closeFaqModal();
@@ -2110,17 +2294,20 @@
       }
     });
 
+    // 문의사항 저장 (제출 탭에서)
     document.getElementById('save-inquiry').addEventListener('click', function() {
       const message = document.getElementById('contact-message').value.trim();
       if (message) {
-        generalInquiry = message;
+        generalInquiry = message;  // 일반 문의사항 별도 저장
         alert('추가 문의사항이 저장되었습니다.');
         document.getElementById('contact-message').value = '';
         updateSummary();
       }
     });
 
+    // 요약 업데이트
     function updateSummary() {
+      // 기본 정보
       document.getElementById('summary-company').textContent =
         document.getElementById('company-name')?.value || '(입력 필요)';
       document.getElementById('summary-instructor').textContent =
@@ -2128,6 +2315,7 @@
       document.getElementById('summary-phone').textContent =
         document.getElementById('phone-number')?.value || '(입력 필요)';
 
+      // 프로그램 설명
       const programDesc = document.getElementById('program-desc')?.value;
       if (programDesc && !document.getElementById('no-installation').checked) {
         document.getElementById('summary-program').classList.remove('hidden');
@@ -2136,6 +2324,7 @@
         document.getElementById('summary-program').classList.add('hidden');
       }
 
+      // 파일 정보
       const totalFiles = uploadedFiles.program.length + uploadedFiles.pdf.length;
       if (totalFiles > 0) {
         document.getElementById('summary-files').classList.remove('hidden');
@@ -2145,6 +2334,7 @@
         document.getElementById('summary-files').classList.add('hidden');
       }
 
+      // 교재 제공 방식
       const materialTypes = [];
       if (document.getElementById('material-pdf')?.checked) materialTypes.push('PDF 교재');
       if (document.getElementById('material-paper')?.checked) materialTypes.push('서면 교재');
@@ -2152,6 +2342,7 @@
       document.getElementById('summary-material-text').textContent =
         materialTypes.length > 0 ? materialTypes.join(', ') : '(선택 필요)';
 
+      // 장비 정보
       const equipmentRows = document.querySelectorAll('.equipment-row');
       const equipmentList = [];
       equipmentRows.forEach(row => {
@@ -2166,6 +2357,7 @@
       document.getElementById('summary-equipment-text').textContent =
         equipmentList.length > 0 ? equipmentList.join(', ') : '(입력 필요)';
 
+      // 저장매체 정보
       const storageInfo = document.getElementById('storage-media-info')?.value;
       if (storageInfo && document.getElementById('storage-media-check')?.checked) {
         document.getElementById('summary-storage').classList.remove('hidden');
@@ -2174,6 +2366,7 @@
         document.getElementById('summary-storage').classList.add('hidden');
       }
 
+      // LAN Port 정보
       const lanPortType = document.querySelector('[name="lan_port_type"]')?.value;
       const lanPortDetail = document.querySelector('[name="lan_port_detail"]')?.value;
       if (lanPortType && document.getElementById('lan-port-check')?.checked) {
@@ -2183,6 +2376,7 @@
         document.getElementById('summary-lanport').classList.add('hidden');
       }
 
+      // 차량 정보
       const vehicleInputs = document.querySelectorAll('[name="vehicle_type"], [name="vehicle_number"]');
       const vehicles = [];
       for (let i = 0; i < vehicleInputs.length; i += 2) {
@@ -2195,6 +2389,7 @@
       document.getElementById('summary-vehicle-text').textContent =
         vehicles.length > 0 ? vehicles.join(', ') : document.getElementById('no-vehicle')?.checked ? '해당사항 없음' : '(입력 선택)';
 
+      // 수신자 정보
       const operatorEmail = document.getElementById('operator-email')?.value;
       const allRecipients = [];
       if (operatorEmail && operatorEmail !== 'custom') allRecipients.push(operatorEmail);
@@ -2202,6 +2397,7 @@
       document.getElementById('summary-recipients').textContent =
         allRecipients.length > 0 ? allRecipients.join(', ') : '(선택 필요)';
 
+      // 참조자 정보
       const ccSection = document.getElementById('summary-cc-section');
       if (ccEmails.length > 0) {
         ccSection.classList.remove('hidden');
@@ -2210,6 +2406,7 @@
         ccSection.classList.add('hidden');
       }
 
+      // 추가 문의사항 (제출 탭)
       if (generalInquiry) {
         document.getElementById('summary-general-inquiry').classList.remove('hidden');
         document.getElementById('summary-general-inquiry-text').textContent = generalInquiry;
@@ -2217,6 +2414,7 @@
         document.getElementById('summary-general-inquiry').classList.add('hidden');
       }
 
+      // 기타 문의사항 (FAQ)
       if (faqInquiry) {
         document.getElementById('summary-faq-inquiry').classList.remove('hidden');
         document.getElementById('summary-faq-inquiry-text').textContent = faqInquiry;
@@ -2225,6 +2423,7 @@
       }
     }
 
+    // 파일 링크 생성 함수
     function generateFileLinks(files, type) {
       if (!files || files.length === 0) return '';
      
@@ -2256,7 +2455,9 @@
       }).join('');
     }
 
+    // 폼 제출 - 수정된 EmailJS 연동
     document.getElementById('submit-form')?.addEventListener('click', function() {
+      // 수신자 확인
       const operatorEmail = document.getElementById('operator-email').value;
       const additionalReceivers = receiverEmails;
      
@@ -2265,24 +2466,29 @@
         return;
       }
 
+      // 모든 수신자 수집
       const allReceivers = [];
       if (operatorEmail && operatorEmail !== 'custom') {
         allReceivers.push(operatorEmail);
       }
       allReceivers.push(...additionalReceivers);
 
+      // 참조자 수집
       const allCCs = [...ccEmails];
 
+      // 문의사항 합치기
       const allInquiries = [];
       if (generalInquiry) allInquiries.push(`[추가 문의사항]\n${generalInquiry}`);
       if (faqInquiry) allInquiries.push(`[기타 문의사항(FAQ)]\n${faqInquiry}`);
       const combinedInquiry = allInquiries.join('\n\n');
 
+      // 교재 유형 수집
       const materialTypes = [];
       if (document.getElementById('material-pdf')?.checked) materialTypes.push('PDF 교재');
       if (document.getElementById('material-paper')?.checked) materialTypes.push('서면 교재');
       if (document.getElementById('material-none')?.checked) materialTypes.push('해당사항 없음');
 
+      // 장비 정보 수집
       const equipmentRows = document.querySelectorAll('.equipment-row');
       const equipmentList = [];
       equipmentRows.forEach(row => {
@@ -2296,18 +2502,24 @@
         }
       });
 
-      const vehicleInputs = document.querySelectorAll('[name="vehicle_type"], [name="vehicle_number"]');
-      const vehicles = [];
-      for (let i = 0; i < vehicleInputs.length; i += 2) {
-        const type = vehicleInputs[i]?.value;
-        const number = vehicleInputs[i + 1]?.value;
-        if (type || number) {
-          vehicles.push(`${type || ''} ${number || ''}`.trim());
+      // 차량 정보 수집
+      let vehicleInfo = '';
+      if (document.getElementById('no-vehicle')?.checked) {
+        vehicleInfo = '해당사항 없음';
+      } else {
+        const vehicles = [];
+        const vehicleInputs = document.querySelectorAll('[name="vehicle_type"], [name="vehicle_number"]');
+        for (let i = 0; i < vehicleInputs.length; i += 2) {
+          const type = vehicleInputs[i]?.value;
+          const number = vehicleInputs[i + 1]?.value;
+          if (type || number) {
+            vehicles.push(`${type || ''} ${number || ''}`.trim());
+          }
         }
+        vehicleInfo = vehicles.length > 0 ? vehicles.join(', ') : '없음';
       }
-      const vehicleInfo = vehicles.length > 0 ? vehicles.join(', ') :
-        document.getElementById('no-vehicle')?.checked ? '해당사항 없음' : '없음';
 
+      // EmailJS 템플릿 파라미터
       const templateParams = {
         to_email: allReceivers.join(','),
         cc: allCCs.join(','),
@@ -2327,10 +2539,12 @@
         timestamp: new Date().toLocaleString('ko-KR')
       };
 
+      // EmailJS 전송
       emailjs.send('ldd_Training Service', 'template_ajf77x7', templateParams)
         .then(function(response) {
           alert('이메일이 성공적으로 전송되었습니다!');
           console.log('SUCCESS!', response.status, response.text);
+          // 전송 후 저장된 데이터 삭제
           localStorage.removeItem('visitFormData');
         })
         .catch(function(error) {
@@ -2339,15 +2553,19 @@
         });
     });
 
+    // 입력 이벤트 리스너 (자동 저장용)
     document.addEventListener('input', function(e) {
       if (e.target.matches('input, textarea, select')) {
+        // 디바운싱을 위한 타이머
         clearTimeout(window.autoSaveTimer);
         window.autoSaveTimer = setTimeout(autoSave, 2000);
       }
     });
 
+    // 페이지 떠날 때 자동 저장
     window.addEventListener('beforeunload', autoSave);
 
+    // 초기 요약 업데이트
     updateSummary();
   </script>
 </body>
