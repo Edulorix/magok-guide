@@ -5,8 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>LG Science Park 방문 안내</title>
   <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.5.1/css/all.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/pretendard@1.3.9/dist/web/static/pretendard.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/emailjs-com@3.2.0/dist/email.min.js"></script>
   <style>
     :root {
       --lg-red: #a50034;
@@ -15,128 +16,183 @@
       --lg-light: #f8f9fa;
       --lg-gray: #e9ecef;
       --lg-accent: #00a5e4;
+      --bg-primary: #ffffff;
+      --bg-secondary: #f5f5f7;
+      --text-primary: #333333;
+      --text-secondary: #666666;
+      --border-color: #e9ecef;
+      --card-bg: #ffffff;
+      --input-bg: #ffffff;
+    }
+
+    [data-theme="dark"] {
+      --bg-primary: #1a1a1a;
+      --bg-secondary: #121212;
+      --text-primary: #ffffff;
+      --text-secondary: #cccccc;
+      --border-color: #404040;
+      --card-bg: #2d2d2d;
+      --input-bg: #3d3d3d;
+      --lg-light: #404040;
+      --lg-gray: #555555;
     }
    
     body {
       font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif;
-      color: var(--lg-dark);
-      background-color: #f5f5f7;
+      color: var(--text-primary);
+      background-color: var(--bg-secondary);
       line-height: 1.7;
+      transition: all 0.3s ease;
+      margin: 0;
+      padding: 0;
     }
    
     .container {
-      max-width: 1280px;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 1.5rem;
     }
    
     .page-title {
-      margin-top: 3rem;
       color: var(--lg-red);
       letter-spacing: -0.02em;
+      font-weight: 800;
+      text-align: center;
+      margin-bottom: 1rem;
+      font-size: 2.5rem;
     }
    
     .subtitle {
-      color: #555;
+      color: var(--text-secondary);
       letter-spacing: -0.01em;
+      font-weight: 600;
+      text-align: center;
+      margin-bottom: 2rem;
+      font-size: 1.1rem;
     }
    
     .section-title {
       color: var(--lg-red);
       font-weight: 600;
-      margin-bottom: 2rem;
+      margin-bottom: 1.5rem;
       display: flex;
       align-items: center;
       gap: 0.5rem;
+      font-size: 1.25rem;
     }
    
     .card {
-      background: white;
+      background: var(--card-bg);
       border-radius: 16px;
       box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
       transition: all 0.3s ease;
-      margin-bottom: 2.5rem;
+      margin-bottom: 1.5rem;
+      border: 1px solid var(--border-color);
+      padding: 2rem;
+    }
+
+    [data-theme="dark"] .card {
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
     }
    
     .card:hover {
-      transform: translateY(-4px);
-      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.1);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+    }
+
+    [data-theme="dark"] .card:hover {
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
     }
    
+    .tab-navigation {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 2rem;
+      background: var(--card-bg);
+      border-radius: 20px;
+      padding: 8px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+      border: 1px solid var(--border-color);
+    }
+
     .tab-button {
-      padding: 1rem 2rem;
-      border-radius: 9999px;
-      font-weight: 500;
-      transition: all 0.3s ease;
       position: relative;
+      padding: 1rem 2rem;
+      background: transparent;
+      border: none;
+      color: var(--text-primary);
+      font-weight: 600;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      border-radius: 12px;
       overflow: hidden;
+      min-width: 120px;
     }
-   
-    .tab-button::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: -100%;
-      width: 100%;
-      height: 100%;
-      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
-      transition: left 0.5s;
+
+    .tab-button:not(.active) {
+      color: var(--text-secondary);
     }
-   
-    .tab-button:hover::before {
-      left: 100%;
+
+    .tab-button:not(.active):hover {
+      background: rgba(165, 0, 52, 0.1);
+      color: var(--lg-red);
+      transform: translateY(-1px);
     }
-   
+
     .tab-button.active {
       background: linear-gradient(135deg, var(--lg-red), #8c002c);
-      color: white;
-      box-shadow: 0 6px 20px rgba(165, 0, 52, 0.3);
+      color: white !important;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(165, 0, 52, 0.3);
     }
-   
-    .tab-button:not(.active) {
-      background-color: white;
-      color: var(--lg-dark);
-      border: 2px solid var(--lg-gray);
-    }
-   
+
     .tab-content {
       display: none;
+      opacity: 0;
+      transform: translateY(20px);
+      transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
     }
    
     .tab-content.active {
       display: block;
-      animation: slideIn 0.4s ease-out;
+      opacity: 1;
+      transform: translateY(0);
+      animation: slideInUp 0.6s cubic-bezier(0.4, 0, 0.2, 1);
     }
-   
-    @keyframes slideIn {
-      from { 
-        opacity: 0; 
-        transform: translateY(20px); 
+
+    @keyframes slideInUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
       }
-      to { 
-        opacity: 1; 
-        transform: translateY(0); 
+      to {
+        opacity: 1;
+        transform: translateY(0);
       }
     }
    
     .form-group {
-      margin-bottom: 2rem;
+      margin-bottom: 1.5rem;
     }
    
     .form-label {
       font-weight: 600;
-      margin-bottom: 0.75rem;
+      margin-bottom: 0.5rem;
       display: block;
-      color: var(--lg-dark);
-      font-size: 1.1rem;
+      color: var(--text-primary);
+      font-size: 1rem;
     }
    
     .form-control {
       width: 100%;
-      padding: 1rem 1.25rem;
-      border: 2px solid var(--lg-gray);
+      padding: 0.875rem 1rem;
+      border: 2px solid var(--border-color);
       border-radius: 12px;
       transition: all 0.3s ease;
       font-size: 1rem;
-      background: white;
+      background: var(--input-bg);
+      color: var(--text-primary);
     }
    
     .form-control:focus {
@@ -145,9 +201,13 @@
       outline: none;
       transform: translateY(-2px);
     }
+
+    .form-control::placeholder {
+      color: var(--text-secondary);
+    }
    
     .btn {
-      padding: 1rem 2rem;
+      padding: 0.875rem 1.5rem;
       border-radius: 12px;
       font-weight: 600;
       transition: all 0.3s ease;
@@ -155,24 +215,7 @@
       cursor: pointer;
       position: relative;
       overflow: hidden;
-    }
-   
-    .btn::before {
-      content: '';
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      width: 0;
-      height: 0;
-      background: rgba(255,255,255,0.2);
-      border-radius: 50%;
-      transform: translate(-50%, -50%);
-      transition: all 0.3s ease;
-    }
-   
-    .btn:hover::before {
-      width: 300px;
-      height: 300px;
+      font-size: 1rem;
     }
    
     .btn-primary {
@@ -187,13 +230,13 @@
     }
    
     .btn-secondary {
-      background: linear-gradient(135deg, white, #f8f9fa);
-      color: var(--lg-dark);
-      border: 2px solid var(--lg-gray);
+      background: var(--card-bg);
+      color: var(--text-primary);
+      border: 2px solid var(--border-color);
     }
    
     .btn-secondary:hover {
-      background: linear-gradient(135deg, var(--lg-gray), #dee2e6);
+      background: var(--lg-light);
       transform: translateY(-2px);
     }
    
@@ -203,11 +246,14 @@
     }
    
     .info-list li {
-      margin-bottom: 1rem;
+      margin-bottom: 0.75rem;
       display: flex;
       align-items: flex-start;
       gap: 0.75rem;
-      padding: 0.5rem 0;
+      padding: 0.75rem;
+      border-radius: 8px;
+      background: rgba(165, 0, 52, 0.05);
+      border: 1px solid rgba(165, 0, 52, 0.1);
     }
    
     .info-list li i {
@@ -219,45 +265,58 @@
     .operator-badge {
       display: inline-flex;
       align-items: center;
-      background: linear-gradient(135deg, var(--lg-light-red), #fce4ec);
-      color: var(--lg-red);
+      background: linear-gradient(135deg, #e8f4f8, #d1ecf1);
+      color: #0c5460;
       padding: 0.5rem 1rem;
       border-radius: 25px;
-      font-size: 0.95rem;
+      font-size: 0.9rem;
       margin-right: 0.75rem;
       margin-bottom: 0.75rem;
       font-weight: 500;
-      border: 1px solid rgba(165, 0, 52, 0.2);
+      border: 1px solid #b8d4da;
+    }
+
+    [data-theme="dark"] .operator-badge {
+      background: linear-gradient(135deg, #2d3748, #4a5568);
+      color: #e2e8f0;
+      border-color: #4a5568;
     }
    
     .operator-badge .num {
       margin-left: 0.5rem;
       font-weight: 700;
-      background: var(--lg-red);
+      background: #0c5460;
       color: white;
       padding: 0.2rem 0.6rem;
       border-radius: 15px;
-      font-size: 0.85rem;
+      font-size: 0.8rem;
+    }
+
+    [data-theme="dark"] .operator-badge .num {
+      background: #2d3748;
+      color: #e2e8f0;
     }
    
     .equipment-row {
       display: grid;
       grid-template-columns: 1fr 1fr 1fr 80px 1fr auto;
       gap: 1rem;
-      margin-bottom: 1.5rem;
+      margin-bottom: 1rem;
       align-items: center;
       padding: 1rem;
-      background: #f8f9fa;
+      background: var(--lg-light);
       border-radius: 12px;
-      border: 1px solid var(--lg-gray);
+      border: 1px solid var(--border-color);
     }
    
     .equipment-row select,
     .equipment-row input {
       padding: 0.75rem 1rem;
-      border: 2px solid var(--lg-gray);
+      border: 2px solid var(--border-color);
       border-radius: 8px;
       transition: all 0.3s ease;
+      background: var(--input-bg);
+      color: var(--text-primary);
     }
    
     .equipment-row select:focus,
@@ -270,36 +329,46 @@
       text-align: center;
     }
    
-    .floating-faq {
+    .floating-controls {
       position: fixed;
       right: 30px;
       bottom: 30px;
       z-index: 1000;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
     }
    
     .floating-btn {
-      width: 70px;
-      height: 70px;
+      width: 60px;
+      height: 60px;
       border-radius: 50%;
       display: flex;
       align-items: center;
       justify-content: center;
-      background: linear-gradient(135deg, var(--lg-red), #8c002c);
       color: white;
-      box-shadow: 0 10px 25px rgba(165, 0, 52, 0.4);
-      font-size: 1rem;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+      font-size: 1.1rem;
       font-weight: bold;
       cursor: pointer;
       transition: all 0.3s ease;
       border: none;
     }
 
+    .floating-btn.faq {
+      background: linear-gradient(135deg, var(--lg-red), #8c002c);
+    }
+
+    .floating-btn.theme {
+      background: linear-gradient(135deg, #4a5568, #2d3748);
+    }
+
     .floating-btn:hover {
       transform: translateY(-5px) scale(1.05);
-      box-shadow: 0 15px 35px rgba(165, 0, 52, 0.5);
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
     }
    
-    .faq-modal {
+    .modal {
       position: fixed;
       top: 0;
       right: 0;
@@ -314,50 +383,38 @@
       transition: all 0.3s ease;
     }
 
-    .faq-modal.show {
+    .modal.show {
       display: flex;
       animation: fadeIn 0.3s ease;
-    }
-
-    .faq-modal.closing {
-      animation: fadeOut 0.3s ease;
     }
 
     @keyframes fadeIn {
       from { opacity: 0; }
       to { opacity: 1; }
     }
-
-    @keyframes fadeOut {
-      from { opacity: 1; }
-      to { opacity: 0; }
-    }
    
     .modal-content {
-      background: white;
+      background: var(--card-bg);
       width: 90%;
       max-width: 700px;
       max-height: 85vh;
       overflow-y: auto;
       border-radius: 20px;
-      padding: 2.5rem;
+      padding: 2rem;
       position: relative;
       transform: scale(1);
       transition: transform 0.3s ease;
       box-shadow: 0 25px 50px rgba(0,0,0,0.25);
+      border: 1px solid var(--border-color);
     }
 
-    .faq-modal.show .modal-content {
+    .modal.show .modal-content {
       animation: scaleIn 0.3s ease;
     }
 
     @keyframes scaleIn {
       from { transform: scale(0.8) translateY(-50px); opacity: 0; }
       to { transform: scale(1) translateY(0); opacity: 1; }
-    }
-
-    .faq-modal.closing .modal-content {
-      transform: scale(0.9);
     }
    
     .close-modal {
@@ -367,8 +424,8 @@
       font-size: 1.5rem;
       cursor: pointer;
       transition: all 0.3s ease;
-      color: #999;
-      background: #f1f3f4;
+      color: var(--text-secondary);
+      background: var(--lg-light);
       width: 40px;
       height: 40px;
       border-radius: 50%;
@@ -384,19 +441,19 @@
     }
    
     .accordion-item {
-      border-bottom: 1px solid #e2e8f0;
+      border-bottom: 1px solid var(--border-color);
       margin-bottom: 0.5rem;
     }
    
     .accordion-header {
-      padding: 1.5rem 0;
+      padding: 1.2rem 0;
       cursor: pointer;
       display: flex;
       justify-content: space-between;
       align-items: center;
       font-weight: 600;
       transition: all 0.3s ease;
-      color: var(--lg-dark);
+      color: var(--text-primary);
     }
 
     .accordion-header:hover {
@@ -404,9 +461,9 @@
     }
    
     .accordion-content {
-      padding: 0 0 1.5rem 0;
+      padding: 0 0 1.2rem 0;
       display: none;
-      color: #666;
+      color: var(--text-secondary);
       line-height: 1.6;
     }
    
@@ -421,22 +478,26 @@
     }
    
     .contact-form {
-      margin-top: 2.5rem;
-      padding-top: 2rem;
-      border-top: 2px solid var(--lg-gray);
+      margin-top: 2rem;
+      padding-top: 1.5rem;
+      border-top: 2px solid var(--border-color);
     }
    
     .drag-drop-area {
-      border: 3px dashed var(--lg-gray);
+      border: 3px dashed var(--border-color);
       border-radius: 16px;
-      padding: 3rem;
+      padding: 2.5rem;
       text-align: center;
       transition: all 0.3s ease;
-      background: linear-gradient(45deg, #f8f9fa 25%, transparent 25%, transparent 75%, #f8f9fa 75%, #f8f9fa),
-                  linear-gradient(45deg, #f8f9fa 25%, transparent 25%, transparent 75%, #f8f9fa 75%, #f8f9fa);
-      background-size: 20px 20px;
-      background-position: 0 0, 10px 10px;
       cursor: pointer;
+      background: var(--card-bg);
+      color: var(--text-primary);
+      position: relative;
+      min-height: 200px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
     }
    
     .drag-drop-area:hover {
@@ -451,11 +512,23 @@
       transform: scale(1.05);
       box-shadow: 0 10px 30px rgba(165, 0, 52, 0.2);
     }
+
+    .drag-drop-area.disabled {
+      opacity: 0.5;
+      pointer-events: none;
+      filter: blur(1px);
+      transform: scale(0.98);
+      background: #f5f5f5 !important;
+    }
+
+    [data-theme="dark"] .drag-drop-area.disabled {
+      background: #2a2a2a !important;
+    }
    
     .upload-icon {
-      font-size: 4rem;
+      font-size: 3rem;
       color: var(--lg-red);
-      margin-bottom: 1.5rem;
+      margin-bottom: 1rem;
       animation: bounce 2s infinite;
     }
    
@@ -470,32 +543,80 @@
         transform: translateY(-8px);
       }
     }
-   
-    .file-preview {
+
+    .file-list {
+      margin-top: 1rem;
+      width: 100%;
+    }
+
+    .file-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.75rem;
+      background: var(--lg-light);
+      border-radius: 8px;
+      margin-bottom: 0.5rem;
+      border: 1px solid var(--border-color);
+    }
+
+    .file-info {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .file-icon {
+      color: var(--lg-red);
+      font-size: 1.25rem;
+    }
+
+    .file-details {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .file-name {
+      font-weight: 500;
+      color: var(--text-primary);
+      font-size: 0.9rem;
+    }
+
+    .file-size {
+      color: var(--text-secondary);
+      font-size: 0.8rem;
+    }
+
+    .file-remove {
+      background: #dc3545;
+      color: white;
+      border: none;
+      border-radius: 50%;
+      width: 24px;
+      height: 24px;
       display: flex;
       align-items: center;
       justify-content: center;
-      flex-direction: column;
-      padding: 1.5rem;
-      background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-      border-radius: 12px;
-      border: 2px solid var(--lg-accent);
-      margin-top: 1rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
     }
-   
-    .file-preview i {
-      color: var(--lg-red);
-      font-size: 3rem;
-      margin-bottom: 1rem;
+
+    .file-remove:hover {
+      background: #c82333;
+      transform: scale(1.1);
     }
    
     .summary-item {
-      margin-bottom: 1.5rem;
+      margin-bottom: 1rem;
       padding: 1.5rem;
-      border-bottom: 1px solid var(--lg-gray);
-      background: #f8f9fa;
+      background: var(--card-bg);
       border-radius: 12px;
-      margin-top: 1rem;
+      border-left: 4px solid var(--lg-red);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    [data-theme="dark"] .summary-item {
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
     }
    
     .summary-item:last-child {
@@ -503,164 +624,72 @@
     }
    
     .summary-label {
-      font-weight: 600;
-      margin-bottom: 0.75rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
       color: var(--lg-red);
       font-size: 1.1rem;
     }
    
     .summary-value {
-      color: #555;
+      color: var(--text-secondary);
       line-height: 1.6;
     }
    
-    .lan-port-container {
-      display: flex;
-      flex-wrap: wrap;
-      align-items: center;
-      gap: 1.5rem;
-      margin-top: 1.5rem;
-      padding: 1rem;
-      background: #f8f9fa;
-      border-radius: 12px;
-    }
-   
-    .lan-port-fields {
-      display: none;
-      flex: 1;
-      gap: 1rem;
-    }
-   
-    .lan-port-fields.active {
-      display: flex;
-    }
-
-    .error-message {
-      color: #dc2626;
-      font-size: 0.9rem;
-      margin-top: 0.5rem;
-      font-weight: 500;
-    }
-
-    .success-message {
-      color: #059669;
-      font-size: 0.9rem;
-      margin-top: 0.5rem;
-      font-weight: 500;
-    }
-
-    .upload-status {
-      background: linear-gradient(135deg, #e0f2fe, #b3e5fc);
-      border: 1px solid #00acc1;
-      color: #00695c;
-      padding: 1rem;
-      border-radius: 12px;
-      margin-top: 1rem;
-      font-size: 0.95rem;
-      font-weight: 500;
-    }
-
-    .file-link {
-      display: block;
-      background: linear-gradient(135deg, #f0f8ff, #e3f2fd);
-      padding: 1rem;
-      margin: 0.5rem 0;
-      border-radius: 8px;
-      border-left: 4px solid var(--lg-accent);
-      font-family: 'Courier New', monospace;
-      font-size: 0.9rem;
-      word-break: break-all;
-    }
-
-    .download-link {
-      color: #0066cc;
-      text-decoration: none;
-      font-weight: 600;
-      transition: all 0.3s ease;
-    }
-
-    .download-link:hover {
-      color: var(--lg-red);
-      text-decoration: underline;
-    }
-
-    /* 개선된 참조자 관리 스타일 */
-    .cc-section {
-      background: linear-gradient(135deg, #e8f5e8, #f1f8e9);
-      border: 2px solid #4caf50;
+    .email-section {
+      background: var(--lg-light);
+      border: 1px solid var(--border-color);
       border-radius: 16px;
-      padding: 2rem;
-      margin-top: 2rem;
+      padding: 1.5rem;
+      margin-top: 1.5rem;
     }
 
-    .cc-section .section-header {
+    .email-section .section-header {
       display: flex;
       align-items: center;
       gap: 0.75rem;
-      margin-bottom: 1.5rem;
+      margin-bottom: 1rem;
     }
 
-    .cc-section .section-header i {
-      color: #4caf50;
-      font-size: 1.5rem;
+    .email-section .section-header i {
+      color: var(--lg-accent);
+      font-size: 1.25rem;
     }
 
-    .cc-section .section-header h3 {
-      color: #2e7d32;
+    .email-section .section-header h3 {
+      color: var(--text-primary);
       font-weight: 700;
-      font-size: 1.2rem;
+      font-size: 1.1rem;
       margin: 0;
     }
 
-    .cc-info {
-      background: rgba(76, 175, 80, 0.1);
-      border: 1px solid #4caf50;
-      color: #2e7d32;
-      padding: 1rem;
-      border-radius: 12px;
-      margin-bottom: 1.5rem;
-      font-size: 0.95rem;
-      font-weight: 500;
-    }
-
-    .cc-info i {
-      color: #4caf50;
-      margin-right: 0.75rem;
-      font-size: 1.1rem;
-    }
-
-    .cc-input-container {
+    .email-input-container {
       position: relative;
       margin-bottom: 1rem;
     }
 
-    .cc-input {
+    .email-input {
       width: 100%;
-      padding: 1rem 1.25rem;
-      padding-right: 3rem;
-      border: 2px solid #4caf50;
+      padding: 0.875rem 3rem 0.875rem 1rem;
+      border: 2px solid var(--border-color);
       border-radius: 12px;
       font-size: 1rem;
       transition: all 0.3s ease;
-      background: white;
+      background: var(--input-bg);
+      color: var(--text-primary);
     }
 
-    .cc-input:focus {
+    .email-input:focus {
       outline: none;
-      border-color: #2e7d32;
-      box-shadow: 0 0 0 4px rgba(76, 175, 80, 0.15);
+      border-color: var(--lg-accent);
+      box-shadow: 0 0 0 4px rgba(0, 165, 228, 0.15);
     }
 
-    .cc-input.error {
-      border-color: #dc2626;
-    }
-
-    .cc-add-btn {
+    .email-add-btn {
       position: absolute;
       right: 8px;
       top: 50%;
       transform: translateY(-50%);
-      background: #4caf50;
+      background: var(--lg-accent);
       color: white;
       border: none;
       border-radius: 8px;
@@ -674,85 +703,176 @@
       justify-content: center;
     }
 
-    .cc-add-btn:hover {
-      background: #2e7d32;
+    .email-add-btn:hover {
+      background: #0288d1;
       transform: translateY(-50%) scale(1.1);
     }
 
-    .cc-tags {
+    .email-tags {
       display: flex;
       flex-wrap: wrap;
-      gap: 0.75rem;
-      margin-top: 1rem;
-      min-height: 2rem;
+      gap: 0.5rem;
+      margin-top: 0.75rem;
+      min-height: 1.5rem;
     }
 
-    .cc-tag {
+    .email-tag {
       display: inline-flex;
       align-items: center;
-      background: linear-gradient(135deg, #4caf50, #388e3c);
+      background: var(--lg-accent);
       color: white;
-      padding: 0.5rem 1rem;
-      border-radius: 20px;
-      font-size: 0.9rem;
+      padding: 0.375rem 0.75rem;
+      border-radius: 15px;
+      font-size: 0.85rem;
       font-weight: 500;
-      gap: 0.5rem;
-      box-shadow: 0 2px 8px rgba(76, 175, 80, 0.3);
+      gap: 0.375rem;
       animation: slideIn 0.3s ease;
     }
 
-    .cc-tag .remove-tag {
+    .email-tag .remove-tag {
       background: rgba(255, 255, 255, 0.2);
       border: none;
       color: white;
       border-radius: 50%;
-      width: 1.5rem;
-      height: 1.5rem;
+      width: 1.25rem;
+      height: 1.25rem;
       display: flex;
       align-items: center;
       justify-content: center;
       cursor: pointer;
       transition: all 0.3s ease;
-      font-size: 0.8rem;
+      font-size: 0.75rem;
     }
 
-    .cc-tag .remove-tag:hover {
+    .email-tag .remove-tag:hover {
       background: rgba(255, 255, 255, 0.3);
       transform: scale(1.1);
     }
 
-    .email-validation-message {
-      font-size: 0.85rem;
+    .validation-message {
+      font-size: 0.8rem;
+      margin-top: 0.375rem;
+      font-weight: 500;
+    }
+
+    .validation-message.valid {
+      color: #059669;
+    }
+
+    .validation-message.invalid {
+      color: #dc2626;
+    }
+
+    .auto-save-indicator {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: var(--card-bg);
+      color: var(--text-primary);
+      padding: 0.5rem 1rem;
+      border-radius: 8px;
+      border: 1px solid var(--border-color);
+      font-size: 0.875rem;
+      opacity: 0;
+      transition: all 0.3s ease;
+      z-index: 1000;
+    }
+
+    .auto-save-indicator.show {
+      opacity: 1;
+    }
+
+    .error-message {
+      color: #dc2626;
+      font-size: 0.875rem;
       margin-top: 0.5rem;
       font-weight: 500;
     }
 
-    .email-validation-message.valid {
+    .success-message {
       color: #059669;
+      font-size: 0.875rem;
+      margin-top: 0.5rem;
+      font-weight: 500;
     }
 
-    .email-validation-message.invalid {
-      color: #dc2626;
+    .section-disabled {
+      opacity: 0.4;
+      pointer-events: none;
+      transition: all 0.5s ease;
+      background: #f8f8f8 !important;
+      border-color: #ddd !important;
     }
-   
+
+    [data-theme="dark"] .section-disabled {
+      background: #1e1e1e !important;
+      border-color: #333 !important;
+    }
+
+    .checkbox-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1.5rem;
+      margin-bottom: 1rem;
+    }
+
+    .checkbox-item {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      cursor: pointer;
+      padding: 0.5rem;
+      border-radius: 8px;
+      transition: all 0.3s ease;
+    }
+
+    .checkbox-item:hover {
+      background: rgba(165, 0, 52, 0.05);
+    }
+
+    .checkbox-item input[type="checkbox"] {
+      width: 18px;
+      height: 18px;
+      cursor: pointer;
+      accent-color: var(--lg-red);
+    }
+
+    .checkbox-item label {
+      cursor: pointer;
+      font-weight: 500;
+      color: var(--text-primary);
+    }
+
     @media (max-width: 768px) {
+      .container {
+        padding: 1rem;
+      }
+
+      .page-title {
+        font-size: 2rem;
+      }
+
+      .subtitle {
+        font-size: 1rem;
+      }
+
+      .card {
+        padding: 1.5rem;
+        margin-bottom: 1rem;
+      }
+
       .equipment-row {
         grid-template-columns: 1fr;
         gap: 0.75rem;
       }
-      
-      .lan-port-fields {
-        flex-direction: column;
-        gap: 0.75rem;
+
+      .email-tags {
+        gap: 0.375rem;
       }
 
-      .cc-tags {
-        gap: 0.5rem;
-      }
-
-      .cc-tag {
+      .email-tag {
         font-size: 0.8rem;
-        padding: 0.4rem 0.8rem;
+        padding: 0.3rem 0.6rem;
       }
 
       .modal-content {
@@ -761,61 +881,92 @@
       }
 
       .floating-btn {
-        width: 60px;
-        height: 60px;
+        width: 50px;
+        height: 50px;
         right: 20px;
-        bottom: 20px;
+      }
+
+      .tab-button {
+        padding: 0.75rem 1rem;
+        font-size: 0.9rem;
+        min-width: 80px;
+      }
+
+      .checkbox-group {
+        flex-direction: column;
+        gap: 0.75rem;
+      }
+
+      .form-control {
+        font-size: 16px;
       }
     }
 
     @media print {
-      .floating-faq, .faq-modal {
+      .floating-controls, .modal {
+        display: none !important;
+      }
+     
+      body {
+        background-color: white !important;
+        font-size: 12px;
+      }
+     
+      .card {
+        box-shadow: none !important;
+        border: 1px solid #ddd !important;
+        break-inside: avoid;
+        page-break-inside: avoid;
+        margin-bottom: 1rem !important;
+      }
+
+      .tab-content {
+        display: block !important;
+        opacity: 1 !important;
+        transform: none !important;
+      }
+
+      .tab-navigation {
         display: none;
       }
-      
-      body {
-        background-color: white;
-      }
-      
-      .card {
-        box-shadow: none;
-        border: 1px solid #e0e0e0;
+
+      .container {
+        max-width: none;
+        padding: 1rem;
       }
     }
   </style>
 </head>
 <body class="min-h-screen">
-  <div class="container mx-auto px-4 py-8 mt-4">
-    <!-- 상단 여백 및 제목 -->
-    <h1 class="page-title text-3xl md:text-4xl font-bold text-center mb-2">LG Science Park 방문 안내</h1>
-    <p class="subtitle text-center text-lg mb-12">강사님을 위한 방문 안내 시스템</p>
+  <div class="auto-save-indicator" id="auto-save-indicator">
+    <i class="fas fa-save mr-2"></i>자동 저장됨
+  </div>
+
+  <div class="container">
+    <h1 class="page-title">LG Science Park 방문 안내</h1>
+    <p class="subtitle">강사님을 위한 방문 안내 시스템</p>
    
-    <!-- 탭 네비게이션 -->
-    <div class="flex justify-center mb-10">
-      <div class="inline-flex p-1 bg-white rounded-full shadow-lg">
-        <button class="tab-button active" data-tab="tab1">1. 기본정보</button>
-        <button class="tab-button" data-tab="tab2">2. 장비/차량정보</button>
-        <button class="tab-button" data-tab="tab3">3. 제출</button>
-      </div>
+    <div class="tab-navigation">
+      <button class="tab-button active" data-tab="tab1">기본정보</button>
+      <button class="tab-button" data-tab="tab2">장비/차량정보</button>
+      <button class="tab-button" data-tab="tab3">제출</button>
     </div>
    
-    <!-- 탭 콘텐츠 영역 -->
     <div class="tab-container">
-      <!-- 탭 1: 기본정보 -->
       <div id="tab1" class="tab-content active">
         <form id="visit-form">
-          <div class="card p-8">
-            <h2 class="section-title text-xl">
+          <div class="card">
+            <h2 class="section-title">
               <i class="fas fa-info-circle"></i> 방문포탈 접속 안내
             </h2>
-            <p class="mb-6 text-lg">LG Science Park 방문을 위해서는 반드시 <strong>방문포탈에서 출입 등록/예약</strong>을 사전에 완료해 주셔야 합니다.</p>
-            <p class="mb-6">아래 버튼을 클릭하여 방문포탈로 이동하세요. 비회원으로도 예약이 가능합니다.</p>
+            <p class="mb-4 text-base">LG Science Park 방문을 위해서는 반드시 <strong>방문포탈에서 출입 등록/예약</strong>을 사전에 완료해 주셔야 합니다.</p>
+            <p class="mb-4">아래 버튼을 클릭하여 방문포탈로 이동하세요. 비회원으로도 예약이 가능합니다.</p>
             <a href="https://visit.lg.com/" target="_blank" class="btn btn-primary inline-block">
               <i class="fas fa-external-link-alt mr-2"></i>방문포탈 접속하기
             </a>
            
-            <div class="mt-8 p-6 bg-gray-50 rounded-lg">
-              <h3 class="font-bold text-lg mb-4">주요 안내 사항</h3>
+            <div class="mt-6 p-4 rounded-lg" style="background: var(--lg-light);">
+              <h3 class="font-bold text-base mb-3">주요 안내 사항</h3>
               <ul class="info-list">
                 <li><i class="fas fa-check-circle"></i> 방문 포털 접속하여 비회원 방문 예약으로 진행해 주세요.</li>
                 <li><i class="fas fa-check-circle"></i> 노트북 등 기타 전자기기는 반입물품 정보에 필수 입력하셔야 합니다. (봉인 예외여부 체크 X)</li>
@@ -826,109 +977,116 @@
               </ul>
             </div>
            
-            <div class="mt-8">
-              <h3 class="font-bold mb-4 text-lg">운영자 정보</h3>
+            <div class="mt-6">
+              <h3 class="font-bold mb-3 text-base">운영자 정보</h3>
               <div>
                 <span class="operator-badge">김미진<span class="num">7477</span></span>
                 <span class="operator-badge">정하연<span class="num">6894</span></span>
                 <span class="operator-badge">선송이<span class="num">7020</span></span>
                 <span class="operator-badge">유지혜<span class="num">0530</span></span>
-                <span class="text-sm text-gray-500 ml-2 font-medium">*교육서비스센터</span>
+                <span class="text-sm ml-2 font-medium" style="color: var(--text-secondary);">*교육서비스센터</span>
               </div>
             </div>
           </div>
          
-          <div class="card p-8">
-            <h2 class="section-title text-xl">
+          <div class="card" id="program-upload-section">
+            <h2 class="section-title">
               <i class="fas fa-laptop-code"></i> 실습 자료 업로드
             </h2>
             <div class="form-group">
               <label class="form-label">파일/프로그램 공유</label>
               <div id="upload-container" class="drag-drop-area">
-                <i class="fas fa-cloud-upload-alt upload-icon"></i>
-                <p class="text-xl font-semibold mb-3">파일을 이곳에 끌어다 놓거나 클릭하여 업로드하세요</p>
-                <p class="text-gray-500">용량 제한 없음 · 다중 파일 업로드 지원 · 모든 파일 형식 지원 (압축파일 포함)</p>
+                <div id="upload-placeholder">
+                  <i class="fas fa-cloud-upload-alt upload-icon"></i>
+                  <p class="text-lg font-semibold mb-2">파일을 이곳에 끌어다 놓거나 클릭하여 업로드하세요</p>
+                  <p style="color: var(--text-secondary);">용량 제한 없음 · 다중 파일 업로드 지원 · 모든 파일 형식 지원 (압축파일 포함)</p>
+                </div>
+                <div id="program-file-list" class="file-list"></div>
                 <input type="file" id="file-upload" class="hidden" multiple accept="*/*">
               </div>
              
-              <div class="form-group">
+              <div class="form-group mt-4">
                 <label class="form-label">설치 프로그램 설명</label>
-                <textarea id="program-desc" name="program_description" class="form-control" rows="4" placeholder="예시:&#10;- Python 3.9 설치 파일&#10;- 실습용 코드 예제 파일&#10;- 개발 환경 설정 가이드"></textarea>
+                <textarea id="program-desc" name="program_description" class="form-control" rows="6" placeholder="수업 중 사용할 실습용 프로그램, 코드 예제, 설치 파일 등을 업로드해주세요.&#10;교육생들이 사전에 다운로드하여 실습 환경을 준비할 수 있습니다.&#10;&#10;- Python 3.9 설치 파일&#10;- 실습용 코드 예제 파일&#10;- 개발 환경 설정 가이드"></textarea>
               </div>
              
-              <div class="flex items-center">
+              <div class="checkbox-item mt-4">
                 <input type="checkbox" id="no-installation" class="mr-3">
-                <label for="no-installation" class="cursor-pointer font-medium">해당사항 없음</label>
+                <label for="no-installation">해당사항 없음</label>
               </div>
             </div>
           </div>
          
-          <div class="card p-8">
-            <h2 class="section-title text-xl">
+          <div class="card" id="material-section">
+            <h2 class="section-title">
               <i class="fas fa-book"></i> 교재 제공 방식
             </h2>
-            <div class="flex flex-wrap gap-8 mb-6">
-              <div class="flex items-center">
-                <input type="checkbox" id="material-pdf" name="material_type" value="PDF" class="mr-3">
-                <label for="material-pdf" class="cursor-pointer font-medium">PDF 교재</label>
+            <div class="checkbox-group">
+              <div class="checkbox-item">
+                <input type="checkbox" id="material-pdf" name="material_type" value="PDF">
+                <label for="material-pdf">PDF 교재</label>
               </div>
              
-              <div class="flex items-center">
-                <input type="checkbox" id="material-paper" name="material_type" value="서면" class="mr-3">
-                <label for="material-paper" class="cursor-pointer font-medium">서면 교재</label>
+              <div class="checkbox-item">
+                <input type="checkbox" id="material-paper" name="material_type" value="서면">
+                <label for="material-paper">서면 교재</label>
               </div>
              
-              <div class="flex items-center">
-                <input type="checkbox" id="material-none" name="material_type" value="없음" class="mr-3">
-                <label for="material-none" class="cursor-pointer font-medium">해당사항 없음</label>
+              <div class="checkbox-item">
+                <input type="checkbox" id="material-none" name="material_type" value="없음">
+                <label for="material-none">해당사항 없음</label>
               </div>
             </div>
            
-            <div id="pdf-upload-container" class="drag-drop-area mt-6 hidden">
-              <i class="fas fa-file-pdf upload-icon"></i>
-              <p class="text-xl font-semibold mb-3">PDF 교재를 이곳에 끌어다 놓거나 클릭하여 업로드하세요</p>
-              <p class="text-gray-500 mb-2">용량 제한 없음 · 모든 파일 형식 지원 (압축파일 포함)</p>
-              <p class="text-gray-400 text-sm">예시) 강사명_교재.pdf</p>
+            <div id="pdf-upload-container" class="drag-drop-area mt-4 hidden">
+              <div id="pdf-placeholder">
+                <i class="fas fa-file-pdf upload-icon"></i>
+                <p class="text-lg font-semibold mb-2">PDF 교재를 이곳에 끌어다 놓거나 클릭하여 업로드하세요</p>
+                <p style="color: var(--text-secondary);" class="mb-2">용량 제한 없음 · 모든 파일 형식 지원 (압축파일 포함)</p>
+                <p class="text-sm" style="color: var(--text-secondary);">강사명_교재.pdf</p>
+              </div>
+              <div id="pdf-file-list" class="file-list"></div>
               <input type="file" id="pdf-upload" class="hidden" multiple accept="*/*">
             </div>
            
-            <div id="paper-material-info" class="mt-6 p-6 bg-gray-50 rounded-lg hidden">
-              <p class="font-semibold mb-2 text-lg">교재 배송지:</p>
-              <p class="mb-4">서울 강서구 마곡중앙로 10로 10, W10동 지하1층 메일센터</p>
+            <div id="paper-material-info" class="mt-4 p-4 rounded-lg hidden" style="background: var(--lg-light);">
+              <p class="font-semibold mb-2 text-base">교재 배송지:</p>
+              <p class="mb-3">서울 강서구 마곡중앙로 10로 10, W10동 지하1층 메일센터</p>
               <a href="https://map.naver.com/p/search/LG사이언스파크%20W10동/place/1948693696?c=15.00,0,0,0,dh&isCorrectAnswer=true"
                  target="_blank"
-                 class="text-blue-600 hover:underline inline-flex items-center font-medium">
+                 class="hover:underline inline-flex items-center font-medium"
+                 style="color: var(--lg-accent);">
                 <i class="fas fa-map-marker-alt mr-2"></i> 지도보기
               </a>
             </div>
           </div>
          
-          <div class="card p-8">
-            <h2 class="section-title text-xl">
+          <div class="card">
+            <h2 class="section-title">
               <i class="fas fa-user-tie"></i> 강사 정보
             </h2>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div class="form-group">
                 <label class="form-label">업체명 <span class="text-red-500">*</span></label>
-                <input type="text" id="company-name" name="company" class="form-control" placeholder="예: LG전자" required>
+                <input type="text" id="company-name" name="company" class="form-control" placeholder="LG전자" required>
                 <div id="company-error" class="error-message hidden">업체명을 입력해주세요.</div>
               </div>
              
               <div class="form-group">
                 <label class="form-label">성함 <span class="text-red-500">*</span></label>
-                <input type="text" id="instructor-name" name="instructor_name" class="form-control" placeholder="예: 김엘지" required>
+                <input type="text" id="instructor-name" name="instructor_name" class="form-control" placeholder="김엘지" required>
                 <div id="instructor-error" class="error-message hidden">성함을 입력해주세요.</div>
               </div>
              
               <div class="form-group">
                 <label class="form-label">연락처 <span class="text-red-500">*</span></label>
-                <input type="tel" id="phone-number" name="phone" class="form-control" placeholder="예: 010-1234-5678" required>
+                <input type="tel" id="phone-number" name="phone" class="form-control" placeholder="010-1234-5678" required>
                 <div id="phone-error" class="error-message hidden">연락처를 입력해주세요.</div>
               </div>
             </div>
           </div>
          
-          <div class="flex justify-end mt-6">
+          <div class="flex justify-end mt-4">
             <button type="button" id="next-to-tab2" class="btn btn-primary">
               다음 단계로 <i class="fas fa-arrow-right ml-2"></i>
             </button>
@@ -936,17 +1094,16 @@
         </form>
       </div>
      
-      <!-- 탭 2: 장비 및 차량 정보 -->
       <div id="tab2" class="tab-content">
-        <div class="card p-8">
-          <h2 class="section-title text-xl">
+        <div class="card">
+          <h2 class="section-title">
             <i class="fas fa-laptop"></i> 반입 장비 정보
           </h2>
          
-          <div class="bg-blue-50 p-6 rounded-lg mb-8 border-l-4 border-blue-400">
-            <p class="mb-3 font-semibold text-blue-800"><i class="fas fa-wifi mr-2"></i>무선랜 게스트망 연결을 위해 MAC 주소 정보가 필수입니다.</p>
-            <p class="mb-3">노트북의 MAC 주소는 cmd 창에서 'ipconfig /all'로 확인 가능합니다.</p>
-            <p class="text-blue-700">외장하드 등 저장매체는 원칙상 반입이 불가합니다. 필요 시 아래 해당 항목을 체크하고 사유를 기입해 주세요.</p>
+          <div class="p-4 rounded-lg mb-6 border-l-4" style="background: #e3f2fd; border-color: #2196f3;">
+            <p class="mb-2 font-semibold" style="color: #1976d2;"><i class="fas fa-wifi mr-2"></i>무선랜 게스트망 연결을 위해 MAC 주소 정보가 필수입니다.</p>
+            <p class="mb-2" style="color: #1976d2;">노트북의 MAC 주소는 cmd 창에서 'ipconfig /all'로 확인 가능합니다.</p>
+            <p style="color: #1565c0;">외장하드 등 저장매체는 원칙상 반입이 불가합니다. 필요 시 아래 해당 항목을 체크하고 사유를 기입해 주세요.</p>
           </div>
          
           <div id="equipment-container">
@@ -982,72 +1139,72 @@
             </div>
           </div>
          
-          <button type="button" id="add-equipment" class="btn btn-secondary mt-6">
+          <button type="button" id="add-equipment" class="btn btn-secondary mt-3">
             <i class="fas fa-plus mr-2"></i> 장비 추가
           </button>
          
-          <div class="mt-8">
-            <div class="flex items-center mb-4">
+          <div class="mt-6">
+            <div class="flex items-center mb-3">
               <input type="checkbox" id="storage-media-check" class="mr-3">
-              <label for="storage-media-check" class="font-semibold text-lg">USB 등 저장매체 반입이 필요한 경우</label>
+              <label for="storage-media-check" class="font-semibold">USB 등 저장매체 반입이 필요한 경우</label>
             </div>
-           
-            <textarea id="storage-media-info" name="storage_media_info" class="form-control hidden" rows="4" placeholder="저장매체 종류 및 개수, 반입 사유를 상세히 작성해 주세요."></textarea>
+            <textarea id="storage-media-info" name="storage_media_info" class="form-control hidden" rows="3" placeholder="저장매체 종류 및 개수, 반입 사유를 상세히 작성해 주세요."></textarea>
           </div>
          
-          <div class="lan-port-container">
-            <div class="flex items-center">
+          <div class="mt-4">
+            <div class="flex items-center mb-3">
               <input type="checkbox" id="lan-port-check" class="mr-3">
-              <label for="lan-port-check" class="font-semibold text-lg">LAN Port 해제가 필요한 경우</label>
+              <label for="lan-port-check" class="font-semibold">LAN Port 해제가 필요한 경우</label>
             </div>
-           
-            <div id="lan-port-fields" class="lan-port-fields">
-              <select class="form-control" name="lan_port_type" style="min-width: 150px;">
-                <option value="">유형 선택</option>
-                <option value="USB">USB</option>
-                <option value="LAN">LAN</option>
-                <option value="SD카드">SD카드</option>
-                <option value="카메라">카메라</option>
-                <option value="기타">기타</option>
-              </select>
-              <input type="text" class="form-control" name="lan_port_detail" placeholder="추가 상세 정보">
+            <div id="lan-port-fields" class="hidden">
+              <div class="flex gap-4">
+                <select class="form-control" name="lan_port_type" style="min-width: 150px;">
+                  <option value="">유형 선택</option>
+                  <option value="USB">USB</option>
+                  <option value="LAN">LAN</option>
+                  <option value="SD카드">SD카드</option>
+                  <option value="카메라">카메라</option>
+                  <option value="기타">기타</option>
+                </select>
+                <input type="text" class="form-control" name="lan_port_detail" placeholder="추가 상세 정보">
+              </div>
             </div>
           </div>
         </div>
        
-        <div class="card p-8">
-          <h2 class="section-title text-xl">
+        <div class="card" id="vehicle-section">
+          <h2 class="section-title">
             <i class="fas fa-car"></i> 차량 정보 입력
           </h2>
          
-          <p class="mb-6 text-lg">주차가 필요한 경우 차량 정보를 입력해 주세요.</p>
+          <p class="mb-4 text-base">주차가 필요한 경우 차량 정보를 입력해 주세요.</p>
          
           <div id="vehicle-container">
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
               <div class="form-group">
                 <label class="form-label">차종</label>
-                <input type="text" class="form-control" name="vehicle_type" placeholder="예: 그랜저">
+                <input type="text" class="form-control" name="vehicle_type" placeholder="그랜저">
               </div>
               <div class="form-group">
                 <label class="form-label">차량번호</label>
-                <input type="text" class="form-control" name="vehicle_number" placeholder="예: 12가 1234">
+                <input type="text" class="form-control" name="vehicle_number" placeholder="12가 1234">
               </div>
             </div>
           </div>
          
-          <div class="flex justify-between items-center mb-6">
+          <div class="flex justify-between items-center mb-4">
             <button type="button" id="add-vehicle" class="btn btn-secondary">
               <i class="fas fa-plus mr-2"></i> 차량 추가
             </button>
            
-            <div class="flex items-center">
-              <input type="checkbox" id="no-vehicle" class="mr-3">
-              <label for="no-vehicle" class="cursor-pointer font-medium">해당사항 없음</label>
+            <div class="checkbox-item">
+              <input type="checkbox" id="no-vehicle">
+              <label for="no-vehicle">해당사항 없음</label>
             </div>
           </div>
         </div>
        
-        <div class="flex justify-between mt-6">
+        <div class="flex justify-between mt-4">
           <button type="button" id="prev-to-tab1" class="btn btn-secondary">
             <i class="fas fa-arrow-left mr-2"></i> 이전 단계
           </button>
@@ -1057,23 +1214,22 @@
         </div>
       </div>
      
-      <!-- 탭 3: 제출 -->
       <div id="tab3" class="tab-content">
-        <div class="card p-8">
-          <h2 class="section-title text-xl">
+        <div class="card">
+          <h2 class="section-title">
             <i class="fas fa-clipboard-check"></i> 정보 확인 및 제출
           </h2>
          
-          <div class="bg-gray-50 p-6 rounded-lg mb-8">
-            <h3 class="font-bold text-xl mb-4">입력 정보 요약</h3>
+          <div class="p-4 rounded-lg mb-6" style="background: var(--lg-light);">
+            <h3 class="font-bold text-lg mb-4">입력 정보 요약</h3>
            
             <div class="summary-item">
               <div class="summary-label">기본 정보</div>
-              <ul class="list-disc list-inside pl-2">
-                <li>업체명: <span id="summary-company">(입력 필요)</span></li>
-                <li>강사명: <span id="summary-instructor">(입력 필요)</span></li>
-                <li>연락처: <span id="summary-phone">(입력 필요)</span></li>
-              </ul>
+              <div class="summary-value">
+                <p>업체명: <span id="summary-company">(입력 필요)</span></p>
+                <p>강사명: <span id="summary-instructor">(입력 필요)</span></p>
+                <p>연락처: <span id="summary-phone">(입력 필요)</span></p>
+              </div>
             </div>
 
             <div id="summary-program" class="summary-item hidden">
@@ -1086,9 +1242,14 @@
               <div class="summary-value" id="summary-files-text"></div>
             </div>
            
-            <div id="summary-equipment" class="summary-item">
+            <div class="summary-item">
+              <div class="summary-label">교재 제공 방식</div>
+              <div class="summary-value" id="summary-material-text">(선택 필요)</div>
+            </div>
+           
+            <div class="summary-item">
               <div class="summary-label">반입 장비 정보</div>
-              <div class="summary-value">(입력 필요)</div>
+              <div class="summary-value" id="summary-equipment-text">(입력 필요)</div>
             </div>
 
             <div id="summary-storage" class="summary-item hidden">
@@ -1100,103 +1261,125 @@
               <div class="summary-label">LAN Port 해제 정보</div>
               <div class="summary-value" id="summary-lanport-text"></div>
             </div>
-           
-            <div id="summary-vehicle" class="summary-item">
+
+            <div class="summary-item">
               <div class="summary-label">차량 정보</div>
-              <div class="summary-value">(입력 필요)</div>
+              <div class="summary-value" id="summary-vehicle-text">(입력 선택)</div>
             </div>
 
-            <div id="summary-material" class="summary-item">
-              <div class="summary-label">교재 제공 방식</div>
-              <div class="summary-value" id="summary-material-text">미선택</div>
+            <div class="summary-item">
+              <div class="summary-label">수신자</div>
+              <div class="summary-value" id="summary-recipients">(선택 필요)</div>
             </div>
-           
-            <div id="summary-inquiry" class="summary-item hidden">
+
+            <div id="summary-cc-section" class="summary-item hidden">
+              <div class="summary-label">참조자</div>
+              <div class="summary-value" id="summary-cc"></div>
+            </div>
+
+            <div id="summary-general-inquiry" class="summary-item hidden">
               <div class="summary-label">추가 문의사항</div>
-              <div class="summary-value" id="summary-inquiry-text"></div>
+              <div class="summary-value" id="summary-general-inquiry-text"></div>
+            </div>
+
+            <div id="summary-faq-inquiry" class="summary-item hidden">
+              <div class="summary-label">기타 문의사항 (FAQ)</div>
+              <div class="summary-value" id="summary-faq-inquiry-text"></div>
             </div>
           </div>
-         
-          <div class="form-group">
-            <label class="form-label">운영자 이메일 선택 <span class="text-red-500">*</span></label>
-            <select id="operator-email" name="to_email" class="form-control" required>
-              <option value="">이메일을 보낼 운영자를 선택하세요</option>
-              <option value="mijin1.kim@lgepartner.com">김미진 - mijin1.kim@lgepartner.com</option>
-              <option value="songyi.seon@lge.com">선송이 - songyi.seon@lge.com</option>
-              <option value="jihye.yoo@lgepartner.com">유지혜 - jihye.yoo@lgepartner.com</option>
-              <option value="hayeon.jung@lgepartner.com">정하연 - hayeon.jung@lgepartner.com</option>
-              <option value="custom">직접 입력</option>
-            </select>
-            <div id="email-error" class="error-message hidden">운영자 이메일을 선택해주세요.</div>
+
+          <div class="email-section">
+            <div class="section-header">
+              <i class="fas fa-envelope"></i>
+              <h3>수신자</h3>
+            </div>
            
-            <input type="email" id="custom-email" name="custom_email" class="form-control mt-4 hidden" placeholder="운영자 이메일 직접 입력">
+            <div class="form-group">
+              <label class="form-label">메일을 받을 담당자 선택</label>
+              <select id="operator-email" name="to_email" class="form-control" required>
+                <option value="">이메일을 보낼 운영자를 선택하세요</option>
+                <option value="mijin1.kim@lgepartner.com">김미진 - mijin1.kim@lgepartner.com</option>
+                <option value="songyi.seon@lge.com">선송이 - songyi.seon@lge.com</option>
+                <option value="jihye.yoo@lgepartner.com">유지혜 - jihye.yoo@lgepartner.com</option>
+                <option value="hayeon.jung@lgepartner.com">정하연 - hayeon.jung@lgepartner.com</option>
+                <option value="custom">직접 입력</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">추가 수신자 이메일 기재</label>
+              <div class="email-input-container">
+                <input type="email" id="receiver-email-input" class="email-input" placeholder="추가 수신자 이메일 주소를 입력하세요">
+                <button type="button" id="add-receiver-btn" class="email-add-btn">
+                  <i class="fas fa-plus"></i>
+                </button>
+              </div>
+              <div class="validation-message" id="receiver-validation-message"></div>
+              <div class="email-tags" id="receiver-tags-container"></div>
+            </div>
           </div>
 
-          <!-- 개선된 참조자 관리 섹션 -->
-          <div class="cc-section">
+          <div class="email-section">
             <div class="section-header">
               <i class="fas fa-users"></i>
-              <h3>참조자 관리</h3>
+              <h3>참조자</h3>
             </div>
-            
-            <div class="cc-info">
-              <i class="fas fa-info-circle"></i>
-              <strong>기본 참조자:</strong> DL-TSC@lge.com (교육서비스센터)가 모든 이메일에 자동으로 참조됩니다.
+           
+            <div class="form-group">
+              <label class="form-label">교육서비스센터 담당자 추가</label>
+              <select id="cc-operator-select" class="form-control">
+                <option value="">선택적으로 교육서비스센터 담당자를 추가하세요</option>
+                <option value="DL-TSC@lge.com">DL-TSC@lge.com (교육서비스센터)</option>
+              </select>
             </div>
 
-            <div class="cc-input-container">
-              <input type="email" id="cc-email-input" class="cc-input" placeholder="추가 참조자 이메일 주소를 입력하세요 (예: colleague@company.com)">
-              <button type="button" id="add-cc-btn" class="cc-add-btn">
-                <i class="fas fa-plus"></i>
-              </button>
-            </div>
-            
-            <div class="email-validation-message" id="cc-validation-message"></div>
-            
-            <div class="cc-tags" id="cc-tags-container">
-              <!-- 기본 참조자 태그 -->
-              <div class="cc-tag" data-email="DL-TSC@lge.com">
-                <i class="fas fa-shield-alt mr-1"></i>
-                DL-TSC@lge.com
-                <span class="text-xs opacity-75">(필수)</span>
+            <div class="form-group">
+              <label class="form-label">추가 참조자 이메일 기재</label>
+              <div class="email-input-container">
+                <input type="email" id="cc-email-input" class="email-input" placeholder="추가 참조자 이메일 주소를 입력하세요">
+                <button type="button" id="add-cc-btn" class="email-add-btn">
+                  <i class="fas fa-plus"></i>
+                </button>
               </div>
+              <div class="validation-message" id="cc-validation-message"></div>
+              <div class="email-tags" id="cc-tags-container"></div>
             </div>
           </div>
-         
-          <div class="form-group">
-            <label class="form-label">추가 요청사항</label>
-            <textarea id="additional-comments" name="additional_comments" class="form-control" rows="5" placeholder="예시:&#10;- 교육 시작 전 장비 점검 시간 필요&#10;- 특정 소프트웨어 사전 설치 요청&#10;- 네트워크 설정 관련 문의사항 등"></textarea>
+
+          <div class="contact-form">
+            <h3 class="font-semibold mb-3 text-base">추가 문의사항</h3>
+            <textarea class="form-control mb-3" id="contact-message" rows="3" placeholder="추가 문의사항이 있으면 상세히 입력해 주세요"></textarea>
+            <button type="button" id="save-inquiry" class="btn btn-secondary">
+              <i class="fas fa-save mr-2"></i>저장하기
+            </button>
           </div>
          
-          <div id="email-status" class="hidden p-4 rounded-lg"></div>
-         
-          <div class="flex justify-between mt-8">
+          <div class="flex justify-between mt-6">
             <button type="button" id="prev-to-tab2" class="btn btn-secondary">
               <i class="fas fa-arrow-left mr-2"></i> 이전 단계
             </button>
             <button type="button" id="submit-form" class="btn btn-primary">
-              <i class="fas fa-paper-plane mr-2"></i> 이메일 전송
+              <i class="fas fa-paper-plane mr-2"></i>이메일 전송
             </button>
           </div>
         </div>
       </div>
     </div>
-   
-    <div class="mt-8 mb-12"></div>
   </div>
- 
-  <!-- 플로팅 FAQ 버튼 -->
-  <div class="floating-faq">
-    <button type="button" class="floating-btn" id="open-faq">
+
+  <div class="floating-controls">
+    <button type="button" class="floating-btn theme" id="theme-toggle">
+      <i class="fas fa-moon" id="theme-icon"></i>
+    </button>
+    <button type="button" class="floating-btn faq" id="open-faq">
       FAQ
     </button>
   </div>
  
-  <!-- FAQ 모달 -->
-  <div class="faq-modal" id="faq-modal">
+  <div class="modal" id="faq-modal">
     <div class="modal-content">
-      <div class="flex justify-between items-center mb-6">
-        <h2 class="text-2xl font-bold" style="color: var(--lg-red);">자주 묻는 질문 (FAQ)</h2>
+      <div class="flex justify-between items-center mb-4">
+        <h2 class="text-xl font-bold" style="color: var(--lg-red);">자주 묻는 질문 (FAQ)</h2>
         <button class="close-modal">
           <i class="fas fa-times"></i>
         </button>
@@ -1209,748 +1392,963 @@
             <i class="fas fa-chevron-down"></i>
           </div>
           <div class="accordion-content" id="faq1">
-            <p>네, <strong>무선 연결이 필요한 모든 장비는 MAC 주소 등록</strong>이 필요합니다. 태블릿, 스마트폰, 노트북 등 Wi-Fi를 사용하는 모든 기기를 등록해 주세요.</p>
+            <p>네, 무선 연결이 필요한 모든 장비는 MAC 주소 등록이 필요합니다.<br>
+            태블릿, 스마트폰, 노트북 등 Wi-Fi를 사용하는 모든 기기를 등록해 주세요.<br>
+            MAC 주소는 각 기기의 설정에서 확인할 수 있으며, 보안상 정확한 정보 입력이 필수입니다.</p>
           </div>
         </div>
-       
+
         <div class="accordion-item">
           <div class="accordion-header" data-accordion="faq2">
-            <span>Q2. 입차 등록은 필수인가요?</span>
+            <span>Q2. 방문 당일 추가로 가져올 장비가 생겼다면?</span>
             <i class="fas fa-chevron-down"></i>
           </div>
           <div class="accordion-content" id="faq2">
-            <p>네, <strong>사전 등록되지 않으면 출입이 불가능</strong>합니다. 방문 전 반드시 방문포탈에서 예약을 완료해 주시기 바랍니다.</p>
+            <p>- 방문 당일 추가 장비 반입은 보안상 어려울 수 있습니다.<br>
+            - 사전에 모든 장비를 등록해 주시고, 불가피한 경우 운영자에게 미리 연락해 주세요.</p>
           </div>
         </div>
-       
+
         <div class="accordion-item">
           <div class="accordion-header" data-accordion="faq3">
-            <span>Q3. 장비 반입 목록은 언제까지 제출해야 하나요?</span>
+            <span>Q3. 파일 업로드가 안 되는 경우 어떻게 하나요?</span>
             <i class="fas fa-chevron-down"></i>
           </div>
           <div class="accordion-content" id="faq3">
-            <p><strong>최소 방문 3영업일 전까지</strong> 제출해 주시기 바랍니다. 급한 경우 운영자에게 직접 연락하여 문의해 주세요.</p>
+            <p>파일 업로드 문제 해결 방법:<br><br>
+            1. 브라우저 새로고침 후 다시 시도<br>
+            2. 다른 브라우저 사용 (Chrome, Edge 권장)<br>
+            3. 파일 크기 확인 - 너무 큰 파일은 압축 후 업로드<br>
+            4. 인터넷 연결 상태 확인<br><br>
+            계속 문제가 발생하면 운영자에게 연락주세요.</p>
           </div>
         </div>
-       
+
         <div class="accordion-item">
           <div class="accordion-header" data-accordion="faq4">
-            <span>Q4. 방문증은 어떻게 반납하나요?</span>
+            <span>Q4. 주차는 어떻게 하나요?</span>
             <i class="fas fa-chevron-down"></i>
           </div>
           <div class="accordion-content" id="faq4">
-            <p><strong>방문증을 받은 건물의 안내데스크에 반납</strong>해 주세요.</p>
-            <p class="text-sm text-gray-600 mt-2">예시) W10동에서 수령 → W10동 안내데스크 반납</p>
+            <p>LG Science Park 주차 안내:<br><br>
+            1. 방문자 전용 주차장을 이용해 주세요<br>
+            2. 주차 요금은 무료입니다<br>
+            3. 차량 번호를 반드시 사전 등록해야 합니다<br>
+            4. 사전에 등록하지 않은 차량은 입차가 불가합니다.</p>
           </div>
         </div>
-       
+
         <div class="accordion-item">
           <div class="accordion-header" data-accordion="faq5">
-            <span>추가 안내사항</span>
+            <span>Q5. 저장매체 반입 가능한가요?</span>
             <i class="fas fa-chevron-down"></i>
           </div>
           <div class="accordion-content" id="faq5">
-            <ul class="list-disc ml-6 space-y-2">
-              <li><strong>장비 점검이 필요한 경우</strong>, 교육 시작 30분 전까지 도착해주세요.</li>
-              <li><strong>신분증 지참</strong>은 필수입니다.</li>
-              <li><strong>방문증은 항상 착용</strong>해 주셔야 합니다.</li>
-              <li><strong>보안 구역 출입 시</strong> 추가 승인이 필요할 수 있습니다.</li>
-            </ul>
+            <p>- 원칙적으로는 반입 불가하지만, 교육 목적으로 필요한 경우 사유를 상세히 기재하시면 반입 가능합니다.<br>
+            - 사전에 기재하지 않은 저장매체는 포맷대상이니 꼭 사전 신청 부탁드립니다.</p>
           </div>
         </div>
       </div>
      
       <div class="contact-form">
-        <h3 class="font-semibold mb-4 text-lg">기타 문의사항</h3>
-        <textarea class="form-control mb-4" id="contact-message" rows="4" placeholder="추가 문의사항이 있으면 상세히 입력해 주세요"></textarea>
-        <button type="button" id="save-inquiry" class="btn btn-primary">
+        <h3 class="font-semibold mb-3 text-base">기타 문의사항 (FAQ)</h3>
+        <textarea class="form-control mb-3" id="faq-contact-message" rows="3" placeholder="FAQ 관련 추가 문의사항이 있으면 상세히 입력해 주세요"></textarea>
+        <button type="button" id="faq-save-inquiry" class="btn btn-primary">
           <i class="fas fa-save mr-2"></i>저장하기
         </button>
       </div>
     </div>
   </div>
 
-  <script src="https://cdn.jsdelivr.net/npm/emailjs-com@3.2.0/dist/email.min.js"></script>
   <script>
-    // 전역 변수
-    let savedInquiry = '';
-    let uploadedFiles = {
-      program: [],
-      pdf: []
-    };
-    let ccEmails = ['DL-TSC@lge.com']; // 기본 참조자
+    emailjs.init('C56kGCzPtfgWVEKo');
+
+    let uploadedFiles = { program: [], pdf: [] };
+    let generalInquiry = '';
+    let faqInquiry = '';
+    let receiverEmails = [];
+    let ccEmails = [];
+
+    const themeToggle = document.getElementById('theme-toggle');
+    const themeIcon = document.getElementById('theme-icon');
    
-    document.addEventListener('DOMContentLoaded', function() {
-      // EmailJS 초기화
-      emailjs.init("C56kGCzPtfgWVEKoO");
+    const savedTheme = localStorage.getItem('theme') || 'light';
+    document.documentElement.setAttribute('data-theme', savedTheme);
+    updateThemeIcon(savedTheme);
+
+    themeToggle.addEventListener('click', function() {
+      const currentTheme = document.documentElement.getAttribute('data-theme');
+      const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
      
-      // 탭 전환 기능
-      const tabButtons = document.querySelectorAll('.tab-button');
-      const tabContents = document.querySelectorAll('.tab-content');
+      document.documentElement.setAttribute('data-theme', newTheme);
+      localStorage.setItem('theme', newTheme);
+      updateThemeIcon(newTheme);
+    });
+
+    function updateThemeIcon(theme) {
+      themeIcon.className = theme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
+    }
+
+    function showAutoSaveIndicator() {
+      const indicator = document.getElementById('auto-save-indicator');
+      indicator.classList.add('show');
+      setTimeout(() => {
+        indicator.classList.remove('show');
+      }, 2000);
+    }
+
+    function autoSave() {
+      const formData = {
+        company: document.getElementById('company-name')?.value || '',
+        instructor: document.getElementById('instructor-name')?.value || '',
+        phone: document.getElementById('phone-number')?.value || '',
+        programDesc: document.getElementById('program-desc')?.value || '',
+        uploadedFiles: uploadedFiles,
+        generalInquiry: generalInquiry,
+        faqInquiry: faqInquiry,
+        receiverEmails: receiverEmails,
+        ccEmails: ccEmails,
+        timestamp: new Date().toISOString()
+      };
      
-      function activateTab(tabId) {
-        tabButtons.forEach(btn => {
-          if (btn.dataset.tab === tabId) {
-            btn.classList.add('active');
-          } else {
-            btn.classList.remove('active');
+      localStorage.setItem('visitFormData', JSON.stringify(formData));
+      showAutoSaveIndicator();
+    }
+
+    setInterval(autoSave, 60000);
+
+    function loadSavedData() {
+      const savedData = localStorage.getItem('visitFormData');
+      if (savedData) {
+        try {
+          const data = JSON.parse(savedData);
+          if (document.getElementById('company-name')) document.getElementById('company-name').value = data.company || '';
+          if (document.getElementById('instructor-name')) document.getElementById('instructor-name').value = data.instructor || '';
+          if (document.getElementById('phone-number')) document.getElementById('phone-number').value = data.phone || '';
+          if (document.getElementById('program-desc')) document.getElementById('program-desc').value = data.programDesc || '';
+          uploadedFiles = data.uploadedFiles || { program: [], pdf: [] };
+          generalInquiry = data.generalInquiry || '';
+          faqInquiry = data.faqInquiry || '';
+          receiverEmails = data.receiverEmails || [];
+          ccEmails = data.ccEmails || [];
+         
+          if (generalInquiry) {
+            document.getElementById('contact-message').value = generalInquiry;
           }
-        });
-       
-        tabContents.forEach(content => {
-          if (content.id === tabId) {
-            content.classList.add('active');
-          } else {
-            content.classList.remove('active');
+          if (faqInquiry) {
+            document.getElementById('faq-contact-message').value = faqInquiry;
           }
-        });
-       
-        if (tabId === 'tab3') {
-          updateSummary();
+        } catch (e) {
+          console.log('저장된 데이터 복원 실패:', e);
         }
+      }
+    }
+
+    loadSavedData();
+
+    document.getElementById('phone-number')?.addEventListener('input', function(e) {
+      let value = e.target.value.replace(/\D/g, '');
+      if (value.length <= 3) {
+        e.target.value = value;
+      } else if (value.length <= 7) {
+        e.target.value = value.slice(0, 3) + '-' + value.slice(3);
+      } else {
+        e.target.value = value.slice(0, 3) + '-' + value.slice(3, 7) + '-' + value.slice(7, 11);
+      }
+    });
+
+    const tabButtons = document.querySelectorAll('.tab-button');
+    const tabContents = document.querySelectorAll('.tab-content');
+
+    tabButtons.forEach(button => {
+      button.addEventListener('click', function() {
+        const tabId = this.getAttribute('data-tab');
        
-        window.scrollTo({top: 0, behavior: 'smooth'});
+        tabButtons.forEach(btn => btn.classList.remove('active'));
+        tabContents.forEach(content => content.classList.remove('active'));
+       
+        this.classList.add('active');
+        document.getElementById(tabId).classList.add('active');
+       
+        updateSummary();
+      });
+    });
+
+    document.getElementById('next-to-tab2')?.addEventListener('click', function() {
+      if (validateTab1()) {
+        switchToTab('tab2');
+      }
+    });
+
+    document.getElementById('next-to-tab3')?.addEventListener('click', function() {
+      switchToTab('tab3');
+      updateSummary();
+    });
+
+    document.getElementById('prev-to-tab1')?.addEventListener('click', function() {
+      switchToTab('tab1');
+    });
+
+    document.getElementById('prev-to-tab2')?.addEventListener('click', function() {
+      switchToTab('tab2');
+    });
+
+    function switchToTab(tabId) {
+      tabButtons.forEach(btn => btn.classList.remove('active'));
+      tabContents.forEach(content => content.classList.remove('active'));
+     
+      document.querySelector(`[data-tab="${tabId}"]`).classList.add('active');
+      document.getElementById(tabId).classList.add('active');
+    }
+
+    function validateTab1() {
+      let isValid = true;
+     
+      const companyName = document.getElementById('company-name').value.trim();
+      const instructorName = document.getElementById('instructor-name').value.trim();
+      const phoneNumber = document.getElementById('phone-number').value.trim();
+     
+      if (!companyName) {
+        document.getElementById('company-error').classList.remove('hidden');
+        isValid = false;
+      } else {
+        document.getElementById('company-error').classList.add('hidden');
       }
      
-      tabButtons.forEach(button => {
-        button.addEventListener('click', () => {
-          activateTab(button.dataset.tab);
+      if (!instructorName) {
+        document.getElementById('instructor-error').classList.remove('hidden');
+        isValid = false;
+      } else {
+        document.getElementById('instructor-error').classList.add('hidden');
+      }
+     
+      if (!phoneNumber) {
+        document.getElementById('phone-error').classList.remove('hidden');
+        isValid = false;
+      } else {
+        document.getElementById('phone-error').classList.add('hidden');
+      }
+     
+      return isValid;
+    }
+
+    document.getElementById('no-installation')?.addEventListener('change', function() {
+      const programSection = document.getElementById('program-upload-section');
+      const uploadContainer = document.getElementById('upload-container');
+      const programDesc = document.getElementById('program-desc');
+     
+      if (this.checked) {
+        uploadContainer.classList.add('disabled');
+        programDesc.classList.add('section-disabled');
+      } else {
+        uploadContainer.classList.remove('disabled');
+        programDesc.classList.remove('section-disabled');
+      }
+      updateSummary();
+    });
+
+    document.getElementById('material-none')?.addEventListener('change', function() {
+      const pdfContainer = document.getElementById('pdf-upload-container');
+      const paperInfo = document.getElementById('paper-material-info');
+      const pdfCheckbox = document.getElementById('material-pdf');
+      const paperCheckbox = document.getElementById('material-paper');
+     
+      if (this.checked) {
+        pdfCheckbox.checked = false;
+        paperCheckbox.checked = false;
+        pdfContainer.classList.add('hidden');
+        paperInfo.classList.add('hidden');
+      }
+      updateSummary();
+    });
+
+    document.getElementById('no-vehicle')?.addEventListener('change', function() {
+      const vehicleSection = document.getElementById('vehicle-section');
+      const vehicleContainer = document.getElementById('vehicle-container');
+      const addVehicleBtn = document.getElementById('add-vehicle');
+     
+      if (this.checked) {
+        vehicleContainer.classList.add('section-disabled');
+        addVehicleBtn.classList.add('section-disabled');
+      } else {
+        vehicleContainer.classList.remove('section-disabled');
+        addVehicleBtn.classList.remove('section-disabled');
+      }
+      updateSummary();
+    });
+
+    document.getElementById('material-pdf')?.addEventListener('change', function() {
+      const container = document.getElementById('pdf-upload-container');
+      const noneCheckbox = document.getElementById('material-none');
+     
+      if (this.checked) {
+        container.classList.remove('hidden');
+        noneCheckbox.checked = false;
+      } else {
+        container.classList.add('hidden');
+      }
+      updateSummary();
+    });
+
+    document.getElementById('material-paper')?.addEventListener('change', function() {
+      const container = document.getElementById('paper-material-info');
+      const noneCheckbox = document.getElementById('material-none');
+     
+      if (this.checked) {
+        container.classList.remove('hidden');
+        noneCheckbox.checked = false;
+      } else {
+        container.classList.add('hidden');
+      }
+      updateSummary();
+    });
+
+    document.getElementById('storage-media-check')?.addEventListener('change', function() {
+      const textarea = document.getElementById('storage-media-info');
+      if (this.checked) {
+        textarea.classList.remove('hidden');
+      } else {
+        textarea.classList.add('hidden');
+      }
+    });
+
+    document.getElementById('lan-port-check')?.addEventListener('change', function() {
+      const fields = document.getElementById('lan-port-fields');
+      if (this.checked) {
+        fields.classList.remove('hidden');
+      } else {
+        fields.classList.add('hidden');
+      }
+    });
+
+    function formatFileSize(bytes) {
+      if (bytes === 0) return '0 Bytes';
+      const k = 1024;
+      const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+      const i = Math.floor(Math.log(bytes) / Math.log(k));
+      return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    }
+
+    function getFileIcon(fileName) {
+      const ext = fileName.split('.').pop().toLowerCase();
+      if (['pdf'].includes(ext)) return 'fas fa-file-pdf';
+      if (['doc', 'docx'].includes(ext)) return 'fas fa-file-word';
+      if (['xls', 'xlsx'].includes(ext)) return 'fas fa-file-excel';
+      if (['ppt', 'pptx'].includes(ext)) return 'fas fa-file-powerpoint';
+      if (['jpg', 'jpeg', 'png', 'gif'].includes(ext)) return 'fas fa-file-image';
+      if (['zip', 'rar', '7z'].includes(ext)) return 'fas fa-file-archive';
+      return 'fas fa-file';
+    }
+
+    function renderFileList(fileType) {
+      const listId = fileType === 'program' ? 'program-file-list' : 'pdf-file-list';
+      const placeholderId = fileType === 'program' ? 'upload-placeholder' : 'pdf-placeholder';
+      const fileList = document.getElementById(listId);
+      const placeholder = document.getElementById(placeholderId);
+     
+      if (uploadedFiles[fileType].length === 0) {
+        fileList.innerHTML = '';
+        placeholder.style.display = 'block';
+      } else {
+        placeholder.style.display = 'none';
+        fileList.innerHTML = uploadedFiles[fileType].map((file, index) => `
+          <div class="file-item">
+            <div class="file-info">
+              <i class="${getFileIcon(file.name)} file-icon"></i>
+              <div class="file-details">
+                <div class="file-name">${file.name}</div>
+                <div class="file-size">${formatFileSize(file.size)}</div>
+              </div>
+            </div>
+            <button type="button" class="file-remove" onclick="removeFile('${fileType}', ${index})">
+              <i class="fas fa-times"></i>
+            </button>
+          </div>
+        `).join('');
+      }
+    }
+
+    window.removeFile = function(fileType, index) {
+      uploadedFiles[fileType].splice(index, 1);
+      renderFileList(fileType);
+      updateSummary();
+    };
+
+    function setupFileUpload(containerId, uploadId, fileType) {
+      const container = document.getElementById(containerId);
+      const fileInput = document.getElementById(uploadId);
+
+      container.addEventListener('click', (e) => {
+        if (!e.target.closest('.file-item') && !e.target.closest('.file-remove') && !container.classList.contains('disabled')) {
+          fileInput.click();
+        }
+      });
+
+      container.addEventListener('dragover', (e) => {
+        if (!container.classList.contains('disabled')) {
+          e.preventDefault();
+          container.classList.add('dragover');
+        }
+      });
+
+      container.addEventListener('dragleave', () => {
+        container.classList.remove('dragover');
+      });
+
+      container.addEventListener('drop', (e) => {
+        if (!container.classList.contains('disabled')) {
+          e.preventDefault();
+          container.classList.remove('dragover');
+          handleFiles(e.dataTransfer.files, fileType);
+        }
+      });
+
+      fileInput.addEventListener('change', (e) => {
+        handleFiles(e.target.files, fileType);
+        e.target.value = '';
+      });
+    }
+
+    function handleFiles(files, fileType) {
+      Array.from(files).forEach(file => {
+        uploadedFiles[fileType].push({
+          name: file.name,
+          size: file.size,
+          type: file.type
         });
       });
-     
-      // 참조자 관리 기능
-      const ccInput = document.getElementById('cc-email-input');
-      const addCcBtn = document.getElementById('add-cc-btn');
-      const ccTagsContainer = document.getElementById('cc-tags-container');
-      const ccValidationMessage = document.getElementById('cc-validation-message');
+      renderFileList(fileType);
+      updateSummary();
+    }
 
-      function validateEmail(email) {
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        return emailRegex.test(email);
+    setupFileUpload('upload-container', 'file-upload', 'program');
+    setupFileUpload('pdf-upload-container', 'pdf-upload', 'pdf');
+
+    function validateEmail(email) {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      return emailRegex.test(email);
+    }
+
+    function showValidationMessage(elementId, message, isValid) {
+      const messageEl = document.getElementById(elementId);
+      messageEl.textContent = message;
+      messageEl.className = `validation-message ${isValid ? 'valid' : 'invalid'}`;
+      messageEl.style.display = 'block';
+      if (isValid || !message) {
+        setTimeout(() => { messageEl.style.display = 'none'; }, 3000);
+      }
+    }
+
+    function addReceiverEmail(email) {
+      if (!validateEmail(email)) {
+        showValidationMessage('receiver-validation-message', '올바른 이메일 형식이 아닙니다.', false);
+        return false;
       }
 
-      function showValidationMessage(message, isValid) {
-        ccValidationMessage.textContent = message;
-        ccValidationMessage.className = `email-validation-message ${isValid ? 'valid' : 'invalid'}`;
-        ccValidationMessage.style.display = 'block';
-        
-        if (isValid || !message) {
-          setTimeout(() => {
-            ccValidationMessage.style.display = 'none';
-          }, 3000);
-        }
+      if (receiverEmails.includes(email)) {
+        showValidationMessage('receiver-validation-message', '이미 추가된 이메일입니다.', false);
+        return false;
       }
 
-      function addCcEmail(email) {
-        if (!validateEmail(email)) {
-          showValidationMessage('올바른 이메일 형식이 아닙니다.', false);
-          return false;
-        }
+      receiverEmails.push(email);
+      updateReceiverTags();
+      document.getElementById('receiver-email-input').value = '';
+      showValidationMessage('receiver-validation-message', '수신자가 추가되었습니다.', true);
+      return true;
+    }
 
-        if (ccEmails.includes(email)) {
-          showValidationMessage('이미 추가된 이메일입니다.', false);
-          return false;
-        }
+    function updateReceiverTags() {
+      const container = document.getElementById('receiver-tags-container');
+      container.innerHTML = receiverEmails.map((email, index) => {
+        return `<div class="email-tag" data-email="${email}">
+          <i class="fas fa-user mr-1"></i>
+          ${email}
+          <button type="button" class="remove-tag" onclick="removeReceiverEmail('${email}')">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>`;
+      }).join('');
+    }
 
-        ccEmails.push(email);
-        
-        const tag = document.createElement('div');
-        tag.className = 'cc-tag';
-        tag.setAttribute('data-email', email);
-        tag.innerHTML = `
+    window.removeReceiverEmail = function(email) {
+      receiverEmails = receiverEmails.filter(e => e !== email);
+      updateReceiverTags();
+      updateSummary();
+    };
+
+    document.getElementById('add-receiver-btn')?.addEventListener('click', function() {
+      const email = document.getElementById('receiver-email-input').value.trim();
+      if (email) {
+        if (addReceiverEmail(email)) {
+          updateSummary();
+        }
+      }
+    });
+
+    document.getElementById('receiver-email-input')?.addEventListener('keypress', function(e) {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        const email = this.value.trim();
+        if (email) {
+          if (addReceiverEmail(email)) {
+            updateSummary();
+          }
+        }
+      }
+    });
+
+    function addCcEmail(email) {
+      if (!validateEmail(email)) {
+        showValidationMessage('cc-validation-message', '올바른 이메일 형식이 아닙니다.', false);
+        return false;
+      }
+
+      if (ccEmails.includes(email)) {
+        showValidationMessage('cc-validation-message', '이미 추가된 이메일입니다.', false);
+        return false;
+      }
+
+      ccEmails.push(email);
+      updateCcTags();
+      document.getElementById('cc-email-input').value = '';
+      showValidationMessage('cc-validation-message', '참조자가 추가되었습니다.', true);
+      return true;
+    }
+
+    function updateCcTags() {
+      const container = document.getElementById('cc-tags-container');
+      container.innerHTML = ccEmails.map((email, index) => {
+        return `<div class="email-tag" data-email="${email}">
           <i class="fas fa-user mr-1"></i>
           ${email}
           <button type="button" class="remove-tag" onclick="removeCcEmail('${email}')">
             <i class="fas fa-times"></i>
           </button>
-        `;
-        
-        ccTagsContainer.appendChild(tag);
-        ccInput.value = '';
-        showValidationMessage('이메일이 추가되었습니다.', true);
-        return true;
-      }
+        </div>`;
+      }).join('');
+    }
 
-      window.removeCcEmail = function(email) {
-        if (email === 'DL-TSC@lge.com') {
-          showValidationMessage('기본 참조자는 삭제할 수 없습니다.', false);
-          return;
-        }
-        
-        ccEmails = ccEmails.filter(e => e !== email);
-        const tag = document.querySelector(`[data-email="${email}"]`);
-        if (tag) {
-          tag.remove();
-        }
-      };
+    window.removeCcEmail = function(email) {
+      ccEmails = ccEmails.filter(e => e !== email);
+      updateCcTags();
+      updateSummary();
+    };
 
-      addCcBtn.addEventListener('click', function() {
-        const email = ccInput.value.trim();
-        if (email) {
-          addCcEmail(email);
+    document.getElementById('add-cc-btn')?.addEventListener('click', function() {
+      const email = document.getElementById('cc-email-input').value.trim();
+      if (email) {
+        if (addCcEmail(email)) {
+          updateSummary();
         }
-      });
-
-      ccInput.addEventListener('keypress', function(e) {
-        if (e.key === 'Enter') {
-          e.preventDefault();
-          const email = ccInput.value.trim();
-          if (email) {
-            addCcEmail(email);
-          }
-        }
-      });
-
-      ccInput.addEventListener('input', function() {
-        const email = this.value.trim();
-        if (email && !validateEmail(email)) {
-          showValidationMessage('올바른 이메일 형식을 입력해주세요.', false);
-        } else if (email && ccEmails.includes(email)) {
-          showValidationMessage('이미 추가된 이메일입니다.', false);
-        } else {
-          ccValidationMessage.style.display = 'none';
-        }
-      });
-     
-      // 다음/이전 버튼
-      document.getElementById('next-to-tab2').addEventListener('click', () => {
-        if (validateTab1()) {
-          activateTab('tab2');
-        }
-      });
-      
-      document.getElementById('prev-to-tab1').addEventListener('click', () => {
-        activateTab('tab1');
-      });
-      
-      document.getElementById('next-to-tab3').addEventListener('click', () => {
-        activateTab('tab3');
-      });
-      
-      document.getElementById('prev-to-tab2').addEventListener('click', () => {
-        activateTab('tab2');
-      });
-     
-      // 폼 검증
-      function validateTab1() {
-        let isValid = true;
-        
-        const company = document.getElementById('company-name').value.trim();
-        const instructor = document.getElementById('instructor-name').value.trim();
-        const phone = document.getElementById('phone-number').value.trim();
-        
-        if (!company) {
-          document.getElementById('company-error').classList.remove('hidden');
-          isValid = false;
-        } else {
-          document.getElementById('company-error').classList.add('hidden');
-        }
-        
-        if (!instructor) {
-          document.getElementById('instructor-error').classList.remove('hidden');
-          isValid = false;
-        } else {
-          document.getElementById('instructor-error').classList.add('hidden');
-        }
-        
-        if (!phone) {
-          document.getElementById('phone-error').classList.remove('hidden');
-          isValid = false;
-        } else {
-          document.getElementById('phone-error').classList.add('hidden');
-        }
-        
-        return isValid;
-      }
-     
-      // 장비 추가/삭제
-      document.getElementById('add-equipment').addEventListener('click', function() {
-        const container = document.getElementById('equipment-container');
-        const newRow = document.createElement('div');
-        newRow.className = 'equipment-row';
-        newRow.innerHTML = `
-          <select class="form-control" name="equipment_type">
-            <option value="">장비 유형 선택</option>
-            <option value="노트북">노트북</option>
-            <option value="네트워크장비">네트워크장비</option>
-            <option value="NAS">NAS</option>
-            <option value="데스크탑">데스크탑</option>
-            <option value="스마트패드">스마트패드</option>
-            <option value="샘플폰">샘플폰</option>
-            <option value="서버장비">서버장비</option>
-            <option value="태블릿PC">태블릿PC</option>
-            <option value="AP">AP</option>
-            <option value="CD">CD</option>
-            <option value="디지털카메라">디지털카메라</option>
-            <option value="DVD">DVD</option>
-            <option value="기타">기타</option>
-            <option value="HDD/SSD">HDD/SSD</option>
-            <option value="모바일폰">모바일폰</option>
-            <option value="메모리카드">메모리카드</option>
-            <option value="USB">USB</option>
-            <option value="워크스테이션">워크스테이션</option>
-          </select>
-          <input type="text" class="form-control" name="equipment_manufacturer" placeholder="제조사">
-          <input type="text" class="form-control" name="equipment_model" placeholder="기종">
-          <input type="number" class="form-control equipment-qty" name="equipment_quantity" min="1" value="1" placeholder="수량">
-          <input type="text" class="form-control" name="equipment_serial" placeholder="S/N & MAC주소">
-          <button type="button" class="equipment-remove btn btn-secondary p-2">
-            <i class="fas fa-minus"></i>
-          </button>
-        `;
-        container.appendChild(newRow);
-      });
-     
-      document.addEventListener('click', function(e) {
-        if (e.target.closest('.equipment-remove')) {
-          const row = e.target.closest('.equipment-row');
-          if (document.querySelectorAll('.equipment-row').length > 1) {
-            row.remove();
-          }
-        }
-      });
-     
-      // 저장매체 체크박스
-      document.getElementById('storage-media-check').addEventListener('change', function() {
-        const textarea = document.getElementById('storage-media-info');
-        if (this.checked) {
-          textarea.classList.remove('hidden');
-        } else {
-          textarea.classList.add('hidden');
-          textarea.value = '';
-        }
-      });
-     
-      // LAN Port 체크박스
-      document.getElementById('lan-port-check').addEventListener('change', function() {
-        const fields = document.getElementById('lan-port-fields');
-        if (this.checked) {
-          fields.classList.add('active');
-        } else {
-          fields.classList.remove('active');
-          fields.querySelector('select').value = '';
-          fields.querySelector('input').value = '';
-        }
-      });
-     
-      // 교재 유형 체크박스
-      document.getElementById('material-pdf').addEventListener('change', function() {
-        const uploadContainer = document.getElementById('pdf-upload-container');
-        if (this.checked) {
-          uploadContainer.classList.remove('hidden');
-        } else {
-          uploadContainer.classList.add('hidden');
-        }
-      });
-      
-      document.getElementById('material-paper').addEventListener('change', function() {
-        const infoContainer = document.getElementById('paper-material-info');
-        if (this.checked) {
-          infoContainer.classList.remove('hidden');
-        } else {
-          infoContainer.classList.add('hidden');
-        }
-      });
-     
-      // 차량 추가
-      document.getElementById('add-vehicle').addEventListener('click', function() {
-        const container = document.getElementById('vehicle-container');
-        const newVehicle = document.createElement('div');
-        newVehicle.className = 'grid grid-cols-1 md:grid-cols-3 gap-6 mb-6';
-        newVehicle.innerHTML = `
-          <div class="form-group">
-            <label class="form-label">차종</label>
-            <input type="text" class="form-control" name="vehicle_type" placeholder="예: 그랜저">
-          </div>
-          <div class="form-group">
-            <label class="form-label">차량번호</label>
-            <input type="text" class="form-control" name="vehicle_number" placeholder="예: 12가 1234">
-          </div>
-          <div class="flex items-end">
-            <button type="button" class="btn btn-secondary vehicle-remove">
-              <i class="fas fa-minus mr-1"></i> 삭제
-            </button>
-          </div>
-        `;
-        container.appendChild(newVehicle);
-      });
-     
-      document.addEventListener('click', function(e) {
-        if (e.target.closest('.vehicle-remove')) {
-          e.target.closest('.grid').remove();
-        }
-      });
-     
-      // 운영자 이메일 선택
-      document.getElementById('operator-email').addEventListener('change', function() {
-        const customEmail = document.getElementById('custom-email');
-        if (this.value === 'custom') {
-          customEmail.classList.remove('hidden');
-          customEmail.required = true;
-        } else {
-          customEmail.classList.add('hidden');
-          customEmail.required = false;
-        }
-      });
-     
-      // 파일 업로드 (실습자료)
-      const fileUpload = document.getElementById('file-upload');
-      const uploadContainer = document.getElementById('upload-container');
-      
-      uploadContainer.addEventListener('click', () => fileUpload.click());
-      uploadContainer.addEventListener('dragover', handleDragOver);
-      uploadContainer.addEventListener('drop', handleFileDrop);
-      fileUpload.addEventListener('change', handleFileSelect);
-      
-      function handleDragOver(e) {
-        e.preventDefault();
-        uploadContainer.classList.add('dragover');
-      }
-      
-      function handleFileDrop(e) {
-        e.preventDefault();
-        uploadContainer.classList.remove('dragover');
-        const files = e.dataTransfer.files;
-        handleFiles(files, 'program');
-      }
-      
-      function handleFileSelect(e) {
-        const files = e.target.files;
-        handleFiles(files, 'program');
-      }
-      
-      function handleFiles(files, type) {
-        for (let file of files) {
-          uploadedFiles[type].push(file);
-        }
-        updateFileDisplay(type);
-      }
-      
-      function updateFileDisplay(type) {
-        const container = type === 'program' ? uploadContainer : document.getElementById('pdf-upload-container');
-        const fileList = uploadedFiles[type];
-        
-        if (fileList.length > 0) {
-          container.innerHTML = `
-            <div class="file-preview">
-              <i class="fas fa-file-archive"></i>
-              <p class="font-medium">${fileList.length}개 파일 업로드됨</p>
-              <p class="text-sm text-gray-600">${fileList.map(f => f.name).join(', ')}</p>
-            </div>
-          `;
-        }
-      }
-     
-      // PDF 교재 업로드
-      const pdfUpload = document.getElementById('pdf-upload');
-      const pdfUploadContainer = document.getElementById('pdf-upload-container');
-      
-      pdfUploadContainer.addEventListener('click', () => pdfUpload.click());
-      pdfUploadContainer.addEventListener('dragover', (e) => {
-        e.preventDefault();
-        pdfUploadContainer.classList.add('dragover');
-      });
-      pdfUploadContainer.addEventListener('drop', (e) => {
-        e.preventDefault();
-        pdfUploadContainer.classList.remove('dragover');
-        const files = e.dataTransfer.files;
-        handleFiles(files, 'pdf');
-      });
-      pdfUpload.addEventListener('change', (e) => {
-        const files = e.target.files;
-        handleFiles(files, 'pdf');
-      });
-     
-      // FAQ 모달
-      const faqModal = document.getElementById('faq-modal');
-      const openFaqBtn = document.getElementById('open-faq');
-      const closeFaqBtn = document.querySelector('.close-modal');
-      
-      openFaqBtn.addEventListener('click', () => {
-        faqModal.classList.add('show');
-      });
-      
-      closeFaqBtn.addEventListener('click', closeFaqModal);
-      
-      faqModal.addEventListener('click', (e) => {
-        if (e.target === faqModal) {
-          closeFaqModal();
-        }
-      });
-      
-      function closeFaqModal() {
-        faqModal.classList.add('closing');
-        setTimeout(() => {
-          faqModal.classList.remove('show', 'closing');
-        }, 300);
-      }
-     
-      // 아코디언
-      document.querySelectorAll('.accordion-header').forEach(header => {
-        header.addEventListener('click', function() {
-          const targetId = this.dataset.accordion;
-          const content = document.getElementById(targetId);
-          const icon = this.querySelector('i');
-          
-          // 모든 아코디언 닫기
-          document.querySelectorAll('.accordion-content').forEach(c => {
-            if (c !== content) {
-              c.classList.remove('active');
-            }
-          });
-          document.querySelectorAll('.accordion-header i').forEach(i => {
-            if (i !== icon) {
-              i.className = 'fas fa-chevron-down';
-            }
-          });
-          
-          // 현재 아코디언 토글
-          content.classList.toggle('active');
-          icon.className = content.classList.contains('active') ? 
-            'fas fa-chevron-up' : 'fas fa-chevron-down';
-        });
-      });
-     
-      // 문의사항 저장
-      document.getElementById('save-inquiry').addEventListener('click', function() {
-        const message = document.getElementById('contact-message').value.trim();
-        if (message) {
-          savedInquiry = message;
-          alert('문의사항이 저장되었습니다.');
-          document.getElementById('contact-message').value = '';
-        }
-      });
-     
-      // 요약 업데이트
-      function updateSummary() {
-        // 기본 정보
-        document.getElementById('summary-company').textContent = 
-          document.getElementById('company-name').value || '(입력 필요)';
-        document.getElementById('summary-instructor').textContent = 
-          document.getElementById('instructor-name').value || '(입력 필요)';
-        document.getElementById('summary-phone').textContent = 
-          document.getElementById('phone-number').value || '(입력 필요)';
-        
-        // 프로그램 설명
-        const programDesc = document.getElementById('program-desc').value.trim();
-        if (programDesc) {
-          document.getElementById('summary-program').classList.remove('hidden');
-          document.getElementById('summary-program-text').textContent = programDesc;
-        } else {
-          document.getElementById('summary-program').classList.add('hidden');
-        }
-        
-        // 업로드된 파일
-        if (uploadedFiles.program.length > 0 || uploadedFiles.pdf.length > 0) {
-          document.getElementById('summary-files').classList.remove('hidden');
-          const fileInfo = [];
-          if (uploadedFiles.program.length > 0) {
-            fileInfo.push(`실습자료: ${uploadedFiles.program.length}개 파일`);
-          }
-          if (uploadedFiles.pdf.length > 0) {
-            fileInfo.push(`교재: ${uploadedFiles.pdf.length}개 파일`);
-          }
-          document.getElementById('summary-files-text').textContent = fileInfo.join(', ');
-        } else {
-          document.getElementById('summary-files').classList.add('hidden');
-        }
-        
-        // 장비 정보
-        const equipmentRows = document.querySelectorAll('.equipment-row');
-        let equipmentInfo = [];
-        equipmentRows.forEach(row => {
-          const type = row.querySelector('[name="equipment_type"]').value;
-          const manufacturer = row.querySelector('[name="equipment_manufacturer"]').value;
-          const model = row.querySelector('[name="equipment_model"]').value;
-          const quantity = row.querySelector('[name="equipment_quantity"]').value;
-          
-          if (type) {
-            let equipmentText = `${type}`;
-            if (manufacturer) equipmentText += ` (${manufacturer}`;
-            if (model) equipmentText += ` ${model}`;
-            if (manufacturer) equipmentText += ')';
-            if (quantity && quantity > 1) equipmentText += ` ${quantity}개`;
-            equipmentInfo.push(equipmentText);
-          }
-        });
-        
-        document.getElementById('summary-equipment').querySelector('.summary-value').textContent = 
-          equipmentInfo.length > 0 ? equipmentInfo.join(', ') : '(입력 필요)';
-        
-        // 저장매체 정보
-        const storageInfo = document.getElementById('storage-media-info').value.trim();
-        if (storageInfo) {
-          document.getElementById('summary-storage').classList.remove('hidden');
-          document.getElementById('summary-storage-text').textContent = storageInfo;
-        } else {
-          document.getElementById('summary-storage').classList.add('hidden');
-        }
-        
-        // LAN Port 정보
-        const lanPortType = document.querySelector('[name="lan_port_type"]').value;
-        const lanPortDetail = document.querySelector('[name="lan_port_detail"]').value;
-        if (lanPortType) {
-          document.getElementById('summary-lanport').classList.remove('hidden');
-          let lanPortText = lanPortType;
-          if (lanPortDetail) lanPortText += ` - ${lanPortDetail}`;
-          document.getElementById('summary-lanport-text').textContent = lanPortText;
-        } else {
-          document.getElementById('summary-lanport').classList.add('hidden');
-        }
-        
-        // 차량 정보
-        const vehicleInputs = document.querySelectorAll('[name="vehicle_type"]');
-        let vehicleInfo = [];
-        vehicleInputs.forEach((input, index) => {
-          const type = input.value;
-          const number = document.querySelectorAll('[name="vehicle_number"]')[index]?.value;
-          if (type || number) {
-            vehicleInfo.push(`${type || '(차종 미입력)'} ${number || '(번호 미입력)'}`);
-          }
-        });
-        
-        document.getElementById('summary-vehicle').querySelector('.summary-value').textContent = 
-          vehicleInfo.length > 0 ? vehicleInfo.join(', ') : '(입력 필요)';
-        
-        // 교재 정보
-        const materialTypes = [];
-        if (document.getElementById('material-pdf').checked) materialTypes.push('PDF 교재');
-        if (document.getElementById('material-paper').checked) materialTypes.push('서면 교재');
-        if (document.getElementById('material-none').checked) materialTypes.push('해당사항 없음');
-        
-        document.getElementById('summary-material-text').textContent = 
-          materialTypes.length > 0 ? materialTypes.join(', ') : '미선택';
-        
-        // 추가 문의사항
-        if (savedInquiry) {
-          document.getElementById('summary-inquiry').classList.remove('hidden');
-          document.getElementById('summary-inquiry-text').textContent = savedInquiry;
-        } else {
-          document.getElementById('summary-inquiry').classList.add('hidden');
-        }
-      }
-     
-      // 이메일 전송
-      document.getElementById('submit-form').addEventListener('click', function() {
-        const operatorEmail = document.getElementById('operator-email').value;
-        const customEmail = document.getElementById('custom-email').value;
-        
-        if (!operatorEmail) {
-          document.getElementById('email-error').classList.remove('hidden');
-          return;
-        } else {
-          document.getElementById('email-error').classList.add('hidden');
-        }
-        
-        if (operatorEmail === 'custom' && !customEmail) {
-          alert('직접 입력 이메일을 입력해주세요.');
-          return;
-        }
-        
-        const toEmail = operatorEmail === 'custom' ? customEmail : operatorEmail;
-        
-        // 이메일 데이터 준비
-        const emailData = {
-          to_email: toEmail,
-          cc: ccEmails.join(','),
-          instructor_name: document.getElementById('instructor-name').value,
-          timestamp: new Date().toLocaleString('ko-KR'),
-          company: document.getElementById('company-name').value,
-          phone: document.getElementById('phone-number').value,
-          program_description: document.getElementById('program-desc').value,
-          material_type: Array.from(document.querySelectorAll('[name="material_type"]:checked')).map(cb => cb.value).join(', '),
-          equipment_list: getEquipmentList(),
-          vehicle_list: getVehicleList(),
-          storage_media_info: document.getElementById('storage-media-info').value,
-          lan_port_info: getLanPortInfo(),
-          inquiry: savedInquiry,
-          additional_comments: document.getElementById('additional-comments').value
-        };
-        
-        // 파일 링크 추가 (실제 구현에서는 파일 업로드 서비스 연동 필요)
-        if (uploadedFiles.program.length > 0) {
-          emailData.program_file_links = uploadedFiles.program.map(file => 
-            `<a href="#" class="download-link">${file.name}</a>`
-          ).join('<br>');
-        }
-        
-        if (uploadedFiles.pdf.length > 0) {
-          emailData.material_file_links = uploadedFiles.pdf.map(file => 
-            `<a href="#" class="download-link">${file.name}</a>`
-          ).join('<br>');
-        }
-        
-        // 이메일 전송
-        const statusDiv = document.getElementById('email-status');
-        statusDiv.className = 'p-4 rounded-lg bg-blue-50 border border-blue-200 text-blue-800';
-        statusDiv.textContent = '이메일 전송 중...';
-        statusDiv.classList.remove('hidden');
-        
-        emailjs.send('ldd_Training Service', 'template_ajf77x7', emailData)
-          .then(function(response) {
-            statusDiv.className = 'p-4 rounded-lg bg-green-50 border border-green-200 text-green-800';
-            statusDiv.innerHTML = `
-              <i class="fas fa-check-circle mr-2"></i>
-              이메일이 성공적으로 전송되었습니다!<br>
-              <small>수신자: ${toEmail}</small><br>
-              <small>참조자: ${ccEmails.join(', ')}</small>
-            `;
-          })
-          .catch(function(error) {
-            statusDiv.className = 'p-4 rounded-lg bg-red-50 border border-red-200 text-red-800';
-            statusDiv.innerHTML = `
-              <i class="fas fa-exclamation-triangle mr-2"></i>
-              이메일 전송에 실패했습니다. 다시 시도해주세요.<br>
-              <small>오류: ${error.text || '알 수 없는 오류'}</small>
-            `;
-          });
-      });
-      
-      function getEquipmentList() {
-        const equipmentRows = document.querySelectorAll('.equipment-row');
-        let equipment = [];
-        
-        equipmentRows.forEach(row => {
-          const type = row.querySelector('[name="equipment_type"]').value;
-          const manufacturer = row.querySelector('[name="equipment_manufacturer"]').value;
-          const model = row.querySelector('[name="equipment_model"]').value;
-          const quantity = row.querySelector('[name="equipment_quantity"]').value;
-          const serial = row.querySelector('[name="equipment_serial"]').value;
-          
-          if (type) {
-            equipment.push(`${type} ${manufacturer} ${model} ${quantity}개 (${serial})`);
-          }
-        });
-        
-        return equipment.join('\n');
-      }
-      
-      function getVehicleList() {
-        const vehicleTypes = document.querySelectorAll('[name="vehicle_type"]');
-        const vehicleNumbers = document.querySelectorAll('[name="vehicle_number"]');
-        let vehicles = [];
-        
-        vehicleTypes.forEach((input, index) => {
-          const type = input.value;
-          const number = vehicleNumbers[index]?.value;
-          if (type || number) {
-            vehicles.push(`${type} ${number}`);
-          }
-        });
-        
-        return vehicles.length > 0 ? vehicles.join('\n') : '없음';
-      }
-      
-      function getLanPortInfo() {
-        const type = document.querySelector('[name="lan_port_type"]').value;
-        const detail = document.querySelector('[name="lan_port_detail"]').value;
-        
-        if (type) {
-          return `${type} ${detail}`.trim();
-        }
-        return '';
       }
     });
+
+    document.getElementById('cc-email-input')?.addEventListener('keypress', function(e) {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        const email = this.value.trim();
+        if (email) {
+          if (addCcEmail(email)) {
+            updateSummary();
+          }
+        }
+      }
+    });
+
+    document.getElementById('cc-operator-select')?.addEventListener('change', function() {
+      const email = this.value;
+      if (email && !ccEmails.includes(email)) {
+        if (addCcEmail(email)) {
+          updateSummary();
+        }
+      }
+      this.value = '';
+    });
+
+    document.getElementById('operator-email')?.addEventListener('change', function() {
+      const value = this.value;
+      if (value === 'custom') {
+        // 직접 입력 모드
+      } else if (value) {
+        receiverEmails = [value];
+        updateReceiverTags();
+        updateSummary();
+      }
+    });
+
+    document.getElementById('add-equipment')?.addEventListener('click', function() {
+      const container = document.getElementById('equipment-container');
+      const newRow = document.createElement('div');
+      newRow.className = 'equipment-row';
+      newRow.innerHTML = `
+        <select class="form-control" name="equipment_type">
+          <option value="">장비 유형 선택</option>
+          <option value="노트북">노트북</option>
+          <option value="네트워크장비">네트워크장비</option>
+          <option value="NAS">NAS</option>
+          <option value="데스크탑">데스크탑</option>
+          <option value="스마트패드">스마트패드</option>
+          <option value="샘플폰">샘플폰</option>
+          <option value="서버장비">서버장비</option>
+          <option value="태블릿PC">태블릿PC</option>
+          <option value="AP">AP</option>
+          <option value="CD">CD</option>
+          <option value="디지털카메라">디지털카메라</option>
+          <option value="DVD">DVD</option>
+          <option value="기타">기타</option>
+          <option value="HDD/SSD">HDD/SSD</option>
+          <option value="모바일폰">모바일폰</option>
+          <option value="메모리카드">메모리카드</option>
+          <option value="USB">USB</option>
+          <option value="워크스테이션">워크스테이션</option>
+        </select>
+        <input type="text" class="form-control" name="equipment_manufacturer" placeholder="제조사">
+        <input type="text" class="form-control" name="equipment_model" placeholder="기종">
+        <input type="number" class="form-control equipment-qty" name="equipment_quantity" min="1" value="1" placeholder="수량">
+        <input type="text" class="form-control" name="equipment_serial" placeholder="S/N & MAC주소">
+        <button type="button" class="equipment-remove btn btn-secondary p-2">
+          <i class="fas fa-minus"></i>
+        </button>
+      `;
+      container.appendChild(newRow);
+     
+      newRow.querySelector('.equipment-remove').addEventListener('click', function() {
+        if (container.children.length > 1) {
+          newRow.remove();
+        }
+      });
+    });
+
+    document.querySelectorAll('.equipment-remove').forEach(btn => {
+      btn.addEventListener('click', function() {
+        const container = document.getElementById('equipment-container');
+        if (container.children.length > 1) {
+          this.closest('.equipment-row').remove();
+        }
+      });
+    });
+
+    document.getElementById('add-vehicle')?.addEventListener('click', function() {
+      const container = document.getElementById('vehicle-container');
+      const newVehicle = document.createElement('div');
+      newVehicle.className = 'grid grid-cols-1 md:grid-cols-2 gap-4 mb-4';
+      newVehicle.innerHTML = `
+        <div class="form-group">
+          <label class="form-label">차종</label>
+          <input type="text" class="form-control" name="vehicle_type" placeholder="그랜저">
+        </div>
+        <div class="form-group">
+          <label class="form-label">차량번호</label>
+          <div class="flex gap-2">
+            <input type="text" class="form-control" name="vehicle_number" placeholder="12가 1234">
+            <button type="button" class="vehicle-remove btn btn-secondary">
+              <i class="fas fa-minus"></i>
+            </button>
+          </div>
+        </div>
+      `;
+      container.appendChild(newVehicle);
+     
+      newVehicle.querySelector('.vehicle-remove').addEventListener('click', function() {
+        newVehicle.remove();
+      });
+    });
+
+    const faqModal = document.getElementById('faq-modal');
+    const openFaqBtn = document.getElementById('open-faq');
+    const closeFaqBtn = document.querySelector('.close-modal');
+   
+    openFaqBtn.addEventListener('click', () => {
+      faqModal.classList.add('show');
+    });
+   
+    closeFaqBtn.addEventListener('click', closeFaqModal);
+   
+    faqModal.addEventListener('click', (e) => {
+      if (e.target === faqModal) {
+        closeFaqModal();
+      }
+    });
+   
+    function closeFaqModal() {
+      faqModal.classList.remove('show');
+    }
+   
+    document.querySelectorAll('.accordion-header').forEach(header => {
+      header.addEventListener('click', function() {
+        const targetId = this.dataset.accordion;
+        const content = document.getElementById(targetId);
+        const icon = this.querySelector('i');
+       
+        document.querySelectorAll('.accordion-content').forEach(c => {
+          if (c !== content) {
+            c.classList.remove('active');
+          }
+        });
+        document.querySelectorAll('.accordion-header i').forEach(i => {
+          if (i !== icon) {
+            i.className = 'fas fa-chevron-down';
+          }
+        });
+       
+        content.classList.toggle('active');
+        icon.className = content.classList.contains('active') ?
+          'fas fa-chevron-up' : 'fas fa-chevron-down';
+      });
+    });
+
+    document.getElementById('faq-save-inquiry').addEventListener('click', function() {
+      const message = document.getElementById('faq-contact-message').value.trim();
+      if (message) {
+        faqInquiry = message;
+        alert('기타 문의사항이 저장되었습니다.');
+        document.getElementById('faq-contact-message').value = '';
+        closeFaqModal();
+        setTimeout(() => {
+          updateSummary();
+        }, 500);
+      }
+    });
+
+    document.getElementById('save-inquiry').addEventListener('click', function() {
+      const message = document.getElementById('contact-message').value.trim();
+      if (message) {
+        generalInquiry = message;
+        alert('추가 문의사항이 저장되었습니다.');
+        document.getElementById('contact-message').value = '';
+        updateSummary();
+      }
+    });
+
+    function updateSummary() {
+      document.getElementById('summary-company').textContent =
+        document.getElementById('company-name')?.value || '(입력 필요)';
+      document.getElementById('summary-instructor').textContent =
+        document.getElementById('instructor-name')?.value || '(입력 필요)';
+      document.getElementById('summary-phone').textContent =
+        document.getElementById('phone-number')?.value || '(입력 필요)';
+
+      const programDesc = document.getElementById('program-desc')?.value;
+      if (programDesc && !document.getElementById('no-installation').checked) {
+        document.getElementById('summary-program').classList.remove('hidden');
+        document.getElementById('summary-program-text').textContent = programDesc;
+      } else {
+        document.getElementById('summary-program').classList.add('hidden');
+      }
+
+      const totalFiles = uploadedFiles.program.length + uploadedFiles.pdf.length;
+      if (totalFiles > 0) {
+        document.getElementById('summary-files').classList.remove('hidden');
+        document.getElementById('summary-files-text').textContent =
+          `실습자료: ${uploadedFiles.program.length}개, PDF교재: ${uploadedFiles.pdf.length}개`;
+      } else {
+        document.getElementById('summary-files').classList.add('hidden');
+      }
+
+      const materialTypes = [];
+      if (document.getElementById('material-pdf')?.checked) materialTypes.push('PDF 교재');
+      if (document.getElementById('material-paper')?.checked) materialTypes.push('서면 교재');
+      if (document.getElementById('material-none')?.checked) materialTypes.push('해당사항 없음');
+      document.getElementById('summary-material-text').textContent =
+        materialTypes.length > 0 ? materialTypes.join(', ') : '(선택 필요)';
+
+      const equipmentRows = document.querySelectorAll('.equipment-row');
+      const equipmentList = [];
+      equipmentRows.forEach(row => {
+        const type = row.querySelector('[name="equipment_type"]')?.value;
+        const manufacturer = row.querySelector('[name="equipment_manufacturer"]')?.value;
+        const model = row.querySelector('[name="equipment_model"]')?.value;
+        const quantity = row.querySelector('[name="equipment_quantity"]')?.value;
+        if (type) {
+          equipmentList.push(`${type} ${manufacturer || ''} ${model || ''} ${quantity || 1}대`.trim());
+        }
+      });
+      document.getElementById('summary-equipment-text').textContent =
+        equipmentList.length > 0 ? equipmentList.join(', ') : '(입력 필요)';
+
+      const storageInfo = document.getElementById('storage-media-info')?.value;
+      if (storageInfo && document.getElementById('storage-media-check')?.checked) {
+        document.getElementById('summary-storage').classList.remove('hidden');
+        document.getElementById('summary-storage-text').textContent = storageInfo;
+      } else {
+        document.getElementById('summary-storage').classList.add('hidden');
+      }
+
+      const lanPortType = document.querySelector('[name="lan_port_type"]')?.value;
+      const lanPortDetail = document.querySelector('[name="lan_port_detail"]')?.value;
+      if (lanPortType && document.getElementById('lan-port-check')?.checked) {
+        document.getElementById('summary-lanport').classList.remove('hidden');
+        document.getElementById('summary-lanport-text').textContent = `${lanPortType} ${lanPortDetail || ''}`.trim();
+      } else {
+        document.getElementById('summary-lanport').classList.add('hidden');
+      }
+
+      const vehicleInputs = document.querySelectorAll('[name="vehicle_type"], [name="vehicle_number"]');
+      const vehicles = [];
+      for (let i = 0; i < vehicleInputs.length; i += 2) {
+        const type = vehicleInputs[i]?.value;
+        const number = vehicleInputs[i + 1]?.value;
+        if (type || number) {
+          vehicles.push(`${type || ''} ${number || ''}`.trim());
+        }
+      }
+      document.getElementById('summary-vehicle-text').textContent =
+        vehicles.length > 0 ? vehicles.join(', ') : document.getElementById('no-vehicle')?.checked ? '해당사항 없음' : '(입력 선택)';
+
+      const operatorEmail = document.getElementById('operator-email')?.value;
+      const allRecipients = [];
+      if (operatorEmail && operatorEmail !== 'custom') allRecipients.push(operatorEmail);
+      allRecipients.push(...receiverEmails);
+      document.getElementById('summary-recipients').textContent =
+        allRecipients.length > 0 ? allRecipients.join(', ') : '(선택 필요)';
+
+      const ccSection = document.getElementById('summary-cc-section');
+      if (ccEmails.length > 0) {
+        ccSection.classList.remove('hidden');
+        document.getElementById('summary-cc').textContent = ccEmails.join(', ');
+      } else {
+        ccSection.classList.add('hidden');
+      }
+
+      if (generalInquiry) {
+        document.getElementById('summary-general-inquiry').classList.remove('hidden');
+        document.getElementById('summary-general-inquiry-text').textContent = generalInquiry;
+      } else {
+        document.getElementById('summary-general-inquiry').classList.add('hidden');
+      }
+
+      if (faqInquiry) {
+        document.getElementById('summary-faq-inquiry').classList.remove('hidden');
+        document.getElementById('summary-faq-inquiry-text').textContent = faqInquiry;
+      } else {
+        document.getElementById('summary-faq-inquiry').classList.add('hidden');
+      }
+    }
+
+    function generateFileLinks(files, type) {
+      if (!files || files.length === 0) return '';
+     
+      return files.map(file => {
+        const getFileIcon = (fileName) => {
+          const ext = fileName.split('.').pop().toLowerCase();
+          if (['pdf'].includes(ext)) return '📄';
+          if (['doc', 'docx'].includes(ext)) return '📝';
+          if (['xls', 'xlsx'].includes(ext)) return '📊';
+          if (['ppt', 'pptx'].includes(ext)) return '📽️';
+          if (['jpg', 'jpeg', 'png', 'gif'].includes(ext)) return '🖼️';
+          if (['zip', 'rar', '7z'].includes(ext)) return '📦';
+          return '📁';
+        };
+
+        const icon = getFileIcon(file.name);
+        const fileSize = formatFileSize(file.size);
+       
+        return `<div style="margin-bottom: 8px; padding: 12px; background: #ffffff; border: 1px solid #e9ecef; border-radius: 6px;">
+          <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+            <span style="font-size: 16px;">${icon}</span>
+            <div style="flex: 1; min-width: 200px;">
+              <div style="font-weight: 600; font-size: 13px; color: #333; margin-bottom: 2px;">${file.name}</div>
+              <div style="font-size: 11px; color: #666;">${fileSize}</div>
+            </div>
+            <a href="#" style="background: #a50034; color: white; padding: 6px 12px; border-radius: 4px; text-decoration: none; font-size: 11px; font-weight: 600; white-space: nowrap;">다운로드</a>
+          </div>
+        </div>`;
+      }).join('');
+    }
+
+    document.getElementById('submit-form')?.addEventListener('click', function() {
+      const operatorEmail = document.getElementById('operator-email').value;
+      const additionalReceivers = receiverEmails;
+     
+      if (!operatorEmail && additionalReceivers.length === 0) {
+        alert('수신자를 선택하거나 추가해주세요.');
+        return;
+      }
+
+      const allReceivers = [];
+      if (operatorEmail && operatorEmail !== 'custom') {
+        allReceivers.push(operatorEmail);
+      }
+      allReceivers.push(...additionalReceivers);
+
+      const allCCs = [...ccEmails];
+
+      const allInquiries = [];
+      if (generalInquiry) allInquiries.push(`[추가 문의사항]\n${generalInquiry}`);
+      if (faqInquiry) allInquiries.push(`[기타 문의사항(FAQ)]\n${faqInquiry}`);
+      const combinedInquiry = allInquiries.join('\n\n');
+
+      const materialTypes = [];
+      if (document.getElementById('material-pdf')?.checked) materialTypes.push('PDF 교재');
+      if (document.getElementById('material-paper')?.checked) materialTypes.push('서면 교재');
+      if (document.getElementById('material-none')?.checked) materialTypes.push('해당사항 없음');
+
+      const equipmentRows = document.querySelectorAll('.equipment-row');
+      const equipmentList = [];
+      equipmentRows.forEach(row => {
+        const type = row.querySelector('[name="equipment_type"]')?.value;
+        const manufacturer = row.querySelector('[name="equipment_manufacturer"]')?.value;
+        const model = row.querySelector('[name="equipment_model"]')?.value;
+        const quantity = row.querySelector('[name="equipment_quantity"]')?.value;
+        const serial = row.querySelector('[name="equipment_serial"]')?.value;
+        if (type) {
+          equipmentList.push(`${type} ${manufacturer || ''} ${model || ''} ${quantity || 1}대 (${serial || ''})`.trim());
+        }
+      });
+
+      const vehicleInputs = document.querySelectorAll('[name="vehicle_type"], [name="vehicle_number"]');
+      const vehicles = [];
+      for (let i = 0; i < vehicleInputs.length; i += 2) {
+        const type = vehicleInputs[i]?.value;
+        const number = vehicleInputs[i + 1]?.value;
+        if (type || number) {
+          vehicles.push(`${type || ''} ${number || ''}`.trim());
+        }
+      }
+      const vehicleInfo = vehicles.length > 0 ? vehicles.join(', ') :
+        document.getElementById('no-vehicle')?.checked ? '해당사항 없음' : '없음';
+
+      const templateParams = {
+        to_email: allReceivers.join(','),
+        cc: allCCs.join(','),
+        instructor_name: document.getElementById('instructor-name').value,
+        company: document.getElementById('company-name').value,
+        phone: document.getElementById('phone-number').value,
+        program_description: document.getElementById('program-desc').value || '',
+        program_files: generateFileLinks(uploadedFiles.program, 'program'),
+        material_files: generateFileLinks(uploadedFiles.pdf, 'material'),
+        material_type: materialTypes.join(', ') || '선택 안함',
+        equipment_list: equipmentList.join('\n') || '없음',
+        vehicle_info: vehicleInfo,
+        storage_media_info: document.getElementById('storage-media-info')?.value || '',
+        lan_port_info: `${document.querySelector('[name="lan_port_type"]')?.value || ''} ${document.querySelector('[name="lan_port_detail"]')?.value || ''}`.trim() || '',
+        inquiry: combinedInquiry || '',
+        additional_comments: '',
+        timestamp: new Date().toLocaleString('ko-KR')
+      };
+
+      emailjs.send('ldd_Training Service', 'template_ajf77x7', templateParams)
+        .then(function(response) {
+          alert('이메일이 성공적으로 전송되었습니다!');
+          console.log('SUCCESS!', response.status, response.text);
+          localStorage.removeItem('visitFormData');
+        })
+        .catch(function(error) {
+          alert('이메일 전송에 실패했습니다. 다시 시도해주세요.');
+          console.log('FAILED...', error);
+        });
+    });
+
+    document.addEventListener('input', function(e) {
+      if (e.target.matches('input, textarea, select')) {
+        clearTimeout(window.autoSaveTimer);
+        window.autoSaveTimer = setTimeout(autoSave, 2000);
+      }
+    });
+
+    window.addEventListener('beforeunload', autoSave);
+
+    updateSummary();
   </script>
 </body>
 </html>
