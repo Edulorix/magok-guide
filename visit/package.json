@@ -2,8 +2,10 @@
   "name": "lg-education-system",
   "version": "1.0.0",
   "description": "LG Education File Upload System",
+  "type": "module",
   "scripts": {
-    "build": "echo 'No build needed for static files'"
+    "build": "echo 'Build completed'",
+    "start": "node api/upload.js"
   },
   "dependencies": {
     "googleapis": "^128.0.0",
