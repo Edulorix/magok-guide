@@ -8,6 +8,7 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/pretendard@1.3.9/dist/web/static/pretendard.min.css">
   <script src="https://cdn.jsdelivr.net/npm/emailjs-com@3.2.0/dist/email.min.js"></script>
+  <script src="https://apis.google.com/js/api.js"></script>
   <style>
     :root {
       --lg-red: #a50034;
@@ -362,6 +363,10 @@
 
     .floating-btn.reset {
       background: linear-gradient(135deg, #dc3545, #c82333);
+    }
+
+    .floating-btn.auth {
+      background: linear-gradient(135deg, #28a745, #1e7e34);
     }
 
     .floating-btn:hover {
@@ -926,6 +931,27 @@
       color: var(--text-primary);
     }
 
+    .auth-status {
+      padding: 1rem;
+      border-radius: 8px;
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .auth-status.connected {
+      background: #d1ecf1;
+      color: #0c5460;
+      border: 1px solid #b8d4da;
+    }
+
+    .auth-status.disconnected {
+      background: #f8d7da;
+      color: #721c24;
+      border: 1px solid #f5c6cb;
+    }
+
     @media (max-width: 768px) {
       .container {
         padding: 1rem;
@@ -1032,6 +1058,12 @@
   <div class="container">
     <h1 class="page-title">LG Science Park 방문 안내</h1>
     <p class="subtitle">강사님을 위한 방문 안내 시스템</p>
+
+    <!-- Google Drive 인증 상태 -->
+    <div id="auth-status" class="auth-status disconnected">
+      <i class="fas fa-exclamation-triangle"></i>
+      <span>Google Drive 연동이 필요합니다. 파일 업로드를 위해 인증해주세요.</span>
+    </div>
    
     <div class="tab-navigation">
       <button class="tab-button active" data-tab="tab1">기본정보</button>
@@ -1489,6 +1521,9 @@
   </div>
 
   <div class="floating-controls">
+    <button type="button" class="floating-btn auth" id="google-auth" title="Google Drive 인증">
+      <i class="fas fa-google-drive"></i>
+    </button>
     <button type="button" class="floating-btn reset" id="reset-form" title="내용 초기화">
       <i class="fas fa-refresh"></i>
     </button>
@@ -1540,10 +1575,11 @@
           </div>
           <div class="accordion-content" id="faq3">
             <p>파일 업로드 문제 해결 방법:<br><br>
-            1. 브라우저 새로고침 후 다시 시도<br>
-            2. 다른 브라우저 사용 (Chrome, Edge 권장)<br>
-            3. 파일 크기 확인 - 너무 큰 파일은 압축 후 업로드<br>
-            4. 인터넷 연결 상태 확인<br><br>
+            1. Google Drive 인증을 먼저 완료해주세요 (우측 하단 Google Drive 아이콘 클릭)<br>
+            2. 브라우저 새로고침 후 다시 시도<br>
+            3. 다른 브라우저 사용 (Chrome, Edge 권장)<br>
+            4. 파일 크기 확인 - 너무 큰 파일은 압축 후 업로드<br>
+            5. 인터넷 연결 상태 확인<br><br>
             계속 문제가 발생하면 운영자에게 연락주세요.</p>
           </div>
         </div>
@@ -1572,6 +1608,21 @@
             - 사전에 기재하지 않은 저장매체는 포맷대상이니 꼭 사전 신청 부탁드립니다.</p>
           </div>
         </div>
+
+        <div class="accordion-item">
+          <div class="accordion-header" data-accordion="faq6">
+            <span>Q6. Google Drive 인증은 왜 필요한가요?</span>
+            <i class="fas fa-chevron-down"></i>
+          </div>
+          <div class="accordion-content" id="faq6">
+            <p>Google Drive 인증이 필요한 이유:<br><br>
+            1. 실습 자료와 교재를 안전하게 업로드하기 위해서입니다<br>
+            2. 업로드된 파일에 대한 공유 링크를 자동으로 생성합니다<br>
+            3. 교육생들이 이메일을 통해 파일을 다운로드할 수 있습니다<br>
+            4. 파일 크기 제한 없이 안전하게 공유할 수 있습니다<br><br>
+            우측 하단의 Google Drive 아이콘을 클릭하여 인증을 완료해주세요.</p>
+          </div>
+        </div>
       </div>
      
       <div class="contact-form">
@@ -1585,9 +1636,11 @@
   </div>
 
   <script>
-    // Google Drive API 설정
-    const GOOGLE_DRIVE_API_KEY = 'AIzaSyAMdyzcjK7eUKQqTTk_TgrT0-kmlXYVXeI';
+    // Google Drive API 설정 - 여기에 실제 값을 입력해야 합니다
+    const CLIENT_ID = 'YOUR_OAUTH_CLIENT_ID.apps.googleusercontent.com';  // OAuth 클라이언트 ID
+    const API_KEY = 'AIzaSyAMdyzcjK7eUKQqTTk_TgrT0-kmlXYVXeI';  // API 키
     const DISCOVERY_DOC = 'https://www.googleapis.com/discovery/v1/apis/drive/v3/rest';
+    const SCOPES = 'https://www.googleapis.com/auth/drive.file';
     
     // EmailJS 초기화
     emailjs.init('C56kGCzPtfgWVEKoO');
@@ -1599,40 +1652,109 @@
     let receiverEmails = [];
     let ccEmails = [];
     let gapi;
+    let isGoogleApiLoaded = false;
+    let isAuthenticated = false;
 
     // Google Drive API 초기화
     async function initializeGoogleDrive() {
       try {
-        await new Promise((resolve, reject) => {
-          const script = document.createElement('script');
-          script.src = 'https://apis.google.com/js/api.js';
-          script.onload = resolve;
-          script.onerror = reject;
-          document.head.appendChild(script);
-        });
+        if (!window.gapi) {
+          console.error('Google API가 로드되지 않았습니다.');
+          return;
+        }
 
+        gapi = window.gapi;
+        
         await new Promise((resolve) => {
-          gapi = window.gapi;
-          gapi.load('client', resolve);
+          gapi.load('client:auth2', resolve);
         });
 
         await gapi.client.init({
-          apiKey: GOOGLE_DRIVE_API_KEY,
-          discoveryDocs: [DISCOVERY_DOC]
+          apiKey: API_KEY,
+          clientId: CLIENT_ID,
+          discoveryDocs: [DISCOVERY_DOC],
+          scope: SCOPES
         });
 
+        isGoogleApiLoaded = true;
+        
+        // 인증 상태 확인
+        const authInstance = gapi.auth2.getAuthInstance();
+        isAuthenticated = authInstance.isSignedIn.get();
+        
+        updateAuthStatus();
         console.log('Google Drive API 초기화 완료');
+        
+        // 인증 상태 변경 감지
+        authInstance.isSignedIn.listen(updateAuthStatus);
+        
       } catch (error) {
         console.error('Google Drive API 초기화 실패:', error);
+        updateAuthStatus(false);
+      }
+    }
+
+    // 인증 상태 업데이트
+    function updateAuthStatus(authenticated = null) {
+      const authStatus = document.getElementById('auth-status');
+      const authBtn = document.getElementById('google-auth');
+      
+      if (authenticated === null) {
+        authenticated = isGoogleApiLoaded && gapi.auth2.getAuthInstance().isSignedIn.get();
+      }
+      
+      isAuthenticated = authenticated;
+      
+      if (authenticated) {
+        authStatus.className = 'auth-status connected';
+        authStatus.innerHTML = '<i class="fas fa-check-circle"></i><span>Google Drive 연동 완료 - 파일 업로드가 가능합니다.</span>';
+        authBtn.title = 'Google Drive 연결됨';
+        authBtn.style.background = 'linear-gradient(135deg, #28a745, #1e7e34)';
+      } else {
+        authStatus.className = 'auth-status disconnected';
+        authStatus.innerHTML = '<i class="fas fa-exclamation-triangle"></i><span>Google Drive 연동이 필요합니다. 파일 업로드를 위해 인증해주세요.</span>';
+        authBtn.title = 'Google Drive 인증';
+        authBtn.style.background = 'linear-gradient(135deg, #dc3545, #c82333)';
+      }
+    }
+
+    // Google 인증 처리
+    async function handleGoogleAuth() {
+      try {
+        if (!isGoogleApiLoaded) {
+          alert('Google API가 아직 로드되지 않았습니다. 잠시 후 다시 시도해주세요.');
+          return;
+        }
+
+        const authInstance = gapi.auth2.getAuthInstance();
+        
+        if (authInstance.isSignedIn.get()) {
+          // 로그아웃
+          await authInstance.signOut();
+          alert('Google Drive 연결이 해제되었습니다.');
+        } else {
+          // 로그인
+          await authInstance.signIn();
+          alert('Google Drive 연결이 완료되었습니다. 이제 파일을 업로드할 수 있습니다.');
+        }
+        
+        updateAuthStatus();
+      } catch (error) {
+        console.error('Google 인증 오류:', error);
+        alert('Google 인증에 실패했습니다. 다시 시도해주세요.');
       }
     }
 
     // Google Drive에 파일 업로드
     async function uploadToGoogleDrive(file, onProgress) {
       try {
+        if (!isAuthenticated) {
+          throw new Error('Google Drive 인증이 필요합니다.');
+        }
+
         const metadata = {
           name: file.name,
-          parents: []
+          parents: [] // 루트 폴더에 업로드
         };
 
         const form = new FormData();
@@ -1649,10 +1771,42 @@
             }
           });
 
-          xhr.onload = function() {
+          xhr.onload = async function() {
             if (xhr.status === 200) {
               const response = JSON.parse(xhr.responseText);
-              resolve(response);
+              
+              // 파일을 공개로 설정
+              try {
+                await gapi.client.drive.permissions.create({
+                  fileId: response.id,
+                  resource: {
+                    role: 'reader',
+                    type: 'anyone'
+                  }
+                });
+                
+                // 다운로드 링크 생성
+                const downloadUrl = `https://drive.google.com/uc?export=download&id=${response.id}`;
+                const viewUrl = `https://drive.google.com/file/d/${response.id}/view`;
+                
+                resolve({
+                  id: response.id,
+                  name: response.name,
+                  size: file.size,
+                  downloadUrl: downloadUrl,
+                  viewUrl: viewUrl
+                });
+              } catch (permissionError) {
+                console.error('권한 설정 실패:', permissionError);
+                // 권한 설정이 실패해도 파일 업로드는 성공
+                resolve({
+                  id: response.id,
+                  name: response.name,
+                  size: file.size,
+                  downloadUrl: `https://drive.google.com/file/d/${response.id}/view`,
+                  viewUrl: `https://drive.google.com/file/d/${response.id}/view`
+                });
+              }
             } else {
               reject(new Error('업로드 실패: ' + xhr.status));
             }
@@ -1660,8 +1814,9 @@
 
           xhr.onerror = () => reject(new Error('네트워크 오류'));
 
+          const accessToken = gapi.auth2.getAuthInstance().currentUser.get().getAuthResponse().access_token;
           xhr.open('POST', 'https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart');
-          xhr.setRequestHeader('Authorization', 'Bearer ' + gapi.auth2.getAuthToken());
+          xhr.setRequestHeader('Authorization', 'Bearer ' + accessToken);
           xhr.send(form);
         });
       } catch (error) {
@@ -1670,138 +1825,13 @@
       }
     }
 
-    // 대체 업로드 방법 (API 키 방식)
-    async function uploadToGoogleDriveWithApiKey(file, onProgress) {
-      try {
-        // 임시로 파일을 Base64로 변환하여 저장
-        const base64Data = await convertFileToBase64(file);
-        const fileName = file.name;
-        const fileSize = file.size;
-        
-        // 가상의 Google Drive 파일 ID 생성
-        const fileId = 'file_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
-        
-        // 진행률 시뮬레이션
-        if (onProgress) {
-          let progress = 0;
-          const interval = setInterval(() => {
-            progress += Math.random() * 20;
-            if (progress >= 100) {
-              progress = 100;
-              clearInterval(interval);
-            }
-            onProgress(progress);
-          }, 200);
-        }
-
-        // 2초 후 완료 시뮬레이션
-        await new Promise(resolve => setTimeout(resolve, 2000));
-
-        return {
-          id: fileId,
-          name: fileName,
-          size: fileSize,
-          downloadUrl: createDirectDownloadUrl(fileId, fileName, base64Data)
-        };
-      } catch (error) {
-        console.error('파일 업로드 오류:', error);
-        throw error;
-      }
-    }
-
-    // Base64 변환 함수
-    function convertFileToBase64(file) {
-      return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = () => resolve(reader.result);
-        reader.onerror = reject;
-        reader.readAsDataURL(file);
-      });
-    }
-
-    // 직접 다운로드 URL 생성
-    function createDirectDownloadUrl(fileId, fileName, base64Data) {
-      // localStorage에 파일 데이터 저장
-      const fileData = {
-        id: fileId,
-        name: fileName,
-        data: base64Data,
-        timestamp: Date.now()
-      };
-      localStorage.setItem('gdrive_file_' + fileId, JSON.stringify(fileData));
-      
-      // 다운로드 URL 생성
-      return `${window.location.origin}${window.location.pathname}?download=${fileId}`;
-    }
-
-    // 페이지 로드 시 다운로드 처리
-    function handlePageLoad() {
-      const urlParams = new URLSearchParams(window.location.search);
-      const downloadId = urlParams.get('download');
-      
-      if (downloadId) {
-        handleFileDownload(downloadId);
-        return;
-      }
-      
-      initializeApp();
-    }
-
-    // 파일 다운로드 처리
-    function handleFileDownload(fileId) {
-      try {
-        const fileDataStr = localStorage.getItem('gdrive_file_' + fileId);
-        if (!fileDataStr) {
-          document.body.innerHTML = `
-            <div style="text-align: center; padding: 50px; font-family: Arial, sans-serif;">
-              <i class="fas fa-exclamation-triangle" style="font-size: 48px; color: #dc3545; margin-bottom: 20px;"></i>
-              <h2>파일을 찾을 수 없습니다</h2>
-              <p>요청하신 파일이 존재하지 않거나 만료되었습니다.</p>
-            </div>
-          `;
-          return;
-        }
-
-        const fileData = JSON.parse(fileDataStr);
-        
-        // 파일 다운로드 실행
-        const link = document.createElement('a');
-        link.href = fileData.data;
-        link.download = fileData.name;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-
-        // 다운로드 완료 메시지
-        document.body.innerHTML = `
-          <div style="text-align: center; padding: 50px; font-family: Arial, sans-serif;">
-            <i class="fas fa-check-circle" style="font-size: 48px; color: #28a745; margin-bottom: 20px;"></i>
-            <h2>파일 다운로드 완료</h2>
-            <p><strong>${fileData.name}</strong> 파일이 다운로드되었습니다.</p>
-          </div>
-        `;
-      } catch (error) {
-        console.error('파일 다운로드 오류:', error);
-        document.body.innerHTML = `
-          <div style="text-align: center; padding: 50px; font-family: Arial, sans-serif;">
-            <i class="fas fa-exclamation-triangle" style="font-size: 48px; color: #dc3545; margin-bottom: 20px;"></i>
-            <h2>다운로드 오류</h2>
-            <p>파일 다운로드 중 오류가 발생했습니다.</p>
-          </div>
-        `;
-      }
-    }
-
-    // 앱 초기화
-    function initializeApp() {
-      loadSavedData();
-      initializeGoogleDrive();
-      setupEventListeners();
-      updateSummary();
-    }
-
     // 파일 업로드 처리
     async function handleFiles(files, fileType) {
+      if (!isAuthenticated) {
+        alert('Google Drive 인증이 필요합니다. 우측 하단의 Google Drive 버튼을 클릭하여 인증을 완료해주세요.');
+        return;
+      }
+
       const container = fileType === 'program' ? document.getElementById('upload-container') : document.getElementById('pdf-upload-container');
       const progressElement = fileType === 'program' ? document.getElementById('upload-progress') : document.getElementById('pdf-upload-progress');
       const progressBar = fileType === 'program' ? document.getElementById('upload-progress-bar') : document.getElementById('pdf-upload-progress-bar');
@@ -1811,7 +1841,7 @@
 
       for (const file of files) {
         try {
-          const result = await uploadToGoogleDriveWithApiKey(file, (progress) => {
+          const result = await uploadToGoogleDrive(file, (progress) => {
             progressBar.style.width = progress + '%';
           });
 
@@ -1820,13 +1850,14 @@
             name: file.name,
             size: file.size,
             type: file.type,
-            downloadUrl: result.downloadUrl
+            downloadUrl: result.downloadUrl,
+            viewUrl: result.viewUrl
           });
 
           console.log(`파일 업로드 완료: ${file.name}`);
         } catch (error) {
           console.error(`파일 업로드 실패: ${file.name}`, error);
-          alert(`파일 업로드에 실패했습니다: ${file.name}`);
+          alert(`파일 업로드에 실패했습니다: ${file.name}\n오류: ${error.message}`);
         }
       }
 
@@ -1836,6 +1867,7 @@
       
       renderFileList(fileType);
       updateSummary();
+      autoSave();
     }
 
     // 파일 리스트 렌더링
@@ -1872,6 +1904,7 @@
       uploadedFiles[fileType].splice(index, 1);
       renderFileList(fileType);
       updateSummary();
+      autoSave();
     };
 
     // 파일 크기 포맷팅
@@ -1892,6 +1925,7 @@
       if (['ppt', 'pptx'].includes(ext)) return 'fas fa-file-powerpoint';
       if (['jpg', 'jpeg', 'png', 'gif'].includes(ext)) return 'fas fa-file-image';
       if (['zip', 'rar', '7z'].includes(ext)) return 'fas fa-file-archive';
+      if (['py', 'js', 'html', 'css', 'cpp', 'java'].includes(ext)) return 'fas fa-file-code';
       return 'fas fa-file';
     }
 
@@ -1900,7 +1934,6 @@
       if (!files || files.length === 0) return '';
      
       return files.map(file => {
-        const icon = getFileIcon(file.name);
         const fileSize = formatFileSize(file.size);
        
         return `<div style="margin-bottom: 12px; padding: 16px; background: #ffffff; border: 1px solid #e9ecef; border-radius: 8px;">
@@ -1909,9 +1942,14 @@
               <div style="font-weight: 600; font-size: 14px; color: #333; margin-bottom: 4px;">${file.name}</div>
               <div style="font-size: 12px; color: #666;">${fileSize}</div>
             </div>
-            <a href="${file.downloadUrl}" style="background: linear-gradient(135deg, #a50034, #8c002c); color: white; padding: 8px 16px; border-radius: 6px; text-decoration: none; font-size: 12px; font-weight: 600; white-space: nowrap;">
-              다운로드
-            </a>
+            <div style="display: flex; gap: 8px;">
+              <a href="${file.downloadUrl}" style="background: linear-gradient(135deg, #a50034, #8c002c); color: white; padding: 8px 16px; border-radius: 6px; text-decoration: none; font-size: 12px; font-weight: 600; white-space: nowrap;">
+                다운로드
+              </a>
+              <a href="${file.viewUrl}" target="_blank" style="background: linear-gradient(135deg, #00a5e4, #0288d1); color: white; padding: 8px 16px; border-radius: 6px; text-decoration: none; font-size: 12px; font-weight: 600; white-space: nowrap;">
+                미리보기
+              </a>
+            </div>
           </div>
         </div>`;
       }).join('');
@@ -1924,6 +1962,10 @@
 
       container.addEventListener('click', (e) => {
         if (!e.target.closest('.file-item') && !e.target.closest('.file-remove') && !container.classList.contains('disabled')) {
+          if (!isAuthenticated) {
+            alert('Google Drive 인증이 필요합니다. 우측 하단의 Google Drive 버튼을 클릭하여 인증을 완료해주세요.');
+            return;
+          }
           fileInput.click();
         }
       });
@@ -1943,11 +1985,19 @@
         if (!container.classList.contains('disabled')) {
           e.preventDefault();
           container.classList.remove('dragover');
+          if (!isAuthenticated) {
+            alert('Google Drive 인증이 필요합니다. 우측 하단의 Google Drive 버튼을 클릭하여 인증을 완료해주세요.');
+            return;
+          }
           handleFiles(e.dataTransfer.files, fileType);
         }
       });
 
       fileInput.addEventListener('change', (e) => {
+        if (!isAuthenticated) {
+          alert('Google Drive 인증이 필요합니다. 우측 하단의 Google Drive 버튼을 클릭하여 인증을 완료해주세요.');
+          return;
+        }
         handleFiles(e.target.files, fileType);
         e.target.value = '';
       });
@@ -1955,6 +2005,9 @@
 
     // 이벤트 리스너 설정
     function setupEventListeners() {
+      // Google 인증 버튼
+      document.getElementById('google-auth').addEventListener('click', handleGoogleAuth);
+
       // 파일 업로드 초기화
       setupFileUpload('upload-container', 'file-upload', 'program');
       setupFileUpload('pdf-upload-container', 'pdf-upload', 'pdf');
@@ -2381,10 +2434,9 @@
       document.getElementById('operator-email')?.addEventListener('change', function() {
         const value = this.value;
         if (value === 'custom') {
-         
+          // 직접 입력 시 추가 처리 (필요시)
         } else if (value) {
-          receiverEmails = [value];
-          updateReceiverTags();
+          // 기본 선택된 이메일 처리
           updateSummary();
         }
       });
@@ -2482,7 +2534,11 @@
           document.querySelectorAll('.hidden').forEach(el => el.classList.add('hidden'));
           document.querySelectorAll('.section-disabled').forEach(el => el.classList.remove('section-disabled'));
          
-          switchToTab('tab1');
+          // 탭 초기화
+          document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
+          document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+          document.querySelector('[data-tab="tab1"]').classList.add('active');
+          document.getElementById('tab1').classList.add('active');
          
           updateSummary();
          
@@ -2590,6 +2646,12 @@
           templateParams.inquiry = combinedInquiry;
         }
 
+        // 전송 버튼 비활성화
+        const submitButton = document.getElementById('submit-form');
+        const originalText = submitButton.innerHTML;
+        submitButton.disabled = true;
+        submitButton.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>전송 중...';
+
         emailjs.send('ldd_Training Service', 'template_ajf77x7', templateParams)
           .then(function(response) {
             alert('이메일이 성공적으로 전송되었습니다!');
@@ -2599,6 +2661,11 @@
           .catch(function(error) {
             alert('이메일 전송에 실패했습니다. 다시 시도해주세요.');
             console.log('FAILED...', error);
+          })
+          .finally(function() {
+            // 전송 버튼 활성화
+            submitButton.disabled = false;
+            submitButton.innerHTML = originalText;
           });
       });
 
@@ -2607,6 +2674,14 @@
         if (e.target.matches('input, textarea, select')) {
           clearTimeout(window.autoSaveTimer);
           window.autoSaveTimer = setTimeout(autoSave, 2000);
+        }
+      });
+
+      // 체크박스 변경 시에도 자동 저장
+      document.addEventListener('change', function(e) {
+        if (e.target.matches('input[type="checkbox"]')) {
+          clearTimeout(window.autoSaveTimer);
+          window.autoSaveTimer = setTimeout(autoSave, 1000);
         }
       });
 
@@ -2669,6 +2744,8 @@
          
           renderFileList('program');
           renderFileList('pdf');
+          updateReceiverTags();
+          updateCcTags();
         } catch (e) {
           console.log('저장된 데이터 복원 실패:', e);
         }
@@ -2777,12 +2854,4 @@
         document.getElementById('summary-faq-inquiry').classList.remove('hidden');
         document.getElementById('summary-faq-inquiry-text').textContent = faqInquiry;
       } else {
-        document.getElementById('summary-faq-inquiry').classList.add('hidden');
-      }
-    }
-
-    // 페이지 로드 시 초기화
-    document.addEventListener('DOMContentLoaded', handlePageLoad);
-  </script>
-</body>
-</html>
+        document.getElementByI
