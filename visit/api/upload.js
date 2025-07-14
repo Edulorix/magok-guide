@@ -9,10 +9,11 @@ export const config = {
 };
 
 export default async function handler(req, res) {
-  // CORS 설정
+  // CORS 설정 - 더 완전한 헤더 설정
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  res.setHeader('Access-Control-Max-Age', '86400');
 
   if (req.method === 'OPTIONS') {
     return res.status(200).end();
@@ -23,26 +24,40 @@ export default async function handler(req, res) {
   }
 
   try {
-    // 환경변수 확인
-    if (!process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL || !process.env.GOOGLE_PRIVATE_KEY) {
-      return res.status(500).json({ error: '환경변수가 설정되지 않았습니다.' });
+    // 환경변수 확인 및 더 나은 에러 메시지
+    const serviceAccountEmail = process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL;
+    const privateKey = process.env.GOOGLE_PRIVATE_KEY;
+    const folderId = process.env.GOOGLE_DRIVE_FOLDER_ID || '1BcD2EfG3HiJ4KlM5NoPqR6StU7VwX8Yz';
+
+    if (!serviceAccountEmail || !privateKey) {
+      console.error('Missing environment variables:', {
+        hasEmail: !!serviceAccountEmail,
+        hasKey: !!privateKey
+      });
+      return res.status(500).json({ 
+        error: '서버 설정이 완료되지 않았습니다.',
+        details: 'Google Drive API 인증 정보가 설정되지 않았습니다.'
+      });
     }
 
     // Google Drive 인증
     const auth = new google.auth.GoogleAuth({
       credentials: {
-        client_email: process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL,
-        private_key: process.env.GOOGLE_PRIVATE_KEY.replace(/\\n/g, '\n'),
+        client_email: serviceAccountEmail,
+        private_key: privateKey.replace(/\\n/g, '\n'),
       },
       scopes: ['https://www.googleapis.com/auth/drive.file'],
     });
 
     const drive = google.drive({ version: 'v3', auth });
 
-    // 폼 데이터 파싱
+    // 폼 데이터 파싱 - 더 안전한 설정
     const form = formidable({
-      maxFileSize: 50 * 1024 * 1024, // 50MB
+      maxFileSize: 100 * 1024 * 1024, // 100MB로 증가
       keepExtensions: true,
+      allowEmptyFiles: false,
+      maxFields: 20,
+      maxFieldsSize: 2 * 1024 * 1024, // 2MB
     });
 
     const [fields, files] = await form.parse(req);
@@ -54,14 +69,26 @@ export default async function handler(req, res) {
       
       for (const file of fileList) {
         try {
+          // 파일 유효성 검사
+          if (!file.originalFilename && !file.newFilename) {
+            console.warn('파일명이 없는 파일 건너뜀');
+            continue;
+          }
+
+          // 파일 스트림 확인
+          if (!fs.existsSync(file.filepath)) {
+            console.error('임시 파일이 존재하지 않음:', file.filepath);
+            continue;
+          }
+
           // 파일 업로드
           const response = await drive.files.create({
             requestBody: {
               name: file.originalFilename || file.newFilename,
-              parents: [], // 루트 폴더에 저장
+              parents: [folderId],
             },
             media: {
-              mimeType: file.mimetype,
+              mimeType: file.mimetype || 'application/octet-stream',
               body: fs.createReadStream(file.filepath),
             },
           });
@@ -88,12 +115,24 @@ export default async function handler(req, res) {
           });
 
           // 임시 파일 삭제
-          fs.unlinkSync(file.filepath);
-        } catch (error) {
-          console.error('파일 업로드 오류:', error);
-          throw error;
+          try {
+            fs.unlinkSync(file.filepath);
+          } catch (cleanupError) {
+            console.warn('임시 파일 삭제 실패:', cleanupError.message);
+          }
+        } catch (fileError) {
+          console.error('개별 파일 업로드 오류:', fileError);
+          // 개별 파일 실패시에도 다른 파일들은 계속 처리
         }
       }
+    }
+
+    if (uploadedFiles.length === 0) {
+      return res.status(400).json({
+        success: false,
+        error: '업로드된 파일이 없습니다.',
+        details: '유효한 파일을 선택해주세요.'
+      });
     }
 
     res.status(200).json({
@@ -106,7 +145,7 @@ export default async function handler(req, res) {
     console.error('서버 오류:', error);
     res.status(500).json({ 
       error: '파일 업로드 실패',
-      details: error.message 
+      details: process.env.NODE_ENV === 'development' ? error.message : '서버 내부 오류가 발생했습니다.'
     });
   }
 }
