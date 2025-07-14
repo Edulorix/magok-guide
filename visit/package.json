@@ -2,10 +2,8 @@
   "name": "lg-education-system",
   "version": "1.0.0",
   "description": "LG Education File Upload System",
-  "main": "index.js",
   "scripts": {
-    "dev": "vercel dev",
-    "build": "next build"
+    "build": "echo 'No build needed for static files'"
   },
   "dependencies": {
     "googleapis": "^128.0.0",
