@@ -831,6 +831,11 @@
       transform: scale(1.1);
     }
 
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateX(-20px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+
     .validation-message {
       font-size: 0.8rem;
       margin-top: 0.375rem;
@@ -1583,7 +1588,7 @@
     </div>
   </div>
 
-<script>
+  <script>
     // EmailJS 초기화
     emailjs.init('C56kGCzPtfgWVEKoO');
 
@@ -1594,8 +1599,8 @@
     let receiverEmails = [];
     let ccEmails = [];
 
-    // ✅ API 엔드포인트 (Vercel Functions)
-    const API_BASE_URL = '/api';
+    // API 엔드포인트 수정 - 절대 경로로 변경
+    const API_BASE_URL = 'https://magok-guide-v673.vercel.app/api';
 
     // 파일 업로드 처리
     async function uploadToServer(files, onProgress) {
@@ -1608,11 +1613,13 @@
       try {
         const response = await fetch(`${API_BASE_URL}/upload`, {
           method: 'POST',
-          body: formData
+          body: formData,
+          mode: 'cors'
         });
 
         if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
+          const errorText = await response.text();
+          throw new Error(`HTTP error! status: ${response.status}, response: ${errorText}`);
         }
 
         const result = await response.json();
@@ -1625,9 +1632,13 @@
 
     // 파일 업로드 처리
     async function handleFiles(files, fileType) {
+      if (!files || files.length === 0) return;
+      
       const container = fileType === 'program' ? document.getElementById('upload-container') : document.getElementById('pdf-upload-container');
       const progressElement = fileType === 'program' ? document.getElementById('upload-progress') : document.getElementById('pdf-upload-progress');
       const progressBar = fileType === 'program' ? document.getElementById('upload-progress-bar') : document.getElementById('pdf-upload-progress-bar');
+      
+      if (!container || !progressElement || !progressBar) return;
       
       container.classList.add('uploading');
       progressElement.classList.remove('hidden');
@@ -1660,6 +1671,9 @@
           });
           
           console.log(`${result.files.length}개 파일 업로드 완료`);
+          setTimeout(() => {
+            alert(`${result.files.length}개 파일이 성공적으로 업로드되었습니다.`);
+          }, 500);
         } else {
           throw new Error(result.error || '업로드 실패');
         }
@@ -1682,6 +1696,8 @@
       const placeholderId = fileType === 'program' ? 'upload-placeholder' : 'pdf-placeholder';
       const fileList = document.getElementById(listId);
       const placeholder = document.getElementById(placeholderId);
+     
+      if (!fileList || !placeholder) return;
      
       if (uploadedFiles[fileType].length === 0) {
         fileList.innerHTML = '';
@@ -1760,6 +1776,8 @@
       const container = document.getElementById(containerId);
       const fileInput = document.getElementById(uploadId);
 
+      if (!container || !fileInput) return;
+
       container.addEventListener('click', (e) => {
         if (!e.target.closest('.file-item') && !e.target.closest('.file-remove') && !container.classList.contains('disabled')) {
           fileInput.click();
@@ -1786,8 +1804,10 @@
       });
 
       fileInput.addEventListener('change', (e) => {
-        handleFiles(e.target.files, fileType);
-        e.target.value = '';
+        if (e.target.files.length > 0) {
+          handleFiles(e.target.files, fileType);
+          e.target.value = '';
+        }
       });
     }
 
@@ -1805,30 +1825,37 @@
       document.documentElement.setAttribute('data-theme', savedTheme);
       updateThemeIcon(savedTheme);
 
-      themeToggle.addEventListener('click', function() {
-        const currentTheme = document.documentElement.getAttribute('data-theme');
-        const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-       
-        document.documentElement.setAttribute('data-theme', newTheme);
-        localStorage.setItem('theme', newTheme);
-        updateThemeIcon(newTheme);
-      });
+      if (themeToggle) {
+        themeToggle.addEventListener('click', function() {
+          const currentTheme = document.documentElement.getAttribute('data-theme');
+          const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+         
+          document.documentElement.setAttribute('data-theme', newTheme);
+          localStorage.setItem('theme', newTheme);
+          updateThemeIcon(newTheme);
+        });
+      }
 
       function updateThemeIcon(theme) {
-        themeIcon.className = theme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
+        if (themeIcon) {
+          themeIcon.className = theme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
+        }
       }
 
       // 연락처 자동 포맷팅
-      document.getElementById('phone-number')?.addEventListener('input', function(e) {
-        let value = e.target.value.replace(/\D/g, '');
-        if (value.length <= 3) {
-          e.target.value = value;
-        } else if (value.length <= 7) {
-          e.target.value = value.slice(0, 3) + '-' + value.slice(3);
-        } else {
-          e.target.value = value.slice(0, 3) + '-' + value.slice(3, 7) + '-' + value.slice(7, 11);
-        }
-      });
+      const phoneInput = document.getElementById('phone-number');
+      if (phoneInput) {
+        phoneInput.addEventListener('input', function(e) {
+          let value = e.target.value.replace(/\D/g, '');
+          if (value.length <= 3) {
+            e.target.value = value;
+          } else if (value.length <= 7) {
+            e.target.value = value.slice(0, 3) + '-' + value.slice(3);
+          } else {
+            e.target.value = value.slice(0, 3) + '-' + value.slice(3, 7) + '-' + value.slice(7, 11);
+          }
+        });
+      }
 
       // 탭 관리
       const tabButtons = document.querySelectorAll('.tab-button');
@@ -1846,233 +1873,289 @@
         tabButtons.forEach(btn => btn.classList.remove('active'));
         tabContents.forEach(content => content.classList.remove('active'));
        
-        document.querySelector(`[data-tab="${tabId}"]`).classList.add('active');
-        document.getElementById(tabId).classList.add('active');
+        const targetButton = document.querySelector(`[data-tab="${tabId}"]`);
+        const targetContent = document.getElementById(tabId);
+        
+        if (targetButton) targetButton.classList.add('active');
+        if (targetContent) targetContent.classList.add('active');
       }
 
       // 다음/이전 버튼
-      document.getElementById('next-to-tab2')?.addEventListener('click', function() {
-        if (validateTab1()) {
+      const nextToTab2 = document.getElementById('next-to-tab2');
+      if (nextToTab2) {
+        nextToTab2.addEventListener('click', function() {
+          if (validateTab1()) {
+            switchToTab('tab2');
+          }
+        });
+      }
+
+      const nextToTab3 = document.getElementById('next-to-tab3');
+      if (nextToTab3) {
+        nextToTab3.addEventListener('click', function() {
+          switchToTab('tab3');
+          updateSummary();
+        });
+      }
+
+      const prevToTab1 = document.getElementById('prev-to-tab1');
+      if (prevToTab1) {
+        prevToTab1.addEventListener('click', function() {
+          switchToTab('tab1');
+        });
+      }
+
+      const prevToTab2 = document.getElementById('prev-to-tab2');
+      if (prevToTab2) {
+        prevToTab2.addEventListener('click', function() {
           switchToTab('tab2');
-        }
-      });
-
-      document.getElementById('next-to-tab3')?.addEventListener('click', function() {
-        switchToTab('tab3');
-        updateSummary();
-      });
-
-      document.getElementById('prev-to-tab1')?.addEventListener('click', function() {
-        switchToTab('tab1');
-      });
-
-      document.getElementById('prev-to-tab2')?.addEventListener('click', function() {
-        switchToTab('tab2');
-      });
+        });
+      }
 
       // 탭1 검증
       function validateTab1() {
         let isValid = true;
        
-        const companyName = document.getElementById('company-name').value.trim();
-        const instructorName = document.getElementById('instructor-name').value.trim();
-        const phoneNumber = document.getElementById('phone-number').value.trim();
+        const companyName = document.getElementById('company-name')?.value?.trim() || '';
+        const instructorName = document.getElementById('instructor-name')?.value?.trim() || '';
+        const phoneNumber = document.getElementById('phone-number')?.value?.trim() || '';
+       
+        const companyError = document.getElementById('company-error');
+        const instructorError = document.getElementById('instructor-error');
+        const phoneError = document.getElementById('phone-error');
        
         if (!companyName) {
-          document.getElementById('company-error').classList.remove('hidden');
+          if (companyError) companyError.classList.remove('hidden');
           isValid = false;
         } else {
-          document.getElementById('company-error').classList.add('hidden');
+          if (companyError) companyError.classList.add('hidden');
         }
        
         if (!instructorName) {
-          document.getElementById('instructor-error').classList.remove('hidden');
+          if (instructorError) instructorError.classList.remove('hidden');
           isValid = false;
         } else {
-          document.getElementById('instructor-error').classList.add('hidden');
+          if (instructorError) instructorError.classList.add('hidden');
         }
        
         if (!phoneNumber) {
-          document.getElementById('phone-error').classList.remove('hidden');
+          if (phoneError) phoneError.classList.remove('hidden');
           isValid = false;
         } else {
-          document.getElementById('phone-error').classList.add('hidden');
+          if (phoneError) phoneError.classList.add('hidden');
         }
        
         return isValid;
       }
 
-      // 해당사항 없음 처리
-      document.getElementById('no-installation')?.addEventListener('change', function() {
-        const uploadContainer = document.getElementById('upload-container');
-        const programDesc = document.getElementById('program-desc');
-       
-        if (this.checked) {
-          uploadContainer.classList.add('disabled');
-          programDesc.classList.add('section-disabled');
-        } else {
-          uploadContainer.classList.remove('disabled');
-          programDesc.classList.remove('section-disabled');
-        }
-        updateSummary();
-      });
+      // 체크박스 이벤트 리스너들
+      const noInstallationCheckbox = document.getElementById('no-installation');
+      if (noInstallationCheckbox) {
+        noInstallationCheckbox.addEventListener('change', function() {
+          const uploadContainer = document.getElementById('upload-container');
+          const programDesc = document.getElementById('program-desc');
+         
+          if (this.checked) {
+            if (uploadContainer) uploadContainer.classList.add('disabled');
+            if (programDesc) programDesc.classList.add('section-disabled');
+          } else {
+            if (uploadContainer) uploadContainer.classList.remove('disabled');
+            if (programDesc) programDesc.classList.remove('section-disabled');
+          }
+          updateSummary();
+        });
+      }
 
-      document.getElementById('material-none')?.addEventListener('change', function() {
-        const pdfContainer = document.getElementById('pdf-upload-container');
-        const paperInfo = document.getElementById('paper-material-info');
-        const pdfCheckbox = document.getElementById('material-pdf');
-        const paperCheckbox = document.getElementById('material-paper');
-       
-        if (this.checked) {
-          pdfCheckbox.checked = false;
-          paperCheckbox.checked = false;
-          pdfContainer.classList.add('hidden');
-          paperInfo.classList.add('hidden');
-        }
-        updateSummary();
-      });
+      const materialNoneCheckbox = document.getElementById('material-none');
+      if (materialNoneCheckbox) {
+        materialNoneCheckbox.addEventListener('change', function() {
+          const pdfContainer = document.getElementById('pdf-upload-container');
+          const paperInfo = document.getElementById('paper-material-info');
+          const pdfCheckbox = document.getElementById('material-pdf');
+          const paperCheckbox = document.getElementById('material-paper');
+         
+          if (this.checked) {
+            if (pdfCheckbox) pdfCheckbox.checked = false;
+            if (paperCheckbox) paperCheckbox.checked = false;
+            if (pdfContainer) pdfContainer.classList.add('hidden');
+            if (paperInfo) paperInfo.classList.add('hidden');
+          }
+          updateSummary();
+        });
+      }
 
-      document.getElementById('no-vehicle')?.addEventListener('change', function() {
-        const vehicleContainer = document.getElementById('vehicle-container');
-        const addVehicleBtn = document.getElementById('add-vehicle');
-       
-        if (this.checked) {
-          vehicleContainer.classList.add('section-disabled');
-          addVehicleBtn.classList.add('section-disabled');
-        } else {
-          vehicleContainer.classList.remove('section-disabled');
-          addVehicleBtn.classList.remove('section-disabled');
-        }
-        updateSummary();
-      });
+      const noVehicleCheckbox = document.getElementById('no-vehicle');
+      if (noVehicleCheckbox) {
+        noVehicleCheckbox.addEventListener('change', function() {
+          const vehicleContainer = document.getElementById('vehicle-container');
+          const addVehicleBtn = document.getElementById('add-vehicle');
+         
+          if (this.checked) {
+            if (vehicleContainer) vehicleContainer.classList.add('section-disabled');
+            if (addVehicleBtn) addVehicleBtn.classList.add('section-disabled');
+          } else {
+            if (vehicleContainer) vehicleContainer.classList.remove('section-disabled');
+            if (addVehicleBtn) addVehicleBtn.classList.remove('section-disabled');
+          }
+          updateSummary();
+        });
+      }
 
       // 교재 유형 체크박스
-      document.getElementById('material-pdf')?.addEventListener('change', function() {
-        const container = document.getElementById('pdf-upload-container');
-        const noneCheckbox = document.getElementById('material-none');
-       
-        if (this.checked) {
-          container.classList.remove('hidden');
-          noneCheckbox.checked = false;
-        } else {
-          container.classList.add('hidden');
-        }
-        updateSummary();
-      });
+      const materialPdfCheckbox = document.getElementById('material-pdf');
+      if (materialPdfCheckbox) {
+        materialPdfCheckbox.addEventListener('change', function() {
+          const container = document.getElementById('pdf-upload-container');
+          const noneCheckbox = document.getElementById('material-none');
+         
+          if (this.checked) {
+            if (container) container.classList.remove('hidden');
+            if (noneCheckbox) noneCheckbox.checked = false;
+          } else {
+            if (container) container.classList.add('hidden');
+          }
+          updateSummary();
+        });
+      }
 
-      document.getElementById('material-paper')?.addEventListener('change', function() {
-        const container = document.getElementById('paper-material-info');
-        const noneCheckbox = document.getElementById('material-none');
-       
-        if (this.checked) {
-          container.classList.remove('hidden');
-          noneCheckbox.checked = false;
-        } else {
-          container.classList.add('hidden');
-        }
-        updateSummary();
-      });
+      const materialPaperCheckbox = document.getElementById('material-paper');
+      if (materialPaperCheckbox) {
+        materialPaperCheckbox.addEventListener('change', function() {
+          const container = document.getElementById('paper-material-info');
+          const noneCheckbox = document.getElementById('material-none');
+         
+          if (this.checked) {
+            if (container) container.classList.remove('hidden');
+            if (noneCheckbox) noneCheckbox.checked = false;
+          } else {
+            if (container) container.classList.add('hidden');
+          }
+          updateSummary();
+        });
+      }
 
       // 저장매체 체크박스
-      document.getElementById('storage-media-check')?.addEventListener('change', function() {
-        const textarea = document.getElementById('storage-media-info');
-        if (this.checked) {
-          textarea.classList.remove('hidden');
-        } else {
-          textarea.classList.add('hidden');
-        }
-      });
-
-      // LAN Port 체크박스
-      document.getElementById('lan-port-check')?.addEventListener('change', function() {
-        const fields = document.getElementById('lan-port-fields');
-        if (this.checked) {
-          fields.classList.remove('hidden');
-        } else {
-          fields.classList.add('hidden');
-        }
-      });
-
-      // 장비 추가
-      document.getElementById('add-equipment')?.addEventListener('click', function() {
-        const container = document.getElementById('equipment-container');
-        const newRow = document.createElement('div');
-        newRow.className = 'equipment-row';
-        newRow.innerHTML = `
-          <select class="form-control" name="equipment_type">
-            <option value="">장비 유형 선택</option>
-            <option value="노트북">노트북</option>
-            <option value="네트워크장비">네트워크장비</option>
-            <option value="NAS">NAS</option>
-            <option value="데스크탑">데스크탑</option>
-            <option value="스마트패드">스마트패드</option>
-            <option value="샘플폰">샘플폰</option>
-            <option value="서버장비">서버장비</option>
-            <option value="태블릿PC">태블릿PC</option>
-            <option value="AP">AP</option>
-            <option value="CD">CD</option>
-            <option value="디지털카메라">디지털카메라</option>
-            <option value="DVD">DVD</option>
-            <option value="기타">기타</option>
-            <option value="HDD/SSD">HDD/SSD</option>
-            <option value="모바일폰">모바일폰</option>
-            <option value="메모리카드">메모리카드</option>
-            <option value="USB">USB</option>
-            <option value="워크스테이션">워크스테이션</option>
-          </select>
-          <input type="text" class="form-control" name="equipment_manufacturer" placeholder="제조사">
-          <input type="text" class="form-control" name="equipment_model" placeholder="기종">
-          <input type="number" class="form-control equipment-qty" name="equipment_quantity" min="1" value="1" placeholder="수량">
-          <input type="text" class="form-control" name="equipment_serial" placeholder="S/N & MAC주소">
-          <button type="button" class="equipment-remove btn btn-secondary p-2">
-            <i class="fas fa-minus"></i>
-          </button>
-        `;
-        container.appendChild(newRow);
-       
-        newRow.querySelector('.equipment-remove').addEventListener('click', function() {
-          if (container.children.length > 1) {
-            newRow.remove();
+      const storageMediaCheckbox = document.getElementById('storage-media-check');
+      if (storageMediaCheckbox) {
+        storageMediaCheckbox.addEventListener('change', function() {
+          const textarea = document.getElementById('storage-media-info');
+          if (this.checked) {
+            if (textarea) textarea.classList.remove('hidden');
+          } else {
+            if (textarea) textarea.classList.add('hidden');
           }
         });
-      });
+      }
+
+      // LAN Port 체크박스
+      const lanPortCheckbox = document.getElementById('lan-port-check');
+      if (lanPortCheckbox) {
+        lanPortCheckbox.addEventListener('change', function() {
+          const fields = document.getElementById('lan-port-fields');
+          if (this.checked) {
+            if (fields) fields.classList.remove('hidden');
+          } else {
+            if (fields) fields.classList.add('hidden');
+          }
+        });
+      }
+
+      // 장비 추가
+      const addEquipmentBtn = document.getElementById('add-equipment');
+      if (addEquipmentBtn) {
+        addEquipmentBtn.addEventListener('click', function() {
+          const container = document.getElementById('equipment-container');
+          if (!container) return;
+          
+          const newRow = document.createElement('div');
+          newRow.className = 'equipment-row';
+          newRow.innerHTML = `
+            <select class="form-control" name="equipment_type">
+              <option value="">장비 유형 선택</option>
+              <option value="노트북">노트북</option>
+              <option value="네트워크장비">네트워크장비</option>
+              <option value="NAS">NAS</option>
+              <option value="데스크탑">데스크탑</option>
+              <option value="스마트패드">스마트패드</option>
+              <option value="샘플폰">샘플폰</option>
+              <option value="서버장비">서버장비</option>
+              <option value="태블릿PC">태블릿PC</option>
+              <option value="AP">AP</option>
+              <option value="CD">CD</option>
+              <option value="디지털카메라">디지털카메라</option>
+              <option value="DVD">DVD</option>
+              <option value="기타">기타</option>
+              <option value="HDD/SSD">HDD/SSD</option>
+              <option value="모바일폰">모바일폰</option>
+              <option value="메모리카드">메모리카드</option>
+              <option value="USB">USB</option>
+              <option value="워크스테이션">워크스테이션</option>
+            </select>
+            <input type="text" class="form-control" name="equipment_manufacturer" placeholder="제조사">
+            <input type="text" class="form-control" name="equipment_model" placeholder="기종">
+            <input type="number" class="form-control equipment-qty" name="equipment_quantity" min="1" value="1" placeholder="수량">
+            <input type="text" class="form-control" name="equipment_serial" placeholder="S/N & MAC주소">
+            <button type="button" class="equipment-remove btn btn-secondary p-2">
+              <i class="fas fa-minus"></i>
+            </button>
+          `;
+          container.appendChild(newRow);
+         
+          const removeBtn = newRow.querySelector('.equipment-remove');
+          if (removeBtn) {
+            removeBtn.addEventListener('click', function() {
+              if (container.children.length > 1) {
+                newRow.remove();
+              }
+            });
+          }
+        });
+      }
 
       // 기존 장비 삭제 버튼
       document.querySelectorAll('.equipment-remove').forEach(btn => {
         btn.addEventListener('click', function() {
           const container = document.getElementById('equipment-container');
-          if (container.children.length > 1) {
+          if (container && container.children.length > 1) {
             this.closest('.equipment-row').remove();
           }
         });
       });
 
       // 차량 추가
-      document.getElementById('add-vehicle')?.addEventListener('click', function() {
-        const container = document.getElementById('vehicle-container');
-        const newVehicle = document.createElement('div');
-        newVehicle.className = 'grid grid-cols-1 md:grid-cols-2 gap-4 mb-4';
-        newVehicle.innerHTML = `
-          <div class="form-group">
-            <label class="form-label">차종</label>
-            <input type="text" class="form-control" name="vehicle_type" placeholder="그랜저">
-          </div>
-          <div class="form-group">
-            <label class="form-label">차량번호</label>
-            <div class="flex gap-2">
-              <input type="text" class="form-control" name="vehicle_number" placeholder="12가 1234">
-              <button type="button" class="vehicle-remove btn btn-secondary">
-                <i class="fas fa-minus"></i>
-              </button>
+      const addVehicleBtn = document.getElementById('add-vehicle');
+      if (addVehicleBtn) {
+        addVehicleBtn.addEventListener('click', function() {
+          const container = document.getElementById('vehicle-container');
+          if (!container) return;
+          
+          const newVehicle = document.createElement('div');
+          newVehicle.className = 'grid grid-cols-1 md:grid-cols-2 gap-4 mb-4';
+          newVehicle.innerHTML = `
+            <div class="form-group">
+              <label class="form-label">차종</label>
+              <input type="text" class="form-control" name="vehicle_type" placeholder="그랜저">
             </div>
-          </div>
-        `;
-        container.appendChild(newVehicle);
-       
-        newVehicle.querySelector('.vehicle-remove').addEventListener('click', function() {
-          newVehicle.remove();
+            <div class="form-group">
+              <label class="form-label">차량번호</label>
+              <div class="flex gap-2">
+                <input type="text" class="form-control" name="vehicle_number" placeholder="12가 1234">
+                <button type="button" class="vehicle-remove btn btn-secondary">
+                  <i class="fas fa-minus"></i>
+                </button>
+              </div>
+            </div>
+          `;
+          container.appendChild(newVehicle);
+         
+          const removeBtn = newVehicle.querySelector('.vehicle-remove');
+          if (removeBtn) {
+            removeBtn.addEventListener('click', function() {
+              newVehicle.remove();
+            });
+          }
         });
-      });
+      }
 
       // 수신자/참조자 관리
       function validateEmail(email) {
@@ -2082,6 +2165,8 @@
 
       function showValidationMessage(elementId, message, isValid) {
         const messageEl = document.getElementById(elementId);
+        if (!messageEl) return;
+        
         messageEl.textContent = message;
         messageEl.className = `validation-message ${isValid ? 'valid' : 'invalid'}`;
         messageEl.style.display = 'block';
@@ -2103,13 +2188,16 @@
 
         receiverEmails.push(email);
         updateReceiverTags();
-        document.getElementById('receiver-email-input').value = '';
+        const receiverInput = document.getElementById('receiver-email-input');
+        if (receiverInput) receiverInput.value = '';
         showValidationMessage('receiver-validation-message', '수신자가 추가되었습니다.', true);
         return true;
       }
 
       function updateReceiverTags() {
         const container = document.getElementById('receiver-tags-container');
+        if (!container) return;
+        
         container.innerHTML = receiverEmails.map((email, index) => {
           return `<div class="email-tag" data-email="${email}">
             <i class="fas fa-user mr-1"></i>
@@ -2127,26 +2215,33 @@
         updateSummary();
       };
 
-      document.getElementById('add-receiver-btn')?.addEventListener('click', function() {
-        const email = document.getElementById('receiver-email-input').value.trim();
-        if (email) {
-          if (addReceiverEmail(email)) {
-            updateSummary();
-          }
-        }
-      });
-
-      document.getElementById('receiver-email-input')?.addEventListener('keypress', function(e) {
-        if (e.key === 'Enter') {
-          e.preventDefault();
-          const email = this.value.trim();
+      const addReceiverBtn = document.getElementById('add-receiver-btn');
+      if (addReceiverBtn) {
+        addReceiverBtn.addEventListener('click', function() {
+          const emailInput = document.getElementById('receiver-email-input');
+          const email = emailInput ? emailInput.value.trim() : '';
           if (email) {
             if (addReceiverEmail(email)) {
               updateSummary();
             }
           }
-        }
-      });
+        });
+      }
+
+      const receiverEmailInput = document.getElementById('receiver-email-input');
+      if (receiverEmailInput) {
+        receiverEmailInput.addEventListener('keypress', function(e) {
+          if (e.key === 'Enter') {
+            e.preventDefault();
+            const email = this.value.trim();
+            if (email) {
+              if (addReceiverEmail(email)) {
+                updateSummary();
+              }
+            }
+          }
+        });
+      }
 
       function addCcEmail(email) {
         if (!validateEmail(email)) {
@@ -2161,13 +2256,16 @@
 
         ccEmails.push(email);
         updateCcTags();
-        document.getElementById('cc-email-input').value = '';
+        const ccInput = document.getElementById('cc-email-input');
+        if (ccInput) ccInput.value = '';
         showValidationMessage('cc-validation-message', '참조자가 추가되었습니다.', true);
         return true;
       }
 
       function updateCcTags() {
         const container = document.getElementById('cc-tags-container');
+        if (!container) return;
+        
         container.innerHTML = ccEmails.map((email, index) => {
           return `<div class="email-tag" data-email="${email}">
             <i class="fas fa-user mr-1"></i>
@@ -2185,67 +2283,86 @@
         updateSummary();
       };
 
-      document.getElementById('add-cc-btn')?.addEventListener('click', function() {
-        const email = document.getElementById('cc-email-input').value.trim();
-        if (email) {
-          if (addCcEmail(email)) {
-            updateSummary();
-          }
-        }
-      });
-
-      document.getElementById('cc-email-input')?.addEventListener('keypress', function(e) {
-        if (e.key === 'Enter') {
-          e.preventDefault();
-          const email = this.value.trim();
+      const addCcBtn = document.getElementById('add-cc-btn');
+      if (addCcBtn) {
+        addCcBtn.addEventListener('click', function() {
+          const emailInput = document.getElementById('cc-email-input');
+          const email = emailInput ? emailInput.value.trim() : '';
           if (email) {
             if (addCcEmail(email)) {
               updateSummary();
             }
           }
-        }
-      });
+        });
+      }
 
-      document.getElementById('cc-operator-select')?.addEventListener('change', function() {
-        const email = this.value;
-        if (email && !ccEmails.includes(email)) {
-          if (addCcEmail(email)) {
+      const ccEmailInput = document.getElementById('cc-email-input');
+      if (ccEmailInput) {
+        ccEmailInput.addEventListener('keypress', function(e) {
+          if (e.key === 'Enter') {
+            e.preventDefault();
+            const email = this.value.trim();
+            if (email) {
+              if (addCcEmail(email)) {
+                updateSummary();
+              }
+            }
+          }
+        });
+      }
+
+      const ccOperatorSelect = document.getElementById('cc-operator-select');
+      if (ccOperatorSelect) {
+        ccOperatorSelect.addEventListener('change', function() {
+          const email = this.value;
+          if (email && !ccEmails.includes(email)) {
+            if (addCcEmail(email)) {
+              updateSummary();
+            }
+          }
+          this.value = '';
+        });
+      }
+
+      const operatorEmailSelect = document.getElementById('operator-email');
+      if (operatorEmailSelect) {
+        operatorEmailSelect.addEventListener('change', function() {
+          const value = this.value;
+          if (value === 'custom') {
+           
+          } else if (value) {
+            receiverEmails = [value];
+            updateReceiverTags();
             updateSummary();
           }
-        }
-        this.value = '';
-      });
-
-      document.getElementById('operator-email')?.addEventListener('change', function() {
-        const value = this.value;
-        if (value === 'custom') {
-         
-        } else if (value) {
-          receiverEmails = [value];
-          updateReceiverTags();
-          updateSummary();
-        }
-      });
+        });
+      }
 
       // FAQ 모달
       const faqModal = document.getElementById('faq-modal');
       const openFaqBtn = document.getElementById('open-faq');
       const closeFaqBtn = document.querySelector('.close-modal');
      
-      openFaqBtn.addEventListener('click', () => {
-        faqModal.classList.add('show');
-      });
+      if (openFaqBtn) {
+        openFaqBtn.addEventListener('click', () => {
+          if (faqModal) faqModal.classList.add('show');
+        });
+      }
      
-      closeFaqBtn.addEventListener('click', closeFaqModal);
+      if (closeFaqBtn) {
+        closeFaqBtn.addEventListener('click', closeFaqModal);
+      }
      
-      faqModal.addEventListener('click', (e) => {
-        if (e.target === faqModal) {
-          closeFaqModal();
-        }
-      });
+      if (faqModal) {
+        faqModal.addEventListener('click', (e) => {
+          if (e.target === faqModal) {
+            closeFaqModal();
+          }
+        });
+      }
      
       function closeFaqModal() {
-        faqModal.classList.remove('show');
+        if (faqModal) faqModal.classList.remove('show');
       }
      
       // 아코디언
@@ -2255,190 +2372,207 @@
           const content = document.getElementById(targetId);
           const icon = this.querySelector('i');
          
-          document.querySelectorAll('.accordion-content').forEach(c => {
-            if (c !== content) {
-              c.classList.remove('active');
-            }
-          });
-          document.querySelectorAll('.accordion-header i').forEach(i => {
-            if (i !== icon) {
-              i.className = 'fas fa-chevron-down';
-            }
-          });
-         
-          content.classList.toggle('active');
-          icon.className = content.classList.contains('active') ?
-            'fas fa-chevron-up' : 'fas fa-chevron-down';
+          if (content && icon) {
+            document.querySelectorAll('.accordion-content').forEach(c => {
+              if (c !== content) {
+                c.classList.remove('active');
+              }
+            });
+            document.querySelectorAll('.accordion-header i').forEach(i => {
+              if (i !== icon) {
+                i.className = 'fas fa-chevron-down';
+              }
+            });
+           
+            content.classList.toggle('active');
+            icon.className = content.classList.contains('active') ?
+              'fas fa-chevron-up' : 'fas fa-chevron-down';
+          }
         });
       });
 
       // 문의사항 저장 (FAQ 모달에서)
-      document.getElementById('faq-save-inquiry').addEventListener('click', function() {
-        const message = document.getElementById('faq-contact-message').value.trim();
-        if (message) {
-          faqInquiry = message;
-          alert('기타 문의사항이 저장되었습니다.');
-          document.getElementById('faq-contact-message').value = '';
-          closeFaqModal();
-          setTimeout(() => {
-            updateSummary();
-          }, 500);
-        }
-      });
-
-      // 문의사항 저장 (제출 탭에서)
-      document.getElementById('save-inquiry').addEventListener('click', function() {
-        const message = document.getElementById('contact-message').value.trim();
-        if (message) {
-          generalInquiry = message;
-          alert('추가 문의사항이 저장되었습니다.');
-          document.getElementById('contact-message').value = '';
-          updateSummary();
-        }
-      });
-
-      // 내용 초기화 기능
-      document.getElementById('reset-form').addEventListener('click', function() {
-        if (confirm('모든 입력 내용을 초기화하시겠습니까?')) {
-          document.getElementById('visit-form').reset();
-         
-          uploadedFiles = { program: [], pdf: [] };
-          generalInquiry = '';
-          faqInquiry = '';
-          receiverEmails = [];
-          ccEmails = [];
-         
-          renderFileList('program');
-          renderFileList('pdf');
-         
-          updateReceiverTags();
-          updateCcTags();
-         
-          localStorage.removeItem('visitFormData');
-         
-          document.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
-          document.querySelectorAll('.hidden').forEach(el => el.classList.add('hidden'));
-          document.querySelectorAll('.section-disabled').forEach(el => el.classList.remove('section-disabled'));
-         
-          switchToTab('tab1');
-         
-          updateSummary();
-         
-          alert('모든 내용이 초기화되었습니다.');
-        }
-      });
-
-      // 폼 제출
-      document.getElementById('submit-form')?.addEventListener('click', function() {
-        const operatorEmail = document.getElementById('operator-email').value;
-        const additionalReceivers = receiverEmails;
-       
-        if (!operatorEmail && additionalReceivers.length === 0) {
-          alert('수신자를 선택하거나 추가해주세요.');
-          return;
-        }
-
-        const allReceivers = [];
-        if (operatorEmail && operatorEmail !== 'custom') {
-          allReceivers.push(operatorEmail);
-        }
-        allReceivers.push(...additionalReceivers);
-
-        const allCCs = [...ccEmails];
-
-        const allInquiries = [];
-        if (generalInquiry) allInquiries.push(`[추가 문의사항]\n${generalInquiry}`);
-        if (faqInquiry) allInquiries.push(`[기타 문의사항(FAQ)]\n${faqInquiry}`);
-        const combinedInquiry = allInquiries.join('\n\n');
-
-        const materialTypes = [];
-        if (document.getElementById('material-pdf')?.checked) materialTypes.push('PDF 교재');
-        if (document.getElementById('material-paper')?.checked) materialTypes.push('서면 교재');
-        if (document.getElementById('material-none')?.checked) materialTypes.push('해당사항 없음');
-
-        const equipmentRows = document.querySelectorAll('.equipment-row');
-        const equipmentList = [];
-        equipmentRows.forEach(row => {
-          const type = row.querySelector('[name="equipment_type"]')?.value;
-          const manufacturer = row.querySelector('[name="equipment_manufacturer"]')?.value;
-          const model = row.querySelector('[name="equipment_model"]')?.value;
-          const quantity = row.querySelector('[name="equipment_quantity"]')?.value;
-          const serial = row.querySelector('[name="equipment_serial"]')?.value;
-          if (type) {
-            equipmentList.push(`${type} ${manufacturer || ''} ${model || ''} ${quantity || 1}대 (${serial || ''})`.trim());
+      const faqSaveInquiryBtn = document.getElementById('faq-save-inquiry');
+      if (faqSaveInquiryBtn) {
+        faqSaveInquiryBtn.addEventListener('click', function() {
+          const message = document.getElementById('faq-contact-message')?.value?.trim();
+          if (message) {
+            faqInquiry = message;
+            alert('기타 문의사항이 저장되었습니다.');
+            const faqContactMessage = document.getElementById('faq-contact-message');
+            if (faqContactMessage) faqContactMessage.value = '';
+            closeFaqModal();
+            setTimeout(() => {
+              updateSummary();
+            }, 500);
           }
         });
+      }
 
-        let vehicleInfo = '';
-        if (document.getElementById('no-vehicle')?.checked) {
-          vehicleInfo = '해당사항 없음';
-        } else {
-          const vehicles = [];
-          const vehicleInputs = document.querySelectorAll('[name="vehicle_type"], [name="vehicle_number"]');
-          for (let i = 0; i < vehicleInputs.length; i += 2) {
-            const type = vehicleInputs[i]?.value;
-            const number = vehicleInputs[i + 1]?.value;
-            if (type || number) {
-              vehicles.push(`${type || ''} ${number || ''}`.trim());
-            }
+      // 문의사항 저장 (제출 탭에서)
+      const saveInquiryBtn = document.getElementById('save-inquiry');
+      if (saveInquiryBtn) {
+        saveInquiryBtn.addEventListener('click', function() {
+          const message = document.getElementById('contact-message')?.value?.trim();
+          if (message) {
+            generalInquiry = message;
+            alert('추가 문의사항이 저장되었습니다.');
+            const contactMessage = document.getElementById('contact-message');
+            if (contactMessage) contactMessage.value = '';
+            updateSummary();
           }
-          vehicleInfo = vehicles.length > 0 ? vehicles.join(', ') : '없음';
-        }
+        });
+      }
 
-        const templateParams = {
-          to_email: allReceivers.join(','),
-          instructor_name: document.getElementById('instructor-name').value,
-          company: document.getElementById('company-name').value,
-          phone: document.getElementById('phone-number').value,
-          equipment_list: equipmentList.join('\n') || '없음',
-          vehicle_info: vehicleInfo,
-          material_type: materialTypes.join(', ') || '선택 안함',
-          timestamp: new Date().toLocaleString('ko-KR')
-        };
-
-        if (allCCs.length > 0) {
-          templateParams.cc = allCCs.join(',');
-        }
-
-        const programDesc = document.getElementById('program-desc').value;
-        if (programDesc && !document.getElementById('no-installation').checked) {
-          templateParams.program_description = programDesc;
-        }
-
-        if (uploadedFiles.program.length > 0) {
-          templateParams.program_files = generateFileLinks(uploadedFiles.program, 'program');
-        }
-
-        if (uploadedFiles.pdf.length > 0) {
-          templateParams.material_files = generateFileLinks(uploadedFiles.pdf, 'material');
-        }
-
-        const storageInfo = document.getElementById('storage-media-info').value;
-        if (storageInfo && document.getElementById('storage-media-check').checked) {
-          templateParams.storage_media_info = storageInfo;
-        }
-
-        const lanPortType = document.querySelector('[name="lan_port_type"]').value;
-        const lanPortDetail = document.querySelector('[name="lan_port_detail"]').value;
-        if (lanPortType && document.getElementById('lan-port-check').checked) {
-          templateParams.lan_port_info = `${lanPortType} ${lanPortDetail}`.trim();
-        }
-
-        if (combinedInquiry) {
-          templateParams.inquiry = combinedInquiry;
-        }
-
-        emailjs.send('ldd_Training Service', 'template_ajf77x7', templateParams)
-          .then(function(response) {
-            alert('이메일이 성공적으로 전송되었습니다!');
-            console.log('SUCCESS!', response.status, response.text);
+      // 내용 초기화 기능
+      const resetFormBtn = document.getElementById('reset-form');
+      if (resetFormBtn) {
+        resetFormBtn.addEventListener('click', function() {
+          if (confirm('모든 입력 내용을 초기화하시겠습니까?')) {
+            const visitForm = document.getElementById('visit-form');
+            if (visitForm) visitForm.reset();
+           
+            uploadedFiles = { program: [], pdf: [] };
+            generalInquiry = '';
+            faqInquiry = '';
+            receiverEmails = [];
+            ccEmails = [];
+           
+            renderFileList('program');
+            renderFileList('pdf');
+           
+            updateReceiverTags();
+            updateCcTags();
+           
             localStorage.removeItem('visitFormData');
-          })
-          .catch(function(error) {
-            alert('이메일 전송에 실패했습니다. 다시 시도해주세요.');
-            console.log('FAILED...', error);
+           
+            document.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
+            document.querySelectorAll('.hidden').forEach(el => el.classList.add('hidden'));
+            document.querySelectorAll('.section-disabled').forEach(el => el.classList.remove('section-disabled'));
+           
+            switchToTab('tab1');
+           
+            updateSummary();
+           
+            alert('모든 내용이 초기화되었습니다.');
+          }
+        });
+      }
+
+      // 폼 제출
+      const submitFormBtn = document.getElementById('submit-form');
+      if (submitFormBtn) {
+        submitFormBtn.addEventListener('click', function() {
+          const operatorEmail = document.getElementById('operator-email')?.value;
+          const additionalReceivers = receiverEmails;
+         
+          if (!operatorEmail && additionalReceivers.length === 0) {
+            alert('수신자를 선택하거나 추가해주세요.');
+            return;
+          }
+
+          const allReceivers = [];
+          if (operatorEmail && operatorEmail !== 'custom') {
+            allReceivers.push(operatorEmail);
+          }
+          allReceivers.push(...additionalReceivers);
+
+          const allCCs = [...ccEmails];
+
+          const allInquiries = [];
+          if (generalInquiry) allInquiries.push(`[추가 문의사항]\n${generalInquiry}`);
+          if (faqInquiry) allInquiries.push(`[기타 문의사항(FAQ)]\n${faqInquiry}`);
+          const combinedInquiry = allInquiries.join('\n\n');
+
+          const materialTypes = [];
+          if (document.getElementById('material-pdf')?.checked) materialTypes.push('PDF 교재');
+          if (document.getElementById('material-paper')?.checked) materialTypes.push('서면 교재');
+          if (document.getElementById('material-none')?.checked) materialTypes.push('해당사항 없음');
+
+          const equipmentRows = document.querySelectorAll('.equipment-row');
+          const equipmentList = [];
+          equipmentRows.forEach(row => {
+            const type = row.querySelector('[name="equipment_type"]')?.value;
+            const manufacturer = row.querySelector('[name="equipment_manufacturer"]')?.value;
+            const model = row.querySelector('[name="equipment_model"]')?.value;
+            const quantity = row.querySelector('[name="equipment_quantity"]')?.value;
+            const serial = row.querySelector('[name="equipment_serial"]')?.value;
+            if (type) {
+              equipmentList.push(`${type} ${manufacturer || ''} ${model || ''} ${quantity || 1}대 (${serial || ''})`.trim());
+            }
           });
-      });
+
+          let vehicleInfo = '';
+          if (document.getElementById('no-vehicle')?.checked) {
+            vehicleInfo = '해당사항 없음';
+          } else {
+            const vehicles = [];
+            const vehicleInputs = document.querySelectorAll('[name="vehicle_type"], [name="vehicle_number"]');
+            for (let i = 0; i < vehicleInputs.length; i += 2) {
+              const type = vehicleInputs[i]?.value;
+              const number = vehicleInputs[i + 1]?.value;
+              if (type || number) {
+                vehicles.push(`${type || ''} ${number || ''}`.trim());
+              }
+            }
+            vehicleInfo = vehicles.length > 0 ? vehicles.join(', ') : '없음';
+          }
+
+          const templateParams = {
+            to_email: allReceivers.join(','),
+            instructor_name: document.getElementById('instructor-name')?.value || '',
+            company: document.getElementById('company-name')?.value || '',
+            phone: document.getElementById('phone-number')?.value || '',
+            equipment_list: equipmentList.join('\n') || '없음',
+            vehicle_info: vehicleInfo,
+            material_type: materialTypes.join(', ') || '선택 안함',
+            timestamp: new Date().toLocaleString('ko-KR')
+          };
+
+          if (allCCs.length > 0) {
+            templateParams.cc = allCCs.join(',');
+          }
+
+          const programDesc = document.getElementById('program-desc')?.value;
+          if (programDesc && !document.getElementById('no-installation')?.checked) {
+            templateParams.program_description = programDesc;
+          }
+
+          if (uploadedFiles.program.length > 0) {
+            templateParams.program_files = generateFileLinks(uploadedFiles.program, 'program');
+          }
+
+          if (uploadedFiles.pdf.length > 0) {
+            templateParams.material_files = generateFileLinks(uploadedFiles.pdf, 'material');
+          }
+
+          const storageInfo = document.getElementById('storage-media-info')?.value;
+          if (storageInfo && document.getElementById('storage-media-check')?.checked) {
+            templateParams.storage_media_info = storageInfo;
+          }
+
+          const lanPortType = document.querySelector('[name="lan_port_type"]')?.value;
+          const lanPortDetail = document.querySelector('[name="lan_port_detail"]')?.value;
+          if (lanPortType && document.getElementById('lan-port-check')?.checked) {
+            templateParams.lan_port_info = `${lanPortType} ${lanPortDetail || ''}`.trim();
+          }
+
+          if (combinedInquiry) {
+            templateParams.inquiry = combinedInquiry;
+          }
+
+          emailjs.send('ldd_Training Service', 'template_ajf77x7', templateParams)
+            .then(function(response) {
+              alert('이메일이 성공적으로 전송되었습니다!');
+              console.log('SUCCESS!', response.status, response.text);
+              localStorage.removeItem('visitFormData');
+            })
+            .catch(function(error) {
+              alert('이메일 전송에 실패했습니다. 다시 시도해주세요.');
+              console.log('FAILED...', error);
+            });
+        });
+      }
 
       // 입력 이벤트 리스너 (자동 저장용)
       document.addEventListener('input', function(e) {
@@ -2455,10 +2589,12 @@
     // 자동 저장 기능
     function showAutoSaveIndicator() {
       const indicator = document.getElementById('auto-save-indicator');
-      indicator.classList.add('show');
-      setTimeout(() => {
-        indicator.classList.remove('show');
-      }, 2000);
+      if (indicator) {
+        indicator.classList.add('show');
+        setTimeout(() => {
+          indicator.classList.remove('show');
+        }, 2000);
+      }
     }
 
     function autoSave() {
@@ -2488,21 +2624,29 @@
       if (savedData) {
         try {
           const data = JSON.parse(savedData);
-          if (document.getElementById('company-name')) document.getElementById('company-name').value = data.company || '';
-          if (document.getElementById('instructor-name')) document.getElementById('instructor-name').value = data.instructor || '';
-          if (document.getElementById('phone-number')) document.getElementById('phone-number').value = data.phone || '';
-          if (document.getElementById('program-desc')) document.getElementById('program-desc').value = data.programDesc || '';
+          const companyName = document.getElementById('company-name');
+          const instructorName = document.getElementById('instructor-name');
+          const phoneNumber = document.getElementById('phone-number');
+          const programDesc = document.getElementById('program-desc');
+          const contactMessage = document.getElementById('contact-message');
+          const faqContactMessage = document.getElementById('faq-contact-message');
+          
+          if (companyName) companyName.value = data.company || '';
+          if (instructorName) instructorName.value = data.instructor || '';
+          if (phoneNumber) phoneNumber.value = data.phone || '';
+          if (programDesc) programDesc.value = data.programDesc || '';
+          
           uploadedFiles = data.uploadedFiles || { program: [], pdf: [] };
           generalInquiry = data.generalInquiry || '';
           faqInquiry = data.faqInquiry || '';
           receiverEmails = data.receiverEmails || [];
           ccEmails = data.ccEmails || [];
          
-          if (generalInquiry) {
-            document.getElementById('contact-message').value = generalInquiry;
+          if (generalInquiry && contactMessage) {
+            contactMessage.value = generalInquiry;
           }
-          if (faqInquiry) {
-            document.getElementById('faq-contact-message').value = faqInquiry;
+          if (faqInquiry && faqContactMessage) {
+            faqContactMessage.value = faqInquiry;
           }
          
           renderFileList('program');
@@ -2515,36 +2659,53 @@
 
     // 요약 업데이트
     function updateSummary() {
-      document.getElementById('summary-company').textContent =
-        document.getElementById('company-name')?.value || '(입력 필요)';
-      document.getElementById('summary-instructor').textContent =
-        document.getElementById('instructor-name')?.value || '(입력 필요)';
-      document.getElementById('summary-phone').textContent =
-        document.getElementById('phone-number')?.value || '(입력 필요)';
+      const summaryCompany = document.getElementById('summary-company');
+      const summaryInstructor = document.getElementById('summary-instructor');
+      const summaryPhone = document.getElementById('summary-phone');
+      
+      if (summaryCompany) {
+        summaryCompany.textContent = document.getElementById('company-name')?.value || '(입력 필요)';
+      }
+      if (summaryInstructor) {
+        summaryInstructor.textContent = document.getElementById('instructor-name')?.value || '(입력 필요)';
+      }
+      if (summaryPhone) {
+        summaryPhone.textContent = document.getElementById('phone-number')?.value || '(입력 필요)';
+      }
 
       const programDesc = document.getElementById('program-desc')?.value;
-      if (programDesc && !document.getElementById('no-installation').checked) {
-        document.getElementById('summary-program').classList.remove('hidden');
-        document.getElementById('summary-program-text').textContent = programDesc;
+      const summaryProgram = document.getElementById('summary-program');
+      const summaryProgramText = document.getElementById('summary-program-text');
+      
+      if (programDesc && !document.getElementById('no-installation')?.checked) {
+        if (summaryProgram) summaryProgram.classList.remove('hidden');
+        if (summaryProgramText) summaryProgramText.textContent = programDesc;
       } else {
-        document.getElementById('summary-program').classList.add('hidden');
+        if (summaryProgram) summaryProgram.classList.add('hidden');
       }
 
       const totalFiles = uploadedFiles.program.length + uploadedFiles.pdf.length;
+      const summaryFiles = document.getElementById('summary-files');
+      const summaryFilesText = document.getElementById('summary-files-text');
+      
       if (totalFiles > 0) {
-        document.getElementById('summary-files').classList.remove('hidden');
-        document.getElementById('summary-files-text').textContent =
-          `실습자료: ${uploadedFiles.program.length}개, PDF교재: ${uploadedFiles.pdf.length}개`;
+        if (summaryFiles) summaryFiles.classList.remove('hidden');
+        if (summaryFilesText) {
+          summaryFilesText.textContent = `실습자료: ${uploadedFiles.program.length}개, PDF교재: ${uploadedFiles.pdf.length}개`;
+        }
       } else {
-        document.getElementById('summary-files').classList.add('hidden');
+        if (summaryFiles) summaryFiles.classList.add('hidden');
       }
 
       const materialTypes = [];
       if (document.getElementById('material-pdf')?.checked) materialTypes.push('PDF 교재');
       if (document.getElementById('material-paper')?.checked) materialTypes.push('서면 교재');
       if (document.getElementById('material-none')?.checked) materialTypes.push('해당사항 없음');
-      document.getElementById('summary-material-text').textContent =
-        materialTypes.length > 0 ? materialTypes.join(', ') : '(선택 필요)';
+      
+      const summaryMaterialText = document.getElementById('summary-material-text');
+      if (summaryMaterialText) {
+        summaryMaterialText.textContent = materialTypes.length > 0 ? materialTypes.join(', ') : '(선택 필요)';
+      }
 
       const equipmentRows = document.querySelectorAll('.equipment-row');
       const equipmentList = [];
@@ -2557,24 +2718,33 @@
           equipmentList.push(`${type} ${manufacturer || ''} ${model || ''} ${quantity || 1}대`.trim());
         }
       });
-      document.getElementById('summary-equipment-text').textContent =
-        equipmentList.length > 0 ? equipmentList.join(', ') : '(입력 필요)';
+      
+      const summaryEquipmentText = document.getElementById('summary-equipment-text');
+      if (summaryEquipmentText) {
+        summaryEquipmentText.textContent = equipmentList.length > 0 ? equipmentList.join(', ') : '(입력 필요)';
+      }
 
       const storageInfo = document.getElementById('storage-media-info')?.value;
+      const summaryStorage = document.getElementById('summary-storage');
+      const summaryStorageText = document.getElementById('summary-storage-text');
+      
       if (storageInfo && document.getElementById('storage-media-check')?.checked) {
-        document.getElementById('summary-storage').classList.remove('hidden');
-        document.getElementById('summary-storage-text').textContent = storageInfo;
+        if (summaryStorage) summaryStorage.classList.remove('hidden');
+        if (summaryStorageText) summaryStorageText.textContent = storageInfo;
       } else {
-        document.getElementById('summary-storage').classList.add('hidden');
+        if (summaryStorage) summaryStorage.classList.add('hidden');
       }
 
       const lanPortType = document.querySelector('[name="lan_port_type"]')?.value;
       const lanPortDetail = document.querySelector('[name="lan_port_detail"]')?.value;
+      const summaryLanport = document.getElementById('summary-lanport');
+      const summaryLanportText = document.getElementById('summary-lanport-text');
+      
       if (lanPortType && document.getElementById('lan-port-check')?.checked) {
-        document.getElementById('summary-lanport').classList.remove('hidden');
-        document.getElementById('summary-lanport-text').textContent = `${lanPortType} ${lanPortDetail || ''}`.trim();
+        if (summaryLanport) summaryLanport.classList.remove('hidden');
+        if (summaryLanportText) summaryLanportText.textContent = `${lanPortType} ${lanPortDetail || ''}`.trim();
       } else {
-        document.getElementById('summary-lanport').classList.add('hidden');
+        if (summaryLanport) summaryLanport.classList.add('hidden');
       }
 
       const vehicleInputs = document.querySelectorAll('[name="vehicle_type"], [name="vehicle_number"]');
@@ -2586,36 +2756,51 @@
           vehicles.push(`${type || ''} ${number || ''}`.trim());
         }
       }
-      document.getElementById('summary-vehicle-text').textContent =
-        vehicles.length > 0 ? vehicles.join(', ') : document.getElementById('no-vehicle')?.checked ? '해당사항 없음' : '(입력 선택)';
+      
+      const summaryVehicleText = document.getElementById('summary-vehicle-text');
+      if (summaryVehicleText) {
+        summaryVehicleText.textContent = vehicles.length > 0 ? vehicles.join(', ') : 
+          document.getElementById('no-vehicle')?.checked ? '해당사항 없음' : '(입력 선택)';
+      }
 
       const operatorEmail = document.getElementById('operator-email')?.value;
       const allRecipients = [];
       if (operatorEmail && operatorEmail !== 'custom') allRecipients.push(operatorEmail);
       allRecipients.push(...receiverEmails);
-      document.getElementById('summary-recipients').textContent =
-        allRecipients.length > 0 ? allRecipients.join(', ') : '(선택 필요)';
+      
+      const summaryRecipients = document.getElementById('summary-recipients');
+      if (summaryRecipients) {
+        summaryRecipients.textContent = allRecipients.length > 0 ? allRecipients.join(', ') : '(선택 필요)';
+      }
 
       const ccSection = document.getElementById('summary-cc-section');
+      const summaryCc = document.getElementById('summary-cc');
+      
       if (ccEmails.length > 0) {
-        ccSection.classList.remove('hidden');
-        document.getElementById('summary-cc').textContent = ccEmails.join(', ');
+        if (ccSection) ccSection.classList.remove('hidden');
+        if (summaryCc) summaryCc.textContent = ccEmails.join(', ');
       } else {
-        ccSection.classList.add('hidden');
+        if (ccSection) ccSection.classList.add('hidden');
       }
 
+      const summaryGeneralInquiry = document.getElementById('summary-general-inquiry');
+      const summaryGeneralInquiryText = document.getElementById('summary-general-inquiry-text');
+      
       if (generalInquiry) {
-        document.getElementById('summary-general-inquiry').classList.remove('hidden');
-        document.getElementById('summary-general-inquiry-text').textContent = generalInquiry;
+        if (summaryGeneralInquiry) summaryGeneralInquiry.classList.remove('hidden');
+        if (summaryGeneralInquiryText) summaryGeneralInquiryText.textContent = generalInquiry;
       } else {
-        document.getElementById('summary-general-inquiry').classList.add('hidden');
+        if (summaryGeneralInquiry) summaryGeneralInquiry.classList.add('hidden');
       }
 
+      const summaryFaqInquiry = document.getElementById('summary-faq-inquiry');
+      const summaryFaqInquiryText = document.getElementById('summary-faq-inquiry-text');
+      
       if (faqInquiry) {
-        document.getElementById('summary-faq-inquiry').classList.remove('hidden');
-        document.getElementById('summary-faq-inquiry-text').textContent = faqInquiry;
+        if (summaryFaqInquiry) summaryFaqInquiry.classList.remove('hidden');
+        if (summaryFaqInquiryText) summaryFaqInquiryText.textContent = faqInquiry;
       } else {
-        document.getElementById('summary-faq-inquiry').classList.add('hidden');
+        if (summaryFaqInquiry) summaryFaqInquiry.classList.add('hidden');
       }
     }
 
