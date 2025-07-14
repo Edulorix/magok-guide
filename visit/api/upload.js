@@ -9,7 +9,7 @@ export const config = {
 };
 
 export default async function handler(req, res) {
-  // CORS 설정 - 더 완전한 헤더 설정
+  // CORS 설정
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
@@ -24,15 +24,16 @@ export default async function handler(req, res) {
   }
 
   try {
-    // 환경변수 확인 및 더 나은 에러 메시지
+    // 환경변수 확인
     const serviceAccountEmail = process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL;
     const privateKey = process.env.GOOGLE_PRIVATE_KEY;
-    const folderId = process.env.GOOGLE_DRIVE_FOLDER_ID || '1BcD2EfG3HiJ4KlM5NoPqR6StU7VwX8Yz';
+    const folderId = process.env.GOOGLE_DRIVE_FOLDER_ID;
 
-    if (!serviceAccountEmail || !privateKey) {
+    if (!serviceAccountEmail || !privateKey || !folderId) {
       console.error('Missing environment variables:', {
         hasEmail: !!serviceAccountEmail,
-        hasKey: !!privateKey
+        hasKey: !!privateKey,
+        hasFolderId: !!folderId
       });
       return res.status(500).json({ 
         error: '서버 설정이 완료되지 않았습니다.',
@@ -51,9 +52,9 @@ export default async function handler(req, res) {
 
     const drive = google.drive({ version: 'v3', auth });
 
-    // 폼 데이터 파싱 - 더 안전한 설정
+    // 폼 데이터 파싱
     const form = formidable({
-      maxFileSize: 100 * 1024 * 1024, // 100MB로 증가
+      maxFileSize: 100 * 1024 * 1024, // 100MB
       keepExtensions: true,
       allowEmptyFiles: false,
       maxFields: 20,
@@ -122,7 +123,6 @@ export default async function handler(req, res) {
           }
         } catch (fileError) {
           console.error('개별 파일 업로드 오류:', fileError);
-          // 개별 파일 실패시에도 다른 파일들은 계속 처리
         }
       }
     }
