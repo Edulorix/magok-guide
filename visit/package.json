@@ -4,8 +4,7 @@
   "description": "LG Education File Upload System",
   "type": "module",
   "scripts": {
-    "build": "echo 'Build completed'",
-    "start": "node api/upload.js"
+    "build": "echo 'Build completed'"
   },
   "dependencies": {
     "googleapis": "^128.0.0",
