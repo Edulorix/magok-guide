@@ -1594,8 +1594,13 @@
     let receiverEmails = [];
     let ccEmails = [];
 
-    // API 엔드포인트 (Vercel Functions)
-    const API_BASE_URL = '/api';
+    // API 엔드포인트 수정 (HTML 파일 내의 JavaScript에서)
+const API_BASE_URL = window.location.hostname === 'localhost' 
+  ? '/api' 
+  : 'https://your-vercel-app-name.vercel.app/api';
+
+// 또는 더 안전한 방법
+const API_BASE_URL = '/api';
 
     // 파일 업로드 처리
     async function uploadToServer(files, onProgress) {
