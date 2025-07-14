@@ -58,7 +58,7 @@ export default async function handler(req, res) {
           const response = await drive.files.create({
             requestBody: {
               name: file.originalFilename || file.newFilename,
-              parents: ['1BcD2EfG3HiJ4KlM5NoPqR6StU7VwX8Yz'], // 여기에 실제 폴더 ID 입력
+              parents: [], // 루트 폴더에 저장
             },
             media: {
               mimeType: file.mimetype,
