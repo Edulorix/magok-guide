@@ -831,11 +831,6 @@
       transform: scale(1.1);
     }
 
-    @keyframes slideIn {
-      from { opacity: 0; transform: translateX(-20px); }
-      to { opacity: 1; transform: translateX(0); }
-    }
-
     .validation-message {
       font-size: 0.8rem;
       margin-top: 0.375rem;
@@ -1025,6 +1020,35 @@
         max-width: none;
         padding: 1rem;
       }
+    }
+
+    .upload-status {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-top: 1rem;
+      padding: 0.75rem;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      font-weight: 500;
+    }
+
+    .upload-status.success {
+      background: #d1f2eb;
+      color: #0c5460;
+      border: 1px solid #7dcea0;
+    }
+
+    .upload-status.error {
+      background: #fadbd8;
+      color: #c0392b;
+      border: 1px solid #e74c3c;
+    }
+
+    .upload-status.info {
+      background: #d6eaf8;
+      color: #1b4f72;
+      border: 1px solid #5dade2;
     }
   </style>
 </head>
@@ -1588,1167 +1612,921 @@
     </div>
   </div>
 
-  <script>
-    // EmailJS 초기화
-    emailjs.init('C56kGCzPtfgWVEKoO');
+<script>
+// EmailJS 초기화
+emailjs.init('C56kGCzPtfgWVEKoO');
 
-    // 전역 변수
-    let uploadedFiles = { program: [], pdf: [] };
-    let generalInquiry = '';
-    let faqInquiry = '';
-    let receiverEmails = [];
-    let ccEmails = [];
+// 전역 변수
+let uploadedFiles = { program: [], pdf: [] };
+let generalInquiry = '';
+let faqInquiry = '';
+let receiverEmails = [];
+let ccEmails = [];
 
-    // API 엔드포인트 수정 - 절대 경로로 변경
-    const API_BASE_URL = 'https://magok-guide-v673.vercel.app/api';
-
-    // 파일 업로드 처리
-    async function uploadToServer(files, onProgress) {
-      const formData = new FormData();
+// 오프라인 모드 파일 업로드 시뮬레이션
+async function simulateFileUpload(files, fileType) {
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      const processedFiles = Array.from(files).map((file, index) => ({
+        id: `file_${Date.now()}_${index}`,
+        name: file.name,
+        size: file.size,
+        downloadUrl: `#file-${file.name}`, // 시뮬레이션 URL
+        type: file.type,
+        uploadedAt: new Date().toISOString()
+      }));
       
-      files.forEach((file, index) => {
-        formData.append(`file_${index}`, file);
+      resolve({
+        success: true,
+        files: processedFiles,
+        message: `${processedFiles.length}개 파일이 성공적으로 업로드되었습니다.`
       });
+    }, 1000 + Math.random() * 2000); // 1-3초 지연 시뮬레이션
+  });
+}
 
-      try {
-        const response = await fetch(`${API_BASE_URL}/upload`, {
-          method: 'POST',
-          body: formData,
-          mode: 'cors'
-        });
+// 파일 업로드 처리
+async function handleFiles(files, fileType) {
+  if (!files || files.length === 0) return;
+  
+  const container = fileType === 'program' ? document.getElementById('upload-container') : document.getElementById('pdf-upload-container');
+  const progressElement = fileType === 'program' ? document.getElementById('upload-progress') : document.getElementById('pdf-upload-progress');
+  const progressBar = fileType === 'program' ? document.getElementById('upload-progress-bar') : document.getElementById('pdf-upload-progress-bar');
+  
+  container.classList.add('uploading');
+  progressElement.classList.remove('hidden');
 
-        if (!response.ok) {
-          const errorText = await response.text();
-          throw new Error(`HTTP error! status: ${response.status}, response: ${errorText}`);
-        }
-
-        const result = await response.json();
-        return result;
-      } catch (error) {
-        console.error('파일 업로드 오류:', error);
-        throw error;
-      }
-    }
-
-    // 파일 업로드 처리
-    async function handleFiles(files, fileType) {
-      if (!files || files.length === 0) return;
-      
-      const container = fileType === 'program' ? document.getElementById('upload-container') : document.getElementById('pdf-upload-container');
-      const progressElement = fileType === 'program' ? document.getElementById('upload-progress') : document.getElementById('pdf-upload-progress');
-      const progressBar = fileType === 'program' ? document.getElementById('upload-progress-bar') : document.getElementById('pdf-upload-progress-bar');
-      
-      if (!container || !progressElement || !progressBar) return;
-      
-      container.classList.add('uploading');
-      progressElement.classList.remove('hidden');
-
-      try {
-        // 진행률 시뮬레이션
-        let progress = 0;
-        const progressInterval = setInterval(() => {
-          progress += Math.random() * 10;
-          if (progress >= 90) {
-            progress = 90;
-            clearInterval(progressInterval);
-          }
-          progressBar.style.width = progress + '%';
-        }, 200);
-
-        const result = await uploadToServer(Array.from(files));
-        
+  try {
+    // 진행률 시뮬레이션
+    let progress = 0;
+    const progressInterval = setInterval(() => {
+      progress += Math.random() * 10;
+      if (progress >= 90) {
+        progress = 90;
         clearInterval(progressInterval);
-        progressBar.style.width = '100%';
+      }
+      progressBar.style.width = progress + '%';
+    }, 200);
 
-        if (result.success) {
-          result.files.forEach(file => {
-            uploadedFiles[fileType].push({
-              id: file.id,
-              name: file.name,
-              size: file.size,
-              downloadUrl: file.downloadUrl
-            });
-          });
-          
-          console.log(`${result.files.length}개 파일 업로드 완료`);
-          setTimeout(() => {
-            alert(`${result.files.length}개 파일이 성공적으로 업로드되었습니다.`);
-          }, 500);
-        } else {
-          throw new Error(result.error || '업로드 실패');
-        }
-      } catch (error) {
-        console.error('파일 업로드 실패:', error);
-        alert(`파일 업로드에 실패했습니다: ${error.message}`);
-      } finally {
-        container.classList.remove('uploading');
-        progressElement.classList.add('hidden');
-        progressBar.style.width = '0%';
-        
-        renderFileList(fileType);
+    const result = await simulateFileUpload(files, fileType);
+    
+    clearInterval(progressInterval);
+    progressBar.style.width = '100%';
+
+    if (result.success) {
+      result.files.forEach(file => {
+        uploadedFiles[fileType].push(file);
+      });
+      
+      // 성공 메시지 표시
+      showUploadStatus(container, 'success', `${result.files.length}개 파일이 성공적으로 업로드되었습니다!`);
+      console.log(`${result.files.length}개 파일 업로드 완료`);
+    } else {
+      throw new Error(result.error || '업로드 실패');
+    }
+  } catch (error) {
+    console.error('파일 업로드 실패:', error);
+    showUploadStatus(container, 'error', `파일 업로드에 실패했습니다: ${error.message}`);
+  } finally {
+    container.classList.remove('uploading');
+    progressElement.classList.add('hidden');
+    progressBar.style.width = '0%';
+    
+    renderFileList(fileType);
+    updateSummary();
+  }
+}
+
+// 업로드 상태 표시
+function showUploadStatus(container, type, message) {
+  // 기존 상태 메시지 제거
+  const existingStatus = container.querySelector('.upload-status');
+  if (existingStatus) {
+    existingStatus.remove();
+  }
+  
+  const statusDiv = document.createElement('div');
+  statusDiv.className = `upload-status ${type}`;
+  statusDiv.innerHTML = `
+    <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle'}"></i>
+    ${message}
+  `;
+  
+  container.appendChild(statusDiv);
+  
+  // 3초 후 자동 제거
+  setTimeout(() => {
+    if (statusDiv.parentNode) {
+      statusDiv.remove();
+    }
+  }, 3000);
+}
+
+// 파일 리스트 렌더링
+function renderFileList(fileType) {
+  const listId = fileType === 'program' ? 'program-file-list' : 'pdf-file-list';
+  const placeholderId = fileType === 'program' ? 'upload-placeholder' : 'pdf-placeholder';
+  const fileList = document.getElementById(listId);
+  const placeholder = document.getElementById(placeholderId);
+ 
+  if (uploadedFiles[fileType].length === 0) {
+    fileList.innerHTML = '';
+    placeholder.style.display = 'block';
+  } else {
+    placeholder.style.display = 'none';
+    fileList.innerHTML = uploadedFiles[fileType].map((file, index) => `
+      <div class="file-item">
+        <div class="file-info">
+          <i class="${getFileIcon(file.name)} file-icon"></i>
+          <div class="file-details">
+            <div class="file-name">${file.name}</div>
+            <div class="file-size">${formatFileSize(file.size)}</div>
+          </div>
+        </div>
+        <button type="button" class="file-remove" onclick="removeFile('${fileType}', ${index})">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+    `).join('');
+  }
+}
+
+// 파일 제거
+window.removeFile = function(fileType, index) {
+  uploadedFiles[fileType].splice(index, 1);
+  renderFileList(fileType);
+  updateSummary();
+};
+
+// 파일 크기 포맷팅
+function formatFileSize(bytes) {
+  if (bytes === 0) return '0 Bytes';
+  const k = 1024;
+  const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+}
+
+// 파일 아이콘 반환
+function getFileIcon(fileName) {
+  const ext = fileName.split('.').pop().toLowerCase();
+  if (['pdf'].includes(ext)) return 'fas fa-file-pdf';
+  if (['doc', 'docx'].includes(ext)) return 'fas fa-file-word';
+  if (['xls', 'xlsx'].includes(ext)) return 'fas fa-file-excel';
+  if (['ppt', 'pptx'].includes(ext)) return 'fas fa-file-powerpoint';
+  if (['jpg', 'jpeg', 'png', 'gif'].includes(ext)) return 'fas fa-file-image';
+  if (['zip', 'rar', '7z'].includes(ext)) return 'fas fa-file-archive';
+  return 'fas fa-file';
+}
+
+// 이메일용 파일 링크 생성
+function generateFileLinks(files, type) {
+  if (!files || files.length === 0) return '';
+ 
+  return files.map(file => {
+    const icon = getFileIcon(file.name);
+    const fileSize = formatFileSize(file.size);
+   
+    return `<div style="margin-bottom: 12px; padding: 16px; background: #ffffff; border: 1px solid #e9ecef; border-radius: 8px;">
+      <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+        <div style="display: flex; align-items: center; gap: 8px; flex: 1; min-width: 200px;">
+          <div style="font-weight: 600; font-size: 14px; color: #333; margin-bottom: 4px;">${file.name}</div>
+          <div style="font-size: 12px; color: #666;">${fileSize}</div>
+        </div>
+        <div style="background: linear-gradient(135deg, #a50034, #8c002c); color: white; padding: 8px 16px; border-radius: 6px; text-decoration: none; font-size: 12px; font-weight: 600; white-space: nowrap;">
+          파일 첨부됨
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// 파일 업로드 설정
+function setupFileUpload(containerId, uploadId, fileType) {
+  const container = document.getElementById(containerId);
+  const fileInput = document.getElementById(uploadId);
+
+  if (!container || !fileInput) return;
+
+  container.addEventListener('click', (e) => {
+    if (!e.target.closest('.file-item') && !e.target.closest('.file-remove') && !container.classList.contains('disabled') && !e.target.closest('.upload-status')) {
+      fileInput.click();
+    }
+  });
+
+  container.addEventListener('dragover', (e) => {
+    if (!container.classList.contains('disabled')) {
+      e.preventDefault();
+      container.classList.add('dragover');
+    }
+  });
+
+  container.addEventListener('dragleave', (e) => {
+    if (!container.contains(e.relatedTarget)) {
+      container.classList.remove('dragover');
+    }
+  });
+
+  container.addEventListener('drop', (e) => {
+    if (!container.classList.contains('disabled')) {
+      e.preventDefault();
+      container.classList.remove('dragover');
+      handleFiles(e.dataTransfer.files, fileType);
+    }
+  });
+
+  fileInput.addEventListener('change', (e) => {
+    if (e.target.files.length > 0) {
+      handleFiles(e.target.files, fileType);
+      e.target.value = '';
+    }
+  });
+}
+
+// 이벤트 리스너 설정
+function setupEventListeners() {
+  // 파일 업로드 초기화
+  setupFileUpload('upload-container', 'file-upload', 'program');
+  setupFileUpload('pdf-upload-container', 'pdf-upload', 'pdf');
+
+  // 다크모드 관리
+  const themeToggle = document.getElementById('theme-toggle');
+  const themeIcon = document.getElementById('theme-icon');
+ 
+  const savedTheme = localStorage.getItem('theme') || 'light';
+  document.documentElement.setAttribute('data-theme', savedTheme);
+  updateThemeIcon(savedTheme);
+
+  if (themeToggle) {
+    themeToggle.addEventListener('click', function() {
+      const currentTheme = document.documentElement.getAttribute('data-theme');
+      const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+     
+      document.documentElement.setAttribute('data-theme', newTheme);
+      localStorage.setItem('theme', newTheme);
+      updateThemeIcon(newTheme);
+    });
+  }
+
+  function updateThemeIcon(theme) {
+    if (themeIcon) {
+      themeIcon.className = theme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
+    }
+  }
+
+  // 연락처 자동 포맷팅
+  const phoneInput = document.getElementById('phone-number');
+  if (phoneInput) {
+    phoneInput.addEventListener('input', function(e) {
+      let value = e.target.value.replace(/\D/g, '');
+      if (value.length <= 3) {
+        e.target.value = value;
+      } else if (value.length <= 7) {
+        e.target.value = value.slice(0, 3) + '-' + value.slice(3);
+      } else {
+        e.target.value = value.slice(0, 3) + '-' + value.slice(3, 7) + '-' + value.slice(7, 11);
+      }
+    });
+  }
+
+  // 탭 관리
+  const tabButtons = document.querySelectorAll('.tab-button');
+  const tabContents = document.querySelectorAll('.tab-content');
+
+  tabButtons.forEach(button => {
+    button.addEventListener('click', function() {
+      const tabId = this.getAttribute('data-tab');
+      switchToTab(tabId);
+      updateSummary();
+    });
+  });
+
+  function switchToTab(tabId) {
+    tabButtons.forEach(btn => btn.classList.remove('active'));
+    tabContents.forEach(content => content.classList.remove('active'));
+   
+    const targetButton = document.querySelector(`[data-tab="${tabId}"]`);
+    const targetContent = document.getElementById(tabId);
+    
+    if (targetButton) targetButton.classList.add('active');
+    if (targetContent) targetContent.classList.add('active');
+  }
+
+  // 다음/이전 버튼
+  const nextToTab2 = document.getElementById('next-to-tab2');
+  if (nextToTab2) {
+    nextToTab2.addEventListener('click', function() {
+      if (validateTab1()) {
+        switchToTab('tab2');
+      }
+    });
+  }
+
+  const nextToTab3 = document.getElementById('next-to-tab3');
+  if (nextToTab3) {
+    nextToTab3.addEventListener('click', function() {
+      switchToTab('tab3');
+      updateSummary();
+    });
+  }
+
+  const prevToTab1 = document.getElementById('prev-to-tab1');
+  if (prevToTab1) {
+    prevToTab1.addEventListener('click', function() {
+      switchToTab('tab1');
+    });
+  }
+
+  const prevToTab2 = document.getElementById('prev-to-tab2');
+  if (prevToTab2) {
+    prevToTab2.addEventListener('click', function() {
+      switchToTab('tab2');
+    });
+  }
+
+  // 탭1 검증
+  function validateTab1() {
+    let isValid = true;
+   
+    const companyName = document.getElementById('company-name')?.value?.trim() || '';
+    const instructorName = document.getElementById('instructor-name')?.value?.trim() || '';
+    const phoneNumber = document.getElementById('phone-number')?.value?.trim() || '';
+   
+    const companyError = document.getElementById('company-error');
+    const instructorError = document.getElementById('instructor-error');
+    const phoneError = document.getElementById('phone-error');
+   
+    if (!companyName) {
+      if (companyError) companyError.classList.remove('hidden');
+      isValid = false;
+    } else {
+      if (companyError) companyError.classList.add('hidden');
+    }
+   
+    if (!instructorName) {
+      if (instructorError) instructorError.classList.remove('hidden');
+      isValid = false;
+    } else {
+      if (instructorError) instructorError.classList.add('hidden');
+    }
+   
+    if (!phoneNumber) {
+      if (phoneError) phoneError.classList.remove('hidden');
+      isValid = false;
+    } else {
+      if (phoneError) phoneError.classList.add('hidden');
+    }
+   
+    return isValid;
+  }
+
+  // 체크박스 이벤트 리스너들
+  const noInstallationCheckbox = document.getElementById('no-installation');
+  if (noInstallationCheckbox) {
+    noInstallationCheckbox.addEventListener('change', function() {
+      const uploadContainer = document.getElementById('upload-container');
+      const programDesc = document.getElementById('program-desc');
+     
+      if (this.checked) {
+        if (uploadContainer) uploadContainer.classList.add('disabled');
+        if (programDesc) programDesc.classList.add('section-disabled');
+      } else {
+        if (uploadContainer) uploadContainer.classList.remove('disabled');
+        if (programDesc) programDesc.classList.remove('section-disabled');
+      }
+      updateSummary();
+    });
+  }
+
+  const materialNoneCheckbox = document.getElementById('material-none');
+  if (materialNoneCheckbox) {
+    materialNoneCheckbox.addEventListener('change', function() {
+      const pdfContainer = document.getElementById('pdf-upload-container');
+      const paperInfo = document.getElementById('paper-material-info');
+      const pdfCheckbox = document.getElementById('material-pdf');
+      const paperCheckbox = document.getElementById('material-paper');
+     
+      if (this.checked) {
+        if (pdfCheckbox) pdfCheckbox.checked = false;
+        if (paperCheckbox) paperCheckbox.checked = false;
+        if (pdfContainer) pdfContainer.classList.add('hidden');
+        if (paperInfo) paperInfo.classList.add('hidden');
+      }
+      updateSummary();
+    });
+  }
+
+  const noVehicleCheckbox = document.getElementById('no-vehicle');
+  if (noVehicleCheckbox) {
+    noVehicleCheckbox.addEventListener('change', function() {
+      const vehicleContainer = document.getElementById('vehicle-container');
+      const addVehicleBtn = document.getElementById('add-vehicle');
+     
+      if (this.checked) {
+        if (vehicleContainer) vehicleContainer.classList.add('section-disabled');
+        if (addVehicleBtn) addVehicleBtn.classList.add('section-disabled');
+      } else {
+        if (vehicleContainer) vehicleContainer.classList.remove('section-disabled');
+        if (addVehicleBtn) addVehicleBtn.classList.remove('section-disabled');
+      }
+      updateSummary();
+    });
+  }
+
+  // 교재 유형 체크박스
+  const materialPdfCheckbox = document.getElementById('material-pdf');
+  if (materialPdfCheckbox) {
+    materialPdfCheckbox.addEventListener('change', function() {
+      const container = document.getElementById('pdf-upload-container');
+      const noneCheckbox = document.getElementById('material-none');
+     
+      if (this.checked) {
+        if (container) container.classList.remove('hidden');
+        if (noneCheckbox) noneCheckbox.checked = false;
+      } else {
+        if (container) container.classList.add('hidden');
+      }
+      updateSummary();
+    });
+  }
+
+  const materialPaperCheckbox = document.getElementById('material-paper');
+  if (materialPaperCheckbox) {
+    materialPaperCheckbox.addEventListener('change', function() {
+      const container = document.getElementById('paper-material-info');
+      const noneCheckbox = document.getElementById('material-none');
+     
+      if (this.checked) {
+        if (container) container.classList.remove('hidden');
+        if (noneCheckbox) noneCheckbox.checked = false;
+      } else {
+        if (container) container.classList.add('hidden');
+      }
+      updateSummary();
+    });
+  }
+
+  // 저장매체 체크박스
+  const storageMediaCheckbox = document.getElementById('storage-media-check');
+  if (storageMediaCheckbox) {
+    storageMediaCheckbox.addEventListener('change', function() {
+      const textarea = document.getElementById('storage-media-info');
+      if (this.checked) {
+        if (textarea) textarea.classList.remove('hidden');
+      } else {
+        if (textarea) textarea.classList.add('hidden');
+      }
+    });
+  }
+
+  // LAN Port 체크박스
+  const lanPortCheckbox = document.getElementById('lan-port-check');
+  if (lanPortCheckbox) {
+    lanPortCheckbox.addEventListener('change', function() {
+      const fields = document.getElementById('lan-port-fields');
+      if (this.checked) {
+        if (fields) fields.classList.remove('hidden');
+      } else {
+        if (fields) fields.classList.add('hidden');
+      }
+    });
+  }
+
+  // 장비 추가
+  const addEquipmentBtn = document.getElementById('add-equipment');
+  if (addEquipmentBtn) {
+    addEquipmentBtn.addEventListener('click', function() {
+      const container = document.getElementById('equipment-container');
+      if (!container) return;
+      
+      const newRow = document.createElement('div');
+      newRow.className = 'equipment-row';
+      newRow.innerHTML = `
+        <select class="form-control" name="equipment_type">
+          <option value="">장비 유형 선택</option>
+          <option value="노트북">노트북</option>
+          <option value="네트워크장비">네트워크장비</option>
+          <option value="NAS">NAS</option>
+          <option value="데스크탑">데스크탑</option>
+          <option value="스마트패드">스마트패드</option>
+          <option value="샘플폰">샘플폰</option>
+          <option value="서버장비">서버장비</option>
+          <option value="태블릿PC">태블릿PC</option>
+          <option value="AP">AP</option>
+          <option value="CD">CD</option>
+          <option value="디지털카메라">디지털카메라</option>
+          <option value="DVD">DVD</option>
+          <option value="기타">기타</option>
+          <option value="HDD/SSD">HDD/SSD</option>
+          <option value="모바일폰">모바일폰</option>
+          <option value="메모리카드">메모리카드</option>
+          <option value="USB">USB</option>
+          <option value="워크스테이션">워크스테이션</option>
+        </select>
+        <input type="text" class="form-control" name="equipment_manufacturer" placeholder="제조사">
+        <input type="text" class="form-control" name="equipment_model" placeholder="기종">
+        <input type="number" class="form-control equipment-qty" name="equipment_quantity" min="1" value="1" placeholder="수량">
+        <input type="text" class="form-control" name="equipment_serial" placeholder="S/N & MAC주소">
+        <button type="button" class="equipment-remove btn btn-secondary p-2">
+          <i class="fas fa-minus"></i>
+        </button>
+      `;
+      container.appendChild(newRow);
+     
+      const removeBtn = newRow.querySelector('.equipment-remove');
+      if (removeBtn) {
+        removeBtn.addEventListener('click', function() {
+          if (container.children.length > 1) {
+            newRow.remove();
+            updateSummary();
+          }
+        });
+      }
+    });
+  }
+
+  // 기존 장비 삭제 버튼
+  document.querySelectorAll('.equipment-remove').forEach(btn => {
+    btn.addEventListener('click', function() {
+      const container = document.getElementById('equipment-container');
+      if (container && container.children.length > 1) {
+        this.closest('.equipment-row').remove();
         updateSummary();
       }
-    }
+    });
+  });
 
-    // 파일 리스트 렌더링
-    function renderFileList(fileType) {
-      const listId = fileType === 'program' ? 'program-file-list' : 'pdf-file-list';
-      const placeholderId = fileType === 'program' ? 'upload-placeholder' : 'pdf-placeholder';
-      const fileList = document.getElementById(listId);
-      const placeholder = document.getElementById(placeholderId);
-     
-      if (!fileList || !placeholder) return;
-     
-      if (uploadedFiles[fileType].length === 0) {
-        fileList.innerHTML = '';
-        placeholder.style.display = 'block';
-      } else {
-        placeholder.style.display = 'none';
-        fileList.innerHTML = uploadedFiles[fileType].map((file, index) => `
-          <div class="file-item">
-            <div class="file-info">
-              <i class="${getFileIcon(file.name)} file-icon"></i>
-              <div class="file-details">
-                <div class="file-name">${file.name}</div>
-                <div class="file-size">${formatFileSize(file.size)}</div>
-              </div>
-            </div>
-            <button type="button" class="file-remove" onclick="removeFile('${fileType}', ${index})">
-              <i class="fas fa-times"></i>
-            </button>
-          </div>
-        `).join('');
-      }
-    }
-
-    // 파일 제거
-    window.removeFile = function(fileType, index) {
-      uploadedFiles[fileType].splice(index, 1);
-      renderFileList(fileType);
-      updateSummary();
-    };
-
-    // 파일 크기 포맷팅
-    function formatFileSize(bytes) {
-      if (bytes === 0) return '0 Bytes';
-      const k = 1024;
-      const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-      const i = Math.floor(Math.log(bytes) / Math.log(k));
-      return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
-    }
-
-    // 파일 아이콘 반환
-    function getFileIcon(fileName) {
-      const ext = fileName.split('.').pop().toLowerCase();
-      if (['pdf'].includes(ext)) return 'fas fa-file-pdf';
-      if (['doc', 'docx'].includes(ext)) return 'fas fa-file-word';
-      if (['xls', 'xlsx'].includes(ext)) return 'fas fa-file-excel';
-      if (['ppt', 'pptx'].includes(ext)) return 'fas fa-file-powerpoint';
-      if (['jpg', 'jpeg', 'png', 'gif'].includes(ext)) return 'fas fa-file-image';
-      if (['zip', 'rar', '7z'].includes(ext)) return 'fas fa-file-archive';
-      return 'fas fa-file';
-    }
-
-    // 이메일용 파일 링크 생성
-    function generateFileLinks(files, type) {
-      if (!files || files.length === 0) return '';
-     
-      return files.map(file => {
-        const icon = getFileIcon(file.name);
-        const fileSize = formatFileSize(file.size);
-       
-        return `<div style="margin-bottom: 12px; padding: 16px; background: #ffffff; border: 1px solid #e9ecef; border-radius: 8px;">
-          <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
-            <div style="display: flex; align-items: center; gap: 8px; flex: 1; min-width: 200px;">
-              <div style="font-weight: 600; font-size: 14px; color: #333; margin-bottom: 4px;">${file.name}</div>
-              <div style="font-size: 12px; color: #666;">${fileSize}</div>
-            </div>
-            <a href="${file.downloadUrl}" style="background: linear-gradient(135deg, #a50034, #8c002c); color: white; padding: 8px 16px; border-radius: 6px; text-decoration: none; font-size: 12px; font-weight: 600; white-space: nowrap;">
-              다운로드
-            </a>
-          </div>
-        </div>`;
-      }).join('');
-    }
-
-    // 파일 업로드 설정
-    function setupFileUpload(containerId, uploadId, fileType) {
-      const container = document.getElementById(containerId);
-      const fileInput = document.getElementById(uploadId);
-
-      if (!container || !fileInput) return;
-
-      container.addEventListener('click', (e) => {
-        if (!e.target.closest('.file-item') && !e.target.closest('.file-remove') && !container.classList.contains('disabled')) {
-          fileInput.click();
-        }
-      });
-
-      container.addEventListener('dragover', (e) => {
-        if (!container.classList.contains('disabled')) {
-          e.preventDefault();
-          container.classList.add('dragover');
-        }
-      });
-
-      container.addEventListener('dragleave', () => {
-        container.classList.remove('dragover');
-      });
-
-      container.addEventListener('drop', (e) => {
-        if (!container.classList.contains('disabled')) {
-          e.preventDefault();
-          container.classList.remove('dragover');
-          handleFiles(e.dataTransfer.files, fileType);
-        }
-      });
-
-      fileInput.addEventListener('change', (e) => {
-        if (e.target.files.length > 0) {
-          handleFiles(e.target.files, fileType);
-          e.target.value = '';
-        }
-      });
-    }
-
-    // 이벤트 리스너 설정
-    function setupEventListeners() {
-      // 파일 업로드 초기화
-      setupFileUpload('upload-container', 'file-upload', 'program');
-      setupFileUpload('pdf-upload-container', 'pdf-upload', 'pdf');
-
-      // 다크모드 관리
-      const themeToggle = document.getElementById('theme-toggle');
-      const themeIcon = document.getElementById('theme-icon');
-     
-      const savedTheme = localStorage.getItem('theme') || 'light';
-      document.documentElement.setAttribute('data-theme', savedTheme);
-      updateThemeIcon(savedTheme);
-
-      if (themeToggle) {
-        themeToggle.addEventListener('click', function() {
-          const currentTheme = document.documentElement.getAttribute('data-theme');
-          const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-         
-          document.documentElement.setAttribute('data-theme', newTheme);
-          localStorage.setItem('theme', newTheme);
-          updateThemeIcon(newTheme);
-        });
-      }
-
-      function updateThemeIcon(theme) {
-        if (themeIcon) {
-          themeIcon.className = theme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
-        }
-      }
-
-      // 연락처 자동 포맷팅
-      const phoneInput = document.getElementById('phone-number');
-      if (phoneInput) {
-        phoneInput.addEventListener('input', function(e) {
-          let value = e.target.value.replace(/\D/g, '');
-          if (value.length <= 3) {
-            e.target.value = value;
-          } else if (value.length <= 7) {
-            e.target.value = value.slice(0, 3) + '-' + value.slice(3);
-          } else {
-            e.target.value = value.slice(0, 3) + '-' + value.slice(3, 7) + '-' + value.slice(7, 11);
-          }
-        });
-      }
-
-      // 탭 관리
-      const tabButtons = document.querySelectorAll('.tab-button');
-      const tabContents = document.querySelectorAll('.tab-content');
-
-      tabButtons.forEach(button => {
-        button.addEventListener('click', function() {
-          const tabId = this.getAttribute('data-tab');
-          switchToTab(tabId);
-          updateSummary();
-        });
-      });
-
-      function switchToTab(tabId) {
-        tabButtons.forEach(btn => btn.classList.remove('active'));
-        tabContents.forEach(content => content.classList.remove('active'));
-       
-        const targetButton = document.querySelector(`[data-tab="${tabId}"]`);
-        const targetContent = document.getElementById(tabId);
-        
-        if (targetButton) targetButton.classList.add('active');
-        if (targetContent) targetContent.classList.add('active');
-      }
-
-      // 다음/이전 버튼
-      const nextToTab2 = document.getElementById('next-to-tab2');
-      if (nextToTab2) {
-        nextToTab2.addEventListener('click', function() {
-          if (validateTab1()) {
-            switchToTab('tab2');
-          }
-        });
-      }
-
-      const nextToTab3 = document.getElementById('next-to-tab3');
-      if (nextToTab3) {
-        nextToTab3.addEventListener('click', function() {
-          switchToTab('tab3');
-          updateSummary();
-        });
-      }
-
-      const prevToTab1 = document.getElementById('prev-to-tab1');
-      if (prevToTab1) {
-        prevToTab1.addEventListener('click', function() {
-          switchToTab('tab1');
-        });
-      }
-
-      const prevToTab2 = document.getElementById('prev-to-tab2');
-      if (prevToTab2) {
-        prevToTab2.addEventListener('click', function() {
-          switchToTab('tab2');
-        });
-      }
-
-      // 탭1 검증
-      function validateTab1() {
-        let isValid = true;
-       
-        const companyName = document.getElementById('company-name')?.value?.trim() || '';
-        const instructorName = document.getElementById('instructor-name')?.value?.trim() || '';
-        const phoneNumber = document.getElementById('phone-number')?.value?.trim() || '';
-       
-        const companyError = document.getElementById('company-error');
-        const instructorError = document.getElementById('instructor-error');
-        const phoneError = document.getElementById('phone-error');
-       
-        if (!companyName) {
-          if (companyError) companyError.classList.remove('hidden');
-          isValid = false;
-        } else {
-          if (companyError) companyError.classList.add('hidden');
-        }
-       
-        if (!instructorName) {
-          if (instructorError) instructorError.classList.remove('hidden');
-          isValid = false;
-        } else {
-          if (instructorError) instructorError.classList.add('hidden');
-        }
-       
-        if (!phoneNumber) {
-          if (phoneError) phoneError.classList.remove('hidden');
-          isValid = false;
-        } else {
-          if (phoneError) phoneError.classList.add('hidden');
-        }
-       
-        return isValid;
-      }
-
-      // 체크박스 이벤트 리스너들
-      const noInstallationCheckbox = document.getElementById('no-installation');
-      if (noInstallationCheckbox) {
-        noInstallationCheckbox.addEventListener('change', function() {
-          const uploadContainer = document.getElementById('upload-container');
-          const programDesc = document.getElementById('program-desc');
-         
-          if (this.checked) {
-            if (uploadContainer) uploadContainer.classList.add('disabled');
-            if (programDesc) programDesc.classList.add('section-disabled');
-          } else {
-            if (uploadContainer) uploadContainer.classList.remove('disabled');
-            if (programDesc) programDesc.classList.remove('section-disabled');
-          }
-          updateSummary();
-        });
-      }
-
-      const materialNoneCheckbox = document.getElementById('material-none');
-      if (materialNoneCheckbox) {
-        materialNoneCheckbox.addEventListener('change', function() {
-          const pdfContainer = document.getElementById('pdf-upload-container');
-          const paperInfo = document.getElementById('paper-material-info');
-          const pdfCheckbox = document.getElementById('material-pdf');
-          const paperCheckbox = document.getElementById('material-paper');
-         
-          if (this.checked) {
-            if (pdfCheckbox) pdfCheckbox.checked = false;
-            if (paperCheckbox) paperCheckbox.checked = false;
-            if (pdfContainer) pdfContainer.classList.add('hidden');
-            if (paperInfo) paperInfo.classList.add('hidden');
-          }
-          updateSummary();
-        });
-      }
-
-      const noVehicleCheckbox = document.getElementById('no-vehicle');
-      if (noVehicleCheckbox) {
-        noVehicleCheckbox.addEventListener('change', function() {
-          const vehicleContainer = document.getElementById('vehicle-container');
-          const addVehicleBtn = document.getElementById('add-vehicle');
-         
-          if (this.checked) {
-            if (vehicleContainer) vehicleContainer.classList.add('section-disabled');
-            if (addVehicleBtn) addVehicleBtn.classList.add('section-disabled');
-          } else {
-            if (vehicleContainer) vehicleContainer.classList.remove('section-disabled');
-            if (addVehicleBtn) addVehicleBtn.classList.remove('section-disabled');
-          }
-          updateSummary();
-        });
-      }
-
-      // 교재 유형 체크박스
-      const materialPdfCheckbox = document.getElementById('material-pdf');
-      if (materialPdfCheckbox) {
-        materialPdfCheckbox.addEventListener('change', function() {
-          const container = document.getElementById('pdf-upload-container');
-          const noneCheckbox = document.getElementById('material-none');
-         
-          if (this.checked) {
-            if (container) container.classList.remove('hidden');
-            if (noneCheckbox) noneCheckbox.checked = false;
-          } else {
-            if (container) container.classList.add('hidden');
-          }
-          updateSummary();
-        });
-      }
-
-      const materialPaperCheckbox = document.getElementById('material-paper');
-      if (materialPaperCheckbox) {
-        materialPaperCheckbox.addEventListener('change', function() {
-          const container = document.getElementById('paper-material-info');
-          const noneCheckbox = document.getElementById('material-none');
-         
-          if (this.checked) {
-            if (container) container.classList.remove('hidden');
-            if (noneCheckbox) noneCheckbox.checked = false;
-          } else {
-            if (container) container.classList.add('hidden');
-          }
-          updateSummary();
-        });
-      }
-
-      // 저장매체 체크박스
-      const storageMediaCheckbox = document.getElementById('storage-media-check');
-      if (storageMediaCheckbox) {
-        storageMediaCheckbox.addEventListener('change', function() {
-          const textarea = document.getElementById('storage-media-info');
-          if (this.checked) {
-            if (textarea) textarea.classList.remove('hidden');
-          } else {
-            if (textarea) textarea.classList.add('hidden');
-          }
-        });
-      }
-
-      // LAN Port 체크박스
-      const lanPortCheckbox = document.getElementById('lan-port-check');
-      if (lanPortCheckbox) {
-        lanPortCheckbox.addEventListener('change', function() {
-          const fields = document.getElementById('lan-port-fields');
-          if (this.checked) {
-            if (fields) fields.classList.remove('hidden');
-          } else {
-            if (fields) fields.classList.add('hidden');
-          }
-        });
-      }
-
-      // 장비 추가
-      const addEquipmentBtn = document.getElementById('add-equipment');
-      if (addEquipmentBtn) {
-        addEquipmentBtn.addEventListener('click', function() {
-          const container = document.getElementById('equipment-container');
-          if (!container) return;
-          
-          const newRow = document.createElement('div');
-          newRow.className = 'equipment-row';
-          newRow.innerHTML = `
-            <select class="form-control" name="equipment_type">
-              <option value="">장비 유형 선택</option>
-              <option value="노트북">노트북</option>
-              <option value="네트워크장비">네트워크장비</option>
-              <option value="NAS">NAS</option>
-              <option value="데스크탑">데스크탑</option>
-              <option value="스마트패드">스마트패드</option>
-              <option value="샘플폰">샘플폰</option>
-              <option value="서버장비">서버장비</option>
-              <option value="태블릿PC">태블릿PC</option>
-              <option value="AP">AP</option>
-              <option value="CD">CD</option>
-              <option value="디지털카메라">디지털카메라</option>
-              <option value="DVD">DVD</option>
-              <option value="기타">기타</option>
-              <option value="HDD/SSD">HDD/SSD</option>
-              <option value="모바일폰">모바일폰</option>
-              <option value="메모리카드">메모리카드</option>
-              <option value="USB">USB</option>
-              <option value="워크스테이션">워크스테이션</option>
-            </select>
-            <input type="text" class="form-control" name="equipment_manufacturer" placeholder="제조사">
-            <input type="text" class="form-control" name="equipment_model" placeholder="기종">
-            <input type="number" class="form-control equipment-qty" name="equipment_quantity" min="1" value="1" placeholder="수량">
-            <input type="text" class="form-control" name="equipment_serial" placeholder="S/N & MAC주소">
-            <button type="button" class="equipment-remove btn btn-secondary p-2">
+  // 차량 추가
+  const addVehicleBtn = document.getElementById('add-vehicle');
+  if (addVehicleBtn) {
+    addVehicleBtn.addEventListener('click', function() {
+      const container = document.getElementById('vehicle-container');
+      if (!container) return;
+      
+      const newVehicle = document.createElement('div');
+      newVehicle.className = 'grid grid-cols-1 md:grid-cols-2 gap-4 mb-4';
+      newVehicle.innerHTML = `
+        <div class="form-group">
+          <label class="form-label">차종</label>
+          <input type="text" class="form-control" name="vehicle_type" placeholder="그랜저">
+        </div>
+        <div class="form-group">
+          <label class="form-label">차량번호</label>
+          <div class="flex gap-2">
+            <input type="text" class="form-control" name="vehicle_number" placeholder="12가 1234">
+            <button type="button" class="vehicle-remove btn btn-secondary">
               <i class="fas fa-minus"></i>
             </button>
-          `;
-          container.appendChild(newRow);
-         
-          const removeBtn = newRow.querySelector('.equipment-remove');
-          if (removeBtn) {
-            removeBtn.addEventListener('click', function() {
-              if (container.children.length > 1) {
-                newRow.remove();
-              }
-            });
-          }
+          </div>
+        </div>
+      `;
+      container.appendChild(newVehicle);
+     
+      const removeBtn = newVehicle.querySelector('.vehicle-remove');
+      if (removeBtn) {
+        removeBtn.addEventListener('click', function() {
+          newVehicle.remove();
+          updateSummary();
         });
       }
+    });
+  }
 
-      // 기존 장비 삭제 버튼
-      document.querySelectorAll('.equipment-remove').forEach(btn => {
-        btn.addEventListener('click', function() {
-          const container = document.getElementById('equipment-container');
-          if (container && container.children.length > 1) {
-            this.closest('.equipment-row').remove();
+  // 수신자/참조자 관리
+  function validateEmail(email) {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  }
+
+  function showValidationMessage(elementId, message, isValid) {
+    const messageEl = document.getElementById(elementId);
+    if (!messageEl) return;
+    
+    messageEl.textContent = message;
+    messageEl.className = `validation-message ${isValid ? 'valid' : 'invalid'}`;
+    messageEl.style.display = 'block';
+    if (isValid || !message) {
+      setTimeout(() => { messageEl.style.display = 'none'; }, 3000);
+    }
+  }
+
+  function addReceiverEmail(email) {
+    if (!validateEmail(email)) {
+      showValidationMessage('receiver-validation-message', '올바른 이메일 형식이 아닙니다.', false);
+      return false;
+    }
+
+    if (receiverEmails.includes(email)) {
+      showValidationMessage('receiver-validation-message', '이미 추가된 이메일입니다.', false);
+      return false;
+    }
+
+    receiverEmails.push(email);
+    updateReceiverTags();
+    const receiverInput = document.getElementById('receiver-email-input');
+    if (receiverInput) receiverInput.value = '';
+    showValidationMessage('receiver-validation-message', '수신자가 추가되었습니다.', true);
+    return true;
+  }
+
+  function updateReceiverTags() {
+    const container = document.getElementById('receiver-tags-container');
+    if (!container) return;
+    
+    container.innerHTML = receiverEmails.map((email, index) => {
+      return `<div class="email-tag" data-email="${email}">
+        <i class="fas fa-user mr-1"></i>
+        ${email}
+        <button type="button" class="remove-tag" onclick="removeReceiverEmail('${email}')">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>`;
+    }).join('');
+  }
+
+  window.removeReceiverEmail = function(email) {
+    receiverEmails = receiverEmails.filter(e => e !== email);
+    updateReceiverTags();
+    updateSummary();
+  };
+
+  const addReceiverBtn = document.getElementById('add-receiver-btn');
+  if (addReceiverBtn) {
+    addReceiverBtn.addEventListener('click', function() {
+      const emailInput = document.getElementById('receiver-email-input');
+      const email = emailInput ? emailInput.value.trim() : '';
+      if (email) {
+        if (addReceiverEmail(email)) {
+          updateSummary();
+        }
+      }
+    });
+  }
+
+  const receiverEmailInput = document.getElementById('receiver-email-input');
+  if (receiverEmailInput) {
+    receiverEmailInput.addEventListener('keypress', function(e) {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        const email = this.value.trim();
+        if (email) {
+          if (addReceiverEmail(email)) {
+            updateSummary();
           }
-        });
-      });
+        }
+      }
+    });
+  }
 
-      // 차량 추가
-      const addVehicleBtn = document.getElementById('add-vehicle');
-      if (addVehicleBtn) {
-        addVehicleBtn.addEventListener('click', function() {
-          const container = document.getElementById('vehicle-container');
-          if (!container) return;
-          
-          const newVehicle = document.createElement('div');
-          newVehicle.className = 'grid grid-cols-1 md:grid-cols-2 gap-4 mb-4';
-          newVehicle.innerHTML = `
-            <div class="form-group">
-              <label class="form-label">차종</label>
-              <input type="text" class="form-control" name="vehicle_type" placeholder="그랜저">
-            </div>
-            <div class="form-group">
-              <label class="form-label">차량번호</label>
-              <div class="flex gap-2">
-                <input type="text" class="form-control" name="vehicle_number" placeholder="12가 1234">
-                <button type="button" class="vehicle-remove btn btn-secondary">
-                  <i class="fas fa-minus"></i>
-                </button>
-              </div>
-            </div>
-          `;
-          container.appendChild(newVehicle);
-         
-          const removeBtn = newVehicle.querySelector('.vehicle-remove');
-          if (removeBtn) {
-            removeBtn.addEventListener('click', function() {
-              newVehicle.remove();
-            });
+  function addCcEmail(email) {
+    if (!validateEmail(email)) {
+      showValidationMessage('cc-validation-message', '올바른 이메일 형식이 아닙니다.', false);
+      return false;
+    }
+
+    if (ccEmails.includes(email)) {
+      showValidationMessage('cc-validation-message', '이미 추가된 이메일입니다.', false);
+      return false;
+    }
+
+    ccEmails.push(email);
+    updateCcTags();
+    const ccInput = document.getElementById('cc-email-input');
+    if (ccInput) ccInput.value = '';
+    showValidationMessage('cc-validation-message', '참조자가 추가되었습니다.', true);
+    return true;
+  }
+
+  function updateCcTags() {
+    const container = document.getElementById('cc-tags-container');
+    if (!container) return;
+    
+    container.innerHTML = ccEmails.map((email, index) => {
+      return `<div class="email-tag" data-email="${email}">
+        <i class="fas fa-user mr-1"></i>
+        ${email}
+        <button type="button" class="remove-tag" onclick="removeCcEmail('${email}')">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>`;
+    }).join('');
+  }
+
+  window.removeCcEmail = function(email) {
+    ccEmails = ccEmails.filter(e => e !== email);
+    updateCcTags();
+    updateSummary();
+  };
+
+  const addCcBtn = document.getElementById('add-cc-btn');
+  if (addCcBtn) {
+    addCcBtn.addEventListener('click', function() {
+      const emailInput = document.getElementById('cc-email-input');
+      const email = emailInput ? emailInput.value.trim() : '';
+      if (email) {
+        if (addCcEmail(email)) {
+          updateSummary();
+        }
+      }
+    });
+  }
+
+  const ccEmailInput = document.getElementById('cc-email-input');
+  if (ccEmailInput) {
+    ccEmailInput.addEventListener('keypress', function(e) {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        const email = this.value.trim();
+        if (email) {
+          if (addCcEmail(email)) {
+            updateSummary();
           }
-        });
-      }
-
-      // 수신자/참조자 관리
-      function validateEmail(email) {
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        return emailRegex.test(email);
-      }
-
-      function showValidationMessage(elementId, message, isValid) {
-        const messageEl = document.getElementById(elementId);
-        if (!messageEl) return;
-        
-        messageEl.textContent = message;
-        messageEl.className = `validation-message ${isValid ? 'valid' : 'invalid'}`;
-        messageEl.style.display = 'block';
-        if (isValid || !message) {
-          setTimeout(() => { messageEl.style.display = 'none'; }, 3000);
         }
       }
+    });
+  }
 
-      function addReceiverEmail(email) {
-        if (!validateEmail(email)) {
-          showValidationMessage('receiver-validation-message', '올바른 이메일 형식이 아닙니다.', false);
-          return false;
+  const ccOperatorSelect = document.getElementById('cc-operator-select');
+  if (ccOperatorSelect) {
+    ccOperatorSelect.addEventListener('change', function() {
+      const email = this.value;
+      if (email && !ccEmails.includes(email)) {
+        if (addCcEmail(email)) {
+          updateSummary();
         }
-
-        if (receiverEmails.includes(email)) {
-          showValidationMessage('receiver-validation-message', '이미 추가된 이메일입니다.', false);
-          return false;
-        }
-
-        receiverEmails.push(email);
-        updateReceiverTags();
-        const receiverInput = document.getElementById('receiver-email-input');
-        if (receiverInput) receiverInput.value = '';
-        showValidationMessage('receiver-validation-message', '수신자가 추가되었습니다.', true);
-        return true;
       }
+      this.value = '';
+    });
+  }
 
-      function updateReceiverTags() {
-        const container = document.getElementById('receiver-tags-container');
-        if (!container) return;
-        
-        container.innerHTML = receiverEmails.map((email, index) => {
-          return `<div class="email-tag" data-email="${email}">
-            <i class="fas fa-user mr-1"></i>
-            ${email}
-            <button type="button" class="remove-tag" onclick="removeReceiverEmail('${email}')">
-              <i class="fas fa-times"></i>
-            </button>
-          </div>`;
-        }).join('');
-      }
-
-      window.removeReceiverEmail = function(email) {
-        receiverEmails = receiverEmails.filter(e => e !== email);
+  const operatorEmailSelect = document.getElementById('operator-email');
+  if (operatorEmailSelect) {
+    operatorEmailSelect.addEventListener('change', function() {
+      const value = this.value;
+      if (value === 'custom') {
+       
+      } else if (value) {
+        receiverEmails = [value];
         updateReceiverTags();
         updateSummary();
-      };
-
-      const addReceiverBtn = document.getElementById('add-receiver-btn');
-      if (addReceiverBtn) {
-        addReceiverBtn.addEventListener('click', function() {
-          const emailInput = document.getElementById('receiver-email-input');
-          const email = emailInput ? emailInput.value.trim() : '';
-          if (email) {
-            if (addReceiverEmail(email)) {
-              updateSummary();
-            }
-          }
-        });
       }
+    });
+  }
 
-      const receiverEmailInput = document.getElementById('receiver-email-input');
-      if (receiverEmailInput) {
-        receiverEmailInput.addEventListener('keypress', function(e) {
-          if (e.key === 'Enter') {
-            e.preventDefault();
-            const email = this.value.trim();
-            if (email) {
-              if (addReceiverEmail(email)) {
-                updateSummary();
-              }
-            }
-          }
-        });
+  // FAQ 모달
+  const faqModal = document.getElementById('faq-modal');
+  const openFaqBtn = document.getElementById('open-faq');
+  const closeFaqBtn = document.querySelector('.close-modal');
+ 
+  if (openFaqBtn) {
+    openFaqBtn.addEventListener('click', () => {
+      if (faqModal) faqModal.classList.add('show');
+    });
+  }
+ 
+  if (closeFaqBtn) {
+    closeFaqBtn.addEventListener('click', closeFaqModal);
+  }
+ 
+  if (faqModal) {
+    faqModal.addEventListener('click', (e) => {
+      if (e.target === faqModal) {
+        closeFaqModal();
       }
-
-      function addCcEmail(email) {
-        if (!validateEmail(email)) {
-          showValidationMessage('cc-validation-message', '올바른 이메일 형식이 아닙니다.', false);
-          return false;
+    });
+  }
+ 
+  function closeFaqModal() {
+    if (faqModal) faqModal.classList.remove('show');
+  }
+ 
+  // 아코디언
+  document.querySelectorAll('.accordion-header').forEach(header => {
+    header.addEventListener('click', function() {
+      const targetId = this.dataset.accordion;
+      const content = document.getElementById(targetId);
+      const icon = this.querySelector('i');
+     
+      document.querySelectorAll('.accordion-content').forEach(c => {
+        if (c !== content) {
+          c.classList.remove('active');
         }
-
-        if (ccEmails.includes(email)) {
-          showValidationMessage('cc-validation-message', '이미 추가된 이메일입니다.', false);
-          return false;
+      });
+      document.querySelectorAll('.accordion-header i').forEach(i => {
+        if (i !== icon) {
+          i.className = 'fas fa-chevron-down';
         }
+      });
+     
+      content.classList.toggle('active');
+      icon.className = content.classList.contains('active') ?
+        'fas fa-chevron-up' : 'fas fa-chevron-down';
+    });
+  });
 
-        ccEmails.push(email);
-        updateCcTags();
-        const ccInput = document.getElementById('cc-email-input');
-        if (ccInput) ccInput.value = '';
-        showValidationMessage('cc-validation-message', '참조자가 추가되었습니다.', true);
-        return true;
-      }
-
-      function updateCcTags() {
-        const container = document.getElementById('cc-tags-container');
-        if (!container) return;
-        
-        container.innerHTML = ccEmails.map((email, index) => {
-          return `<div class="email-tag" data-email="${email}">
-            <i class="fas fa-user mr-1"></i>
-            ${email}
-            <button type="button" class="remove-tag" onclick="removeCcEmail('${email}')">
-              <i class="fas fa-times"></i>
-            </button>
-          </div>`;
-        }).join('');
-      }
-
-      window.removeCcEmail = function(email) {
-        ccEmails = ccEmails.filter(e => e !== email);
-        updateCcTags();
+  // 문의사항 저장 (FAQ 모달에서)
+  document.getElementById('faq-save-inquiry').addEventListener('click', function() {
+    const message = document.getElementById('faq-contact-message').value.trim();
+    if (message) {
+      faqInquiry = message;
+      alert('기타 문의사항이 저장되었습니다.');
+      document.getElementById('faq-contact-message').value = '';
+      closeFaqModal();
+      setTimeout(() => {
         updateSummary();
-      };
+      }, 500);
+    }
+  });
 
-      const addCcBtn = document.getElementById('add-cc-btn');
-      if (addCcBtn) {
-        addCcBtn.addEventListener('click', function() {
-          const emailInput = document.getElementById('cc-email-input');
-          const email = emailInput ? emailInput.value.trim() : '';
-          if (email) {
-            if (addCcEmail(email)) {
-              updateSummary();
-            }
-          }
-        });
-      }
+  // 문의사항 저장 (제출 탭에서)
+  document.getElementById('save-inquiry').addEventListener('click', function() {
+    const message = document.getElementById('contact-message').value.trim();
+    if (message) {
+      generalInquiry = message;
+      alert('추가 문의사항이 저장되었습니다.');
+      document.getElementById('contact-message').value = '';
+      updateSummary();
+    }
+  });
 
-      const ccEmailInput = document.getElementById('cc-email-input');
-      if (ccEmailInput) {
-        ccEmailInput.addEventListener('keypress', function(e) {
-          if (e.key === 'Enter') {
-            e.preventDefault();
-            const email = this.value.trim();
-            if (email) {
-              if (addCcEmail(email)) {
-                updateSummary();
-              }
-            }
-          }
-        });
-      }
-
-      const ccOperatorSelect = document.getElementById('cc-operator-select');
-      if (ccOperatorSelect) {
-        ccOperatorSelect.addEventListener('change', function() {
-          const email = this.value;
-          if (email && !ccEmails.includes(email)) {
-            if (addCcEmail(email)) {
-              updateSummary();
-            }
-          }
-          this.value = '';
-        });
-      }
-
-      const operatorEmailSelect = document.getElementById('operator-email');
-      if (operatorEmailSelect) {
-        operatorEmailSelect.addEventListener('change', function() {
-          const value = this.value;
-          if (value === 'custom') {
-           
-          } else if (value) {
-            receiverEmails = [value];
-            updateReceiverTags();
-            updateSummary();
-          }
-        });
-      }
-
-      // FAQ 모달
-      const faqModal = document.getElementById('faq-modal');
-      const openFaqBtn = document.getElementById('open-faq');
-      const closeFaqBtn = document.querySelector('.close-modal');
+  // 내용 초기화 기능
+  document.getElementById('reset-form').addEventListener('click', function() {
+    if (confirm('모든 입력 내용을 초기화하시겠습니까?')) {
+      document.getElementById('visit-form').reset();
      
-      if (openFaqBtn) {
-        openFaqBtn.addEventListener('click', () => {
-          if (faqModal) faqModal.classList.add('show');
-        });
-      }
+      uploadedFiles = { program: [], pdf: [] };
+      generalInquiry = '';
+      faqInquiry = '';
+      receiverEmails = [];
+      ccEmails = [];
      
-      if (closeFaqBtn) {
-        closeFaqBtn.addEventListener('click', closeFaqModal);
-      }
+      renderFileList('program');
+      renderFileList('pdf');
      
-      if (faqModal) {
-        faqModal.addEventListener('click', (e) => {
-          if (e.target === faqModal) {
-            closeFaqModal();
-          }
-        });
-      }
+      updateReceiverTags();
+      updateCcTags();
      
-      function closeFaqModal() {
-        if (faqModal) faqModal.classList.remove('show');
-      }
+      localStorage.removeItem('visitFormData');
      
-      // 아코디언
-      document.querySelectorAll('.accordion-header').forEach(header => {
-        header.addEventListener('click', function() {
-          const targetId = this.dataset.accordion;
-          const content = document.getElementById(targetId);
-          const icon = this.querySelector('i');
-         
-          if (content && icon) {
-            document.querySelectorAll('.accordion-content').forEach(c => {
-              if (c !== content) {
-                c.classList.remove('active');
-              }
-            });
-            document.querySelectorAll('.accordion-header i').forEach(i => {
-              if (i !== icon) {
-                i.className = 'fas fa-chevron-down';
-              }
-            });
-           
-            content.classList.toggle('active');
-            icon.className = content.classList.contains('active') ?
-              'fas fa-chevron-up' : 'fas fa-chevron-down';
-          }
-        });
-      });
+      document.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
+      document.querySelectorAll('.hidden').forEach(el => el.classList.add('hidden'));
+      document.querySelectorAll('.section-disabled').forEach(el => el.classList.remove('section-disabled'));
+     
+      switchToTab('tab1');
+     
+      updateSummary();
+     
+      alert('모든 내용이 초기화되었습니다.');
+    }
+  });
 
-      // 문의사항 저장 (FAQ 모달에서)
-      const faqSaveInquiryBtn = document.getElementById('faq-save-inquiry');
-      if (faqSaveInquiryBtn) {
-        faqSaveInquiryBtn.addEventListener('click', function() {
-          const message = document.getElementById('faq-contact-message')?.value?.trim();
-          if (message) {
-            faqInquiry = message;
-            alert('기타 문의사항이 저장되었습니다.');
-            const faqContactMessage = document.getElementById('faq-contact-message');
-            if (faqContactMessage) faqContactMessage.value = '';
-            closeFaqModal();
-            setTimeout(() => {
-              updateSummary();
-            }, 500);
-          }
-        });
-      }
-
-      // 문의사항 저장 (제출 탭에서)
-      const saveInquiryBtn = document.getElementById('save-inquiry');
-      if (saveInquiryBtn) {
-        saveInquiryBtn.addEventListener('click', function() {
-          const message = document.getElementById('contact-message')?.value?.trim();
-          if (message) {
-            generalInquiry = message;
-            alert('추가 문의사항이 저장되었습니다.');
-            const contactMessage = document.getElementById('contact-message');
-            if (contactMessage) contactMessage.value = '';
-            updateSummary();
-          }
-        });
-      }
-
-      // 내용 초기화 기능
-      const resetFormBtn = document.getElementById('reset-form');
-      if (resetFormBtn) {
-        resetFormBtn.addEventListener('click', function() {
-          if (confirm('모든 입력 내용을 초기화하시겠습니까?')) {
-            const visitForm = document.getElementById('visit-form');
-            if (visitForm) visitForm.reset();
-           
-            uploadedFiles = { program: [], pdf: [] };
-            generalInquiry = '';
-            faqInquiry = '';
-            receiverEmails = [];
-            ccEmails = [];
-           
-            renderFileList('program');
-            renderFileList('pdf');
-           
-            updateReceiverTags();
-            updateCcTags();
-           
-            localStorage.removeItem('visitFormData');
-           
-            document.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
-            document.querySelectorAll('.hidden').forEach(el => el.classList.add('hidden'));
-            document.querySelectorAll('.section-disabled').forEach(el => el.classList.remove('section-disabled'));
-           
-            switchToTab('tab1');
-           
-            updateSummary();
-           
-            alert('모든 내용이 초기화되었습니다.');
-          }
-        });
-      }
-
-      // 폼 제출
-      const submitFormBtn = document.getElementById('submit-form');
-      if (submitFormBtn) {
-        submitFormBtn.addEventListener('click', function() {
-          const operatorEmail = document.getElementById('operator-email')?.value;
-          const additionalReceivers = receiverEmails;
-         
-          if (!operatorEmail && additionalReceivers.length === 0) {
-            alert('수신자를 선택하거나 추가해주세요.');
-            return;
-          }
-
-          const allReceivers = [];
-          if (operatorEmail && operatorEmail !== 'custom') {
-            allReceivers.push(operatorEmail);
-          }
-          allReceivers.push(...additionalReceivers);
-
-          const allCCs = [...ccEmails];
-
-          const allInquiries = [];
-          if (generalInquiry) allInquiries.push(`[추가 문의사항]\n${generalInquiry}`);
-          if (faqInquiry) allInquiries.push(`[기타 문의사항(FAQ)]\n${faqInquiry}`);
-          const combinedInquiry = allInquiries.join('\n\n');
-
-          const materialTypes = [];
-          if (document.getElementById('material-pdf')?.checked) materialTypes.push('PDF 교재');
-          if (document.getElementById('material-paper')?.checked) materialTypes.push('서면 교재');
-          if (document.getElementById('material-none')?.checked) materialTypes.push('해당사항 없음');
-
-          const equipmentRows = document.querySelectorAll('.equipment-row');
-          const equipmentList = [];
-          equipmentRows.forEach(row => {
-            const type = row.querySelector('[name="equipment_type"]')?.value;
-            const manufacturer = row.querySelector('[name="equipment_manufacturer"]')?.value;
-            const model = row.querySelector('[name="equipment_model"]')?.value;
-            const quantity = row.querySelector('[name="equipment_quantity"]')?.value;
-            const serial = row.querySelector('[name="equipment_serial"]')?.value;
-            if (type) {
-              equipmentList.push(`${type} ${manufacturer || ''} ${model || ''} ${quantity || 1}대 (${serial || ''})`.trim());
-            }
-          });
-
-          let vehicleInfo = '';
-          if (document.getElementById('no-vehicle')?.checked) {
-            vehicleInfo = '해당사항 없음';
-          } else {
-            const vehicles = [];
-            const vehicleInputs = document.querySelectorAll('[name="vehicle_type"], [name="vehicle_number"]');
-            for (let i = 0; i < vehicleInputs.length; i += 2) {
-              const type = vehicleInputs[i]?.value;
-              const number = vehicleInputs[i + 1]?.value;
-              if (type || number) {
-                vehicles.push(`${type || ''} ${number || ''}`.trim());
-              }
-            }
-            vehicleInfo = vehicles.length > 0 ? vehicles.join(', ') : '없음';
-          }
-
-          const templateParams = {
-            to_email: allReceivers.join(','),
-            instructor_name: document.getElementById('instructor-name')?.value || '',
-            company: document.getElementById('company-name')?.value || '',
-            phone: document.getElementById('phone-number')?.value || '',
-            equipment_list: equipmentList.join('\n') || '없음',
-            vehicle_info: vehicleInfo,
-            material_type: materialTypes.join(', ') || '선택 안함',
-            timestamp: new Date().toLocaleString('ko-KR')
-          };
-
-          if (allCCs.length > 0) {
-            templateParams.cc = allCCs.join(',');
-          }
-
-          const programDesc = document.getElementById('program-desc')?.value;
-          if (programDesc && !document.getElementById('no-installation')?.checked) {
-            templateParams.program_description = programDesc;
-          }
-
-          if (uploadedFiles.program.length > 0) {
-            templateParams.program_files = generateFileLinks(uploadedFiles.program, 'program');
-          }
-
-          if (uploadedFiles.pdf.length > 0) {
-            templateParams.material_files = generateFileLinks(uploadedFiles.pdf, 'material');
-          }
-
-          const storageInfo = document.getElementById('storage-media-info')?.value;
-          if (storageInfo && document.getElementById('storage-media-check')?.checked) {
-            templateParams.storage_media_info = storageInfo;
-          }
-
-          const lanPortType = document.querySelector('[name="lan_port_type"]')?.value;
-          const lanPortDetail = document.querySelector('[name="lan_port_detail"]')?.value;
-          if (lanPortType && document.getElementById('lan-port-check')?.checked) {
-            templateParams.lan_port_info = `${lanPortType} ${lanPortDetail || ''}`.trim();
-          }
-
-          if (combinedInquiry) {
-            templateParams.inquiry = combinedInquiry;
-          }
-
-          emailjs.send('ldd_Training Service', 'template_ajf77x7', templateParams)
-            .then(function(response) {
-              alert('이메일이 성공적으로 전송되었습니다!');
-              console.log('SUCCESS!', response.status, response.text);
-              localStorage.removeItem('visitFormData');
-            })
-            .catch(function(error) {
-              alert('이메일 전송에 실패했습니다. 다시 시도해주세요.');
-              console.log('FAILED...', error);
-            });
-        });
-      }
-
-      // 입력 이벤트 리스너 (자동 저장용)
-      document.addEventListener('input', function(e) {
-        if (e.target.matches('input, textarea, select')) {
-          clearTimeout(window.autoSaveTimer);
-          window.autoSaveTimer = setTimeout(autoSave, 2000);
-        }
-      });
-
-      // 페이지 떠날 때 자동 저장
-      window.addEventListener('beforeunload', autoSave);
+  // 폼 제출
+  document.getElementById('submit-form')?.addEventListener('click', function() {
+    const operatorEmail = document.getElementById('operator-email').value;
+    const additionalReceivers = receiverEmails;
+   
+    if (!operatorEmail && additionalReceivers.length === 0) {
+      alert('수신자를 선택하거나 추가해주세요.');
+      return;
     }
 
-    // 자동 저장 기능
-    function showAutoSaveIndicator() {
-      const indicator = document.getElementById('auto-save-indicator');
-      if (indicator) {
-        indicator.classList.add('show');
-        setTimeout(() => {
-          indicator.classList.remove('show');
-        }, 2000);
-      }
+    const allReceivers = [];
+    if (operatorEmail && operatorEmail !== 'custom') {
+      allReceivers.push(operatorEmail);
     }
+    allReceivers.push(...additionalReceivers);
 
-    function autoSave() {
-      const formData = {
-        company: document.getElementById('company-name')?.value || '',
-        instructor: document.getElementById('instructor-name')?.value || '',
-        phone: document.getElementById('phone-number')?.value || '',
-        programDesc: document.getElementById('program-desc')?.value || '',
-        uploadedFiles: uploadedFiles,
-        generalInquiry: generalInquiry,
-        faqInquiry: faqInquiry,
-        receiverEmails: receiverEmails,
-        ccEmails: ccEmails,
-        timestamp: new Date().toISOString()
-      };
-     
-      localStorage.setItem('visitFormData', JSON.stringify(formData));
-      showAutoSaveIndicator();
-    }
+    const allCCs = [...ccEmails];
 
-    // 1분마다 자동 저장
-    setInterval(autoSave, 60000);
+    const allInquiries = [];
+    if (generalInquiry) allInquiries.push(`[추가 문의사항]\n${generalInquiry}`);
+    if (faqInquiry) allInquiries.push(`[기타 문의사항(FAQ)]\n${faqInquiry}`);
+    const combinedInquiry = allInquiries.join('\n\n');
 
-    // 폼 데이터 복원
-    function loadSavedData() {
-      const savedData = localStorage.getItem('visitFormData');
-      if (savedData) {
-        try {
-          const data = JSON.parse(savedData);
-          const companyName = document.getElementById('company-name');
-          const instructorName = document.getElementById('instructor-name');
-          const phoneNumber = document.getElementById('phone-number');
-          const programDesc = document.getElementById('program-desc');
-          const contactMessage = document.getElementById('contact-message');
-          const faqContactMessage = document.getElementById('faq-contact-message');
-          
-          if (companyName) companyName.value = data.company || '';
-          if (instructorName) instructorName.value = data.instructor || '';
-          if (phoneNumber) phoneNumber.value = data.phone || '';
-          if (programDesc) programDesc.value = data.programDesc || '';
-          
-          uploadedFiles = data.uploadedFiles || { program: [], pdf: [] };
-          generalInquiry = data.generalInquiry || '';
-          faqInquiry = data.faqInquiry || '';
-          receiverEmails = data.receiverEmails || [];
-          ccEmails = data.ccEmails || [];
-         
-          if (generalInquiry && contactMessage) {
-            contactMessage.value = generalInquiry;
-          }
-          if (faqInquiry && faqContactMessage) {
-            faqContactMessage.value = faqInquiry;
-          }
-         
-          renderFileList('program');
-          renderFileList('pdf');
-        } catch (e) {
-          console.log('저장된 데이터 복원 실패:', e);
-        }
+    const materialTypes = [];
+    if (document.getElementById('material-pdf')?.checked) materialTypes.push('PDF 교재');
+    if (document.getElementById('material-paper')?.checked) materialTypes.push('서면 교재');
+    if (document.getElementById('material-none')?.checked) materialTypes.push('해당사항 없음');
+
+    const equipmentRows = document.querySelectorAll('.equipment-row');
+    const equipmentList = [];
+    equipmentRows.forEach(row => {
+      const type = row.querySelector('[name="equipment_type"]')?.value;
+      const manufacturer = row.querySelector('[name="equipment_manufacturer"]')?.value;
+      const model = row.querySelector('[name="equipment_model"]')?.value;
+      const quantity = row.querySelector('[name="equipment_quantity"]')?.value;
+      const serial = row.querySelector('[name="equipment_serial"]')?.value;
+      if (type) {
+        equipmentList.push(`${type} ${manufacturer || ''} ${model || ''} ${quantity || 1}대 (${serial || ''})`.trim());
       }
-    }
+    });
 
-    // 요약 업데이트
-    function updateSummary() {
-      const summaryCompany = document.getElementById('summary-company');
-      const summaryInstructor = document.getElementById('summary-instructor');
-      const summaryPhone = document.getElementById('summary-phone');
-      
-      if (summaryCompany) {
-        summaryCompany.textContent = document.getElementById('company-name')?.value || '(입력 필요)';
-      }
-      if (summaryInstructor) {
-        summaryInstructor.textContent = document.getElementById('instructor-name')?.value || '(입력 필요)';
-      }
-      if (summaryPhone) {
-        summaryPhone.textContent = document.getElementById('phone-number')?.value || '(입력 필요)';
-      }
-
-      const programDesc = document.getElementById('program-desc')?.value;
-      const summaryProgram = document.getElementById('summary-program');
-      const summaryProgramText = document.getElementById('summary-program-text');
-      
-      if (programDesc && !document.getElementById('no-installation')?.checked) {
-        if (summaryProgram) summaryProgram.classList.remove('hidden');
-        if (summaryProgramText) summaryProgramText.textContent = programDesc;
-      } else {
-        if (summaryProgram) summaryProgram.classList.add('hidden');
-      }
-
-      const totalFiles = uploadedFiles.program.length + uploadedFiles.pdf.length;
-      const summaryFiles = document.getElementById('summary-files');
-      const summaryFilesText = document.getElementById('summary-files-text');
-      
-      if (totalFiles > 0) {
-        if (summaryFiles) summaryFiles.classList.remove('hidden');
-        if (summaryFilesText) {
-          summaryFilesText.textContent = `실습자료: ${uploadedFiles.program.length}개, PDF교재: ${uploadedFiles.pdf.length}개`;
-        }
-      } else {
-        if (summaryFiles) summaryFiles.classList.add('hidden');
-      }
-
-      const materialTypes = [];
-      if (document.getElementById('material-pdf')?.checked) materialTypes.push('PDF 교재');
-      if (document.getElementById('material-paper')?.checked) materialTypes.push('서면 교재');
-      if (document.getElementById('material-none')?.checked) materialTypes.push('해당사항 없음');
-      
-      const summaryMaterialText = document.getElementById('summary-material-text');
-      if (summaryMaterialText) {
-        summaryMaterialText.textContent = materialTypes.length > 0 ? materialTypes.join(', ') : '(선택 필요)';
-      }
-
-      const equipmentRows = document.querySelectorAll('.equipment-row');
-      const equipmentList = [];
-      equipmentRows.forEach(row => {
-        const type = row.querySelector('[name="equipment_type"]')?.value;
-        const manufacturer = row.querySelector('[name="equipment_manufacturer"]')?.value;
-        const model = row.querySelector('[name="equipment_model"]')?.value;
-        const quantity = row.querySelector('[name="equipment_quantity"]')?.value;
-        if (type) {
-          equipmentList.push(`${type} ${manufacturer || ''} ${model || ''} ${quantity || 1}대`.trim());
-        }
-      });
-      
-      const summaryEquipmentText = document.getElementById('summary-equipment-text');
-      if (summaryEquipmentText) {
-        summaryEquipmentText.textContent = equipmentList.length > 0 ? equipmentList.join(', ') : '(입력 필요)';
-      }
-
-      const storageInfo = document.getElementById('storage-media-info')?.value;
-      const summaryStorage = document.getElementById('summary-storage');
-      const summaryStorageText = document.getElementById('summary-storage-text');
-      
-      if (storageInfo && document.getElementById('storage-media-check')?.checked) {
-        if (summaryStorage) summaryStorage.classList.remove('hidden');
-        if (summaryStorageText) summaryStorageText.textContent = storageInfo;
-      } else {
-        if (summaryStorage) summaryStorage.classList.add('hidden');
-      }
-
-      const lanPortType = document.querySelector('[name="lan_port_type"]')?.value;
-      const lanPortDetail = document.querySelector('[name="lan_port_detail"]')?.value;
-      const summaryLanport = document.getElementById('summary-lanport');
-      const summaryLanportText = document.getElementById('summary-lanport-text');
-      
-      if (lanPortType && document.getElementById('lan-port-check')?.checked) {
-        if (summaryLanport) summaryLanport.classList.remove('hidden');
-        if (summaryLanportText) summaryLanportText.textContent = `${lanPortType} ${lanPortDetail || ''}`.trim();
-      } else {
-        if (summaryLanport) summaryLanport.classList.add('hidden');
-      }
-
-      const vehicleInputs = document.querySelectorAll('[name="vehicle_type"], [name="vehicle_number"]');
+    let vehicleInfo = '';
+    if (document.getElementById('no-vehicle')?.checked) {
+      vehicleInfo = '해당사항 없음';
+    } else {
       const vehicles = [];
+      const vehicleInputs = document.querySelectorAll('[name="vehicle_type"], [name="vehicle_number"]');
       for (let i = 0; i < vehicleInputs.length; i += 2) {
         const type = vehicleInputs[i]?.value;
         const number = vehicleInputs[i + 1]?.value;
@@ -2756,60 +2534,249 @@
           vehicles.push(`${type || ''} ${number || ''}`.trim());
         }
       }
-      
-      const summaryVehicleText = document.getElementById('summary-vehicle-text');
-      if (summaryVehicleText) {
-        summaryVehicleText.textContent = vehicles.length > 0 ? vehicles.join(', ') : 
-          document.getElementById('no-vehicle')?.checked ? '해당사항 없음' : '(입력 선택)';
-      }
-
-      const operatorEmail = document.getElementById('operator-email')?.value;
-      const allRecipients = [];
-      if (operatorEmail && operatorEmail !== 'custom') allRecipients.push(operatorEmail);
-      allRecipients.push(...receiverEmails);
-      
-      const summaryRecipients = document.getElementById('summary-recipients');
-      if (summaryRecipients) {
-        summaryRecipients.textContent = allRecipients.length > 0 ? allRecipients.join(', ') : '(선택 필요)';
-      }
-
-      const ccSection = document.getElementById('summary-cc-section');
-      const summaryCc = document.getElementById('summary-cc');
-      
-      if (ccEmails.length > 0) {
-        if (ccSection) ccSection.classList.remove('hidden');
-        if (summaryCc) summaryCc.textContent = ccEmails.join(', ');
-      } else {
-        if (ccSection) ccSection.classList.add('hidden');
-      }
-
-      const summaryGeneralInquiry = document.getElementById('summary-general-inquiry');
-      const summaryGeneralInquiryText = document.getElementById('summary-general-inquiry-text');
-      
-      if (generalInquiry) {
-        if (summaryGeneralInquiry) summaryGeneralInquiry.classList.remove('hidden');
-        if (summaryGeneralInquiryText) summaryGeneralInquiryText.textContent = generalInquiry;
-      } else {
-        if (summaryGeneralInquiry) summaryGeneralInquiry.classList.add('hidden');
-      }
-
-      const summaryFaqInquiry = document.getElementById('summary-faq-inquiry');
-      const summaryFaqInquiryText = document.getElementById('summary-faq-inquiry-text');
-      
-      if (faqInquiry) {
-        if (summaryFaqInquiry) summaryFaqInquiry.classList.remove('hidden');
-        if (summaryFaqInquiryText) summaryFaqInquiryText.textContent = faqInquiry;
-      } else {
-        if (summaryFaqInquiry) summaryFaqInquiry.classList.add('hidden');
-      }
+      vehicleInfo = vehicles.length > 0 ? vehicles.join(', ') : '없음';
     }
 
-    // 페이지 로드 시 초기화
-    document.addEventListener('DOMContentLoaded', function() {
-      loadSavedData();
-      setupEventListeners();
-      updateSummary();
-    });
-  </script>
+    const templateParams = {
+      to_email: allReceivers.join(','),
+      instructor_name: document.getElementById('instructor-name').value,
+      company: document.getElementById('company-name').value,
+      phone: document.getElementById('phone-number').value,
+      equipment_list: equipmentList.join('\n') || '없음',
+      vehicle_info: vehicleInfo,
+      material_type: materialTypes.join(', ') || '선택 안함',
+      timestamp: new Date().toLocaleString('ko-KR')
+    };
+
+    if (allCCs.length > 0) {
+      templateParams.cc = allCCs.join(',');
+    }
+
+    const programDesc = document.getElementById('program-desc').value;
+    if (programDesc && !document.getElementById('no-installation').checked) {
+      templateParams.program_description = programDesc;
+    }
+
+    if (uploadedFiles.program.length > 0) {
+      templateParams.program_files = generateFileLinks(uploadedFiles.program, 'program');
+    }
+
+    if (uploadedFiles.pdf.length > 0) {
+      templateParams.material_files = generateFileLinks(uploadedFiles.pdf, 'material');
+    }
+
+    const storageInfo = document.getElementById('storage-media-info').value;
+    if (storageInfo && document.getElementById('storage-media-check').checked) {
+      templateParams.storage_media_info = storageInfo;
+    }
+
+    const lanPortType = document.querySelector('[name="lan_port_type"]').value;
+    const lanPortDetail = document.querySelector('[name="lan_port_detail"]').value;
+    if (lanPortType && document.getElementById('lan-port-check').checked) {
+      templateParams.lan_port_info = `${lanPortType} ${lanPortDetail}`.trim();
+    }
+
+    if (combinedInquiry) {
+      templateParams.inquiry = combinedInquiry;
+    }
+
+    emailjs.send('ldd_Training Service', 'template_ajf77x7', templateParams)
+      .then(function(response) {
+        alert('이메일이 성공적으로 전송되었습니다!');
+        console.log('SUCCESS!', response.status, response.text);
+        localStorage.removeItem('visitFormData');
+      })
+      .catch(function(error) {
+        alert('이메일 전송에 실패했습니다. 다시 시도해주세요.');
+        console.log('FAILED...', error);
+      });
+  });
+
+  // 입력 이벤트 리스너 (자동 저장용)
+  document.addEventListener('input', function(e) {
+    if (e.target.matches('input, textarea, select')) {
+      clearTimeout(window.autoSaveTimer);
+      window.autoSaveTimer = setTimeout(autoSave, 2000);
+    }
+  });
+
+  // 페이지 떠날 때 자동 저장
+  window.addEventListener('beforeunload', autoSave);
+}
+
+// 자동 저장 기능
+function showAutoSaveIndicator() {
+  const indicator = document.getElementById('auto-save-indicator');
+  indicator.classList.add('show');
+  setTimeout(() => {
+    indicator.classList.remove('show');
+  }, 2000);
+}
+
+function autoSave() {
+  const formData = {
+    company: document.getElementById('company-name')?.value || '',
+    instructor: document.getElementById('instructor-name')?.value || '',
+    phone: document.getElementById('phone-number')?.value || '',
+    programDesc: document.getElementById('program-desc')?.value || '',
+    uploadedFiles: uploadedFiles,
+    generalInquiry: generalInquiry,
+    faqInquiry: faqInquiry,
+    receiverEmails: receiverEmails,
+    ccEmails: ccEmails,
+    timestamp: new Date().toISOString()
+  };
+ 
+  localStorage.setItem('visitFormData', JSON.stringify(formData));
+  showAutoSaveIndicator();
+}
+
+// 1분마다 자동 저장
+setInterval(autoSave, 60000);
+
+// 폼 데이터 복원
+function loadSavedData() {
+  const savedData = localStorage.getItem('visitFormData');
+  if (savedData) {
+    try {
+      const data = JSON.parse(savedData);
+      if (document.getElementById('company-name')) document.getElementById('company-name').value = data.company || '';
+      if (document.getElementById('instructor-name')) document.getElementById('instructor-name').value = data.instructor || '';
+      if (document.getElementById('phone-number')) document.getElementById('phone-number').value = data.phone || '';
+      if (document.getElementById('program-desc')) document.getElementById('program-desc').value = data.programDesc || '';
+      uploadedFiles = data.uploadedFiles || { program: [], pdf: [] };
+      generalInquiry = data.generalInquiry || '';
+      faqInquiry = data.faqInquiry || '';
+      receiverEmails = data.receiverEmails || [];
+      ccEmails = data.ccEmails || [];
+     
+      if (generalInquiry) {
+        document.getElementById('contact-message').value = generalInquiry;
+      }
+      if (faqInquiry) {
+        document.getElementById('faq-contact-message').value = faqInquiry;
+      }
+     
+      renderFileList('program');
+      renderFileList('pdf');
+    } catch (e) {
+      console.log('저장된 데이터 복원 실패:', e);
+    }
+  }
+}
+
+// 요약 업데이트
+function updateSummary() {
+  document.getElementById('summary-company').textContent =
+    document.getElementById('company-name')?.value || '(입력 필요)';
+  document.getElementById('summary-instructor').textContent =
+    document.getElementById('instructor-name')?.value || '(입력 필요)';
+  document.getElementById('summary-phone').textContent =
+    document.getElementById('phone-number')?.value || '(입력 필요)';
+
+  const programDesc = document.getElementById('program-desc')?.value;
+  if (programDesc && !document.getElementById('no-installation').checked) {
+    document.getElementById('summary-program').classList.remove('hidden');
+    document.getElementById('summary-program-text').textContent = programDesc;
+  } else {
+    document.getElementById('summary-program').classList.add('hidden');
+  }
+
+  const totalFiles = uploadedFiles.program.length + uploadedFiles.pdf.length;
+  if (totalFiles > 0) {
+    document.getElementById('summary-files').classList.remove('hidden');
+    document.getElementById('summary-files-text').textContent =
+      `실습자료: ${uploadedFiles.program.length}개, PDF교재: ${uploadedFiles.pdf.length}개`;
+  } else {
+    document.getElementById('summary-files').classList.add('hidden');
+  }
+
+  const materialTypes = [];
+  if (document.getElementById('material-pdf')?.checked) materialTypes.push('PDF 교재');
+  if (document.getElementById('material-paper')?.checked) materialTypes.push('서면 교재');
+  if (document.getElementById('material-none')?.checked) materialTypes.push('해당사항 없음');
+  document.getElementById('summary-material-text').textContent =
+    materialTypes.length > 0 ? materialTypes.join(', ') : '(선택 필요)';
+
+  const equipmentRows = document.querySelectorAll('.equipment-row');
+  const equipmentList = [];
+  equipmentRows.forEach(row => {
+    const type = row.querySelector('[name="equipment_type"]')?.value;
+    const manufacturer = row.querySelector('[name="equipment_manufacturer"]')?.value;
+    const model = row.querySelector('[name="equipment_model"]')?.value;
+    const quantity = row.querySelector('[name="equipment_quantity"]')?.value;
+    if (type) {
+      equipmentList.push(`${type} ${manufacturer || ''} ${model || ''} ${quantity || 1}대`.trim());
+    }
+  });
+  document.getElementById('summary-equipment-text').textContent =
+    equipmentList.length > 0 ? equipmentList.join(', ') : '(입력 필요)';
+
+  const storageInfo = document.getElementById('storage-media-info')?.value;
+  if (storageInfo && document.getElementById('storage-media-check')?.checked) {
+    document.getElementById('summary-storage').classList.remove('hidden');
+    document.getElementById('summary-storage-text').textContent = storageInfo;
+  } else {
+    document.getElementById('summary-storage').classList.add('hidden');
+  }
+
+  const lanPortType = document.querySelector('[name="lan_port_type"]')?.value;
+  const lanPortDetail = document.querySelector('[name="lan_port_detail"]')?.value;
+  if (lanPortType && document.getElementById('lan-port-check')?.checked) {
+    document.getElementById('summary-lanport').classList.remove('hidden');
+    document.getElementById('summary-lanport-text').textContent = `${lanPortType} ${lanPortDetail || ''}`.trim();
+  } else {
+    document.getElementById('summary-lanport').classList.add('hidden');
+  }
+
+  const vehicleInputs = document.querySelectorAll('[name="vehicle_type"], [name="vehicle_number"]');
+  const vehicles = [];
+  for (let i = 0; i < vehicleInputs.length; i += 2) {
+    const type = vehicleInputs[i]?.value;
+    const number = vehicleInputs[i + 1]?.value;
+    if (type || number) {
+      vehicles.push(`${type || ''} ${number || ''}`.trim());
+    }
+  }
+  document.getElementById('summary-vehicle-text').textContent =
+    vehicles.length > 0 ? vehicles.join(', ') : document.getElementById('no-vehicle')?.checked ? '해당사항 없음' : '(입력 선택)';
+
+  const operatorEmail = document.getElementById('operator-email')?.value;
+  const allRecipients = [];
+  if (operatorEmail && operatorEmail !== 'custom') allRecipients.push(operatorEmail);
+  allRecipients.push(...receiverEmails);
+  document.getElementById('summary-recipients').textContent =
+    allRecipients.length > 0 ? allRecipients.join(', ') : '(선택 필요)';
+
+  const ccSection = document.getElementById('summary-cc-section');
+  if (ccEmails.length > 0) {
+    ccSection.classList.remove('hidden');
+    document.getElementById('summary-cc').textContent = ccEmails.join(', ');
+  } else {
+    ccSection.classList.add('hidden');
+  }
+
+  if (generalInquiry) {
+    document.getElementById('summary-general-inquiry').classList.remove('hidden');
+    document.getElementById('summary-general-inquiry-text').textContent = generalInquiry;
+  } else {
+    document.getElementById('summary-general-inquiry').classList.add('hidden');
+  }
+
+  if (faqInquiry) {
+    document.getElementById('summary-faq-inquiry').classList.remove('hidden');
+    document.getElementById('summary-faq-inquiry-text').textContent = faqInquiry;
+  } else {
+    document.getElementById('summary-faq-inquiry').classList.add('hidden');
+  }
+}
+
+// 페이지 로드 시 초기화
+document.addEventListener('DOMContentLoaded', function() {
+  loadSavedData();
+  setupEventListeners();
+  updateSummary();
+});
+</script>
 </body>
 </html>
