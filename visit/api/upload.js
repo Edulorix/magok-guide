@@ -10,7 +10,7 @@ export const config = {
   },
 };
 
-// 비동기 FormData 파서 함수 (콜백 기반을 Promise로 래핑)
+// FormData 파싱을 Promise로 래핑
 function parseForm(req) {
   return new Promise((resolve, reject) => {
     const form = formidable({
@@ -28,7 +28,7 @@ function parseForm(req) {
 }
 
 export default async function handler(req, res) {
-  // CORS 설정
+  // CORS 헤더 추가
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
@@ -38,13 +38,12 @@ export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
   try {
-    // 환경변수 확인
+    // 환경 변수 확인
     const serviceAccountEmail = process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL;
     const privateKey = process.env.GOOGLE_PRIVATE_KEY;
     const folderId = process.env.GOOGLE_DRIVE_FOLDER_ID;
 
     if (!serviceAccountEmail || !privateKey || !folderId) {
-      console.error('Missing env variables');
       return res.status(500).json({ error: '서버 설정이 완료되지 않았습니다.' });
     }
 
@@ -56,9 +55,10 @@ export default async function handler(req, res) {
       },
       scopes: ['https://www.googleapis.com/auth/drive.file'],
     });
+
     const drive = google.drive({ version: 'v3', auth });
 
-    // FormData 파싱
+    // 파일 파싱
     const [fields, files] = await parseForm(req);
     if (!files || Object.keys(files).length === 0) {
       return res.status(400).json({ success: false, error: '업로드된 파일이 없습니다.' });
@@ -66,7 +66,6 @@ export default async function handler(req, res) {
 
     const uploadedFiles = [];
 
-    // 각 파일 Drive 업로드
     for (const [key, fileData] of Object.entries(files)) {
       const fileList = Array.isArray(fileData) ? fileData : [fileData];
 
@@ -83,15 +82,17 @@ export default async function handler(req, res) {
         const driveRes = await drive.files.create({
           resource: fileMetadata,
           media,
-          fields: 'id, name, webViewLink',
+          fields: 'id, name',
         });
 
-uploadedFiles.push({
-  name: driveRes.data.name,
-  id: driveRes.data.id,
-  size: fs.statSync(file.filepath).size, // ✅ 파일 크기 추가
-  downloadUrl: `https://drive.google.com/uc?id=${driveRes.data.id}&export=download` // ✅ 직접 다운로드 링크
-});
+        const size = fs.statSync(file.filepath).size;
+
+        uploadedFiles.push({
+          name: driveRes.data.name,
+          id: driveRes.data.id,
+          size: size,
+          downloadUrl: `https://drive.google.com/uc?id=${driveRes.data.id}&export=download`
+        });
       }
     }
 
