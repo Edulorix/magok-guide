@@ -86,11 +86,12 @@ export default async function handler(req, res) {
           fields: 'id, name, webViewLink',
         });
 
-        uploadedFiles.push({
-          name: driveRes.data.name,
-          id: driveRes.data.id,
-          link: driveRes.data.webViewLink,
-        });
+uploadedFiles.push({
+  name: driveRes.data.name,
+  id: driveRes.data.id,
+  size: fs.statSync(file.filepath).size, // ✅ 파일 크기 추가
+  downloadUrl: `https://drive.google.com/uc?id=${driveRes.data.id}&export=download` // ✅ 직접 다운로드 링크
+});
       }
     }
 
