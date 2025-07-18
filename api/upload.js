@@ -27,7 +27,12 @@ export default async function handler(req, res) {
     console.log('Upload function started');
     
     // Base64에서 Private Key 디코딩
-    const privateKey = process.env.GOOGLE_PRIVATE_KEY.replace(/\\n/g, '\n');
+    if (!process.env.GOOGLE_PRIVATE_KEY) {
+  console.error('GOOGLE_PRIVATE_KEY environment variable is missing');
+  res.status(500).json({ error: 'Server configuration error: Missing private key' });
+  return;
+}
+const privateKey = process.env.GOOGLE_PRIVATE_KEY.replace(/\\n/g, '\n');
     
     const auth = new google.auth.GoogleAuth({
       credentials: {
