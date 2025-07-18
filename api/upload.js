@@ -27,7 +27,7 @@ export default async function handler(req, res) {
     console.log('Upload function started');
     
     // 환경변수 검증
-    const requiredEnvVars = ['GOOGLE_PROJECT_ID', 'GOOGLE_CLIENT_EMAIL', 'GOOGLE_PRIVATE_KEY_BASE64'];
+    const requiredEnvVars = ['GOOGLE_PROJECT_ID', 'GOOGLE_CLIENT_EMAIL', 'GOOGLE_PRIVATE_KEY'];
     for (const envVar of requiredEnvVars) {
       if (!process.env[envVar]) {
         console.error(`Missing environment variable: ${envVar}`);
