@@ -1,1 +1,4 @@
-/api/credentials.json
+credentials.json
+.env*
+*.env
+api/credentials.json
