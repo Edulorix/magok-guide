@@ -1,8 +1,5 @@
-// api/upload.js
-
 import { google } from 'googleapis';
 import formidable from 'formidable';
-import fs from 'fs';
 
 export const config = {
   api: {
@@ -10,88 +7,84 @@ export const config = {
   },
 };
 
-// ✅ credentials.json 파일을 읽어오기
-const keyFile = JSON.parse(fs.readFileSync('./api/credentials.json', 'utf-8'));
-
-const auth = new google.auth.GoogleAuth({
-  credentials: {
-    client_email: keyFile.client_email,
-    private_key: keyFile.private_key,
-  },
-  scopes: ['https://www.googleapis.com/auth/drive.file'],
-});
-
-const drive = google.drive({ version: 'v3', auth });
-
-// ✅ Formidable 파일 파서 함수
-function parseForm(req) {
-  return new Promise((resolve, reject) => {
-    const form = formidable({ multiples: true });
-    form.parse(req, (err, fields, files) => {
-      if (err) reject(err);
-      else resolve([fields, files]);
-    });
-  });
-}
-
-// ✅ 메인 핸들러
 export default async function handler(req, res) {
-  // CORS 허용
+  // CORS 헤더 설정
   res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-  res.setHeader('Access-Control-Max-Age', '86400');
+  
+  if (req.method === 'OPTIONS') {
+    return res.status(200).end();
+  }
 
-  if (req.method === 'OPTIONS') return res.status(200).end();
-  if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
+  if (req.method !== 'POST') {
+    return res.status(405).json({ error: 'Method not allowed' });
+  }
 
   try {
-    const [fields, files] = await parseForm(req);
+    // Google Drive 인증
+    const auth = new google.auth.GoogleAuth({
+      credentials: {
+        type: 'service_account',
+        project_id: process.env.GOOGLE_PROJECT_ID,
+        private_key: process.env.GOOGLE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
+        client_email: process.env.GOOGLE_CLIENT_EMAIL,
+      },
+      scopes: ['https://www.googleapis.com/auth/drive.file'],
+    });
 
-    if (!files || Object.keys(files).length === 0) {
-      return res.status(400).json({ success: false, error: '업로드된 파일이 없습니다.' });
-    }
+    const drive = google.drive({ version: 'v3', auth });
 
+    // 파일 파싱
+    const form = formidable({
+      maxFileSize: 50 * 1024 * 1024, // 50MB
+      keepExtensions: true,
+    });
+
+    const [fields, files] = await form.parse(req);
+    
     const uploadedFiles = [];
+    
+    // 파일 업로드 처리
+    for (const [fieldName, fileArray] of Object.entries(files)) {
+      const file = Array.isArray(fileArray) ? fileArray[0] : fileArray;
+      
+      if (!file) continue;
 
-    for (const [key, fileData] of Object.entries(files)) {
-      const fileList = Array.isArray(fileData) ? fileData : [fileData];
+      const fileMetadata = {
+        name: file.originalFilename || file.newFilename,
+        parents: ['1your-google-drive-folder-id'], // 실제 폴더 ID로 변경
+      };
 
-      for (const file of fileList) {
-        const fileMetadata = {
-          name: file.originalFilename,
-          parents: [keyFile.folder_id], // 또는 직접 'GOOGLE_DRIVE_FOLDER_ID' 변수로 바꾸기
-        };
-        const media = {
-          mimeType: file.mimetype,
-          body: fs.createReadStream(file.filepath),
-        };
+      const media = {
+        mimeType: file.mimetype,
+        body: require('fs').createReadStream(file.filepath),
+      };
 
-        const driveRes = await drive.files.create({
-          resource: fileMetadata,
-          media,
-          fields: 'id, name',
-        });
+      const response = await drive.files.create({
+        resource: fileMetadata,
+        media: media,
+        fields: 'id, name, webViewLink',
+      });
 
-        const size = fs.statSync(file.filepath).size;
-
-        uploadedFiles.push({
-          name: driveRes.data.name,
-          id: driveRes.data.id,
-          size: size,
-          downloadUrl: `https://drive.google.com/uc?id=${driveRes.data.id}&export=download`,
-        });
-      }
+      uploadedFiles.push({
+        id: response.data.id,
+        name: response.data.name,
+        link: response.data.webViewLink,
+      });
     }
 
-    return res.status(200).json({ success: true, files: uploadedFiles });
+    res.status(200).json({
+      success: true,
+      message: 'Files uploaded successfully',
+      files: uploadedFiles,
+    });
 
-  } catch (err) {
-    console.error('Upload error:', err);
-    return res.status(500).json({
-      success: false,
-      error: '파일 업로드 중 오류 발생',
-      details: err.message || err.toString(),
+  } catch (error) {
+    console.error('Upload error:', error);
+    res.status(500).json({ 
+      error: 'Upload failed',
+      details: error.message 
     });
   }
 }
