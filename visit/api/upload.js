@@ -6,29 +6,37 @@ import fs from 'fs';
 
 export const config = {
   api: {
-    bodyParser: false, // FormData 직접 파싱을 위해 비활성화
+    bodyParser: false,
   },
 };
 
-// FormData 파싱을 Promise로 래핑
+// ✅ credentials.json 파일을 읽어오기
+const keyFile = JSON.parse(fs.readFileSync('./api/credentials.json', 'utf-8'));
+
+const auth = new google.auth.GoogleAuth({
+  credentials: {
+    client_email: keyFile.client_email,
+    private_key: keyFile.private_key,
+  },
+  scopes: ['https://www.googleapis.com/auth/drive.file'],
+});
+
+const drive = google.drive({ version: 'v3', auth });
+
+// ✅ Formidable 파일 파서 함수
 function parseForm(req) {
   return new Promise((resolve, reject) => {
-    const form = formidable({
-      maxFileSize: 100 * 1024 * 1024, // 100MB
-      keepExtensions: true,
-      allowEmptyFiles: false,
-      multiples: true,
-    });
-
+    const form = formidable({ multiples: true });
     form.parse(req, (err, fields, files) => {
-      if (err) return reject(err);
-      resolve([fields, files]);
+      if (err) reject(err);
+      else resolve([fields, files]);
     });
   });
 }
 
+// ✅ 메인 핸들러
 export default async function handler(req, res) {
-  // CORS 헤더 추가
+  // CORS 허용
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
@@ -38,28 +46,8 @@ export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
   try {
-    // 환경 변수 확인
-    const serviceAccountEmail = process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL;
-    const privateKey = process.env.GOOGLE_PRIVATE_KEY;
-    const folderId = process.env.GOOGLE_DRIVE_FOLDER_ID;
-
-    if (!serviceAccountEmail || !privateKey || !folderId) {
-      return res.status(500).json({ error: '서버 설정이 완료되지 않았습니다.' });
-    }
-
-    // Google 인증
-    const auth = new google.auth.GoogleAuth({
-      credentials: {
-        client_email: serviceAccountEmail,
-        private_key: privateKey.replace(/\\n/g, '\n'),
-      },
-      scopes: ['https://www.googleapis.com/auth/drive.file'],
-    });
-
-    const drive = google.drive({ version: 'v3', auth });
-
-    // 파일 파싱
     const [fields, files] = await parseForm(req);
+
     if (!files || Object.keys(files).length === 0) {
       return res.status(400).json({ success: false, error: '업로드된 파일이 없습니다.' });
     }
@@ -72,7 +60,7 @@ export default async function handler(req, res) {
       for (const file of fileList) {
         const fileMetadata = {
           name: file.originalFilename,
-          parents: [folderId],
+          parents: [keyFile.folder_id], // 또는 직접 'GOOGLE_DRIVE_FOLDER_ID' 변수로 바꾸기
         };
         const media = {
           mimeType: file.mimetype,
@@ -91,7 +79,7 @@ export default async function handler(req, res) {
           name: driveRes.data.name,
           id: driveRes.data.id,
           size: size,
-          downloadUrl: `https://drive.google.com/uc?id=${driveRes.data.id}&export=download`
+          downloadUrl: `https://drive.google.com/uc?id=${driveRes.data.id}&export=download`,
         });
       }
     }
