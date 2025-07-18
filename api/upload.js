@@ -27,7 +27,7 @@ export default async function handler(req, res) {
     console.log('Upload function started');
     
     // Base64에서 Private Key 디코딩
-    const privateKey = Buffer.from(process.env.GOOGLE_PRIVATE_KEY_BASE64, 'base64').toString('utf-8');
+    const privateKey = process.env.GOOGLE_PRIVATE_KEY.replace(/\\n/g, '\n');
     
     const auth = new google.auth.GoogleAuth({
       credentials: {
