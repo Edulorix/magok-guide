@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>교육운영 A~Z — HTML CODE 데모(탭형)</title>
+<style>
+  /* ===== Brand / Base ===== */
+  :root{ --brand:#1E2260; --ink:#101321; --muted:#5c6370; --grid:#e6e8ef; --head:#f6f7fb }
+  html,body{ margin:0; background:#fff; color:var(--ink);
+    font-family:"Malgun Gothic","맑은 고딕",Segoe UI,Arial,sans-serif }
+  .wrap{ max-width:1100px; margin:24px auto; padding:0 16px }
+  h1{ margin:0 0 8px; font-size:22px; font-weight:900; color:var(--brand) }
+  .sub{ margin:0 0 16px; color:var(--muted); font-weight:700 }
+
+  /* ===== Tabs ===== */
+  .tabs{ display:flex; gap:8px; flex-wrap:wrap; margin:12px 0 14px }
+  .tab{ background:#eef0ff; color:var(--brand); border:1px solid #dfe3ff; font-weight:900;
+        padding:8px 14px; border-radius:999px; cursor:pointer; user-select:none }
+  .tab.active{ background:var(--brand); color:#fff; border-color:var(--brand) }
+  .tabcontent{ display:none }
+  .tabcontent.active{ display:block; }
+
+  /* ===== Cards / Panels ===== */
+  .panel{ border:1px solid var(--grid); border-radius:12px; padding:14px;
+          box-shadow:0 10px 24px rgba(0,0,0,.04); margin-bottom:12px }
+  .panel h3{ margin:0 0 10px; font-size:15px; color:#0f132d }
+  .row{ display:grid; grid-template-columns: 1fr 1fr; gap:12px }
+  .badge{ display:inline-block; padding:2px 8px; border-radius:999px; background:#eef0ff;
+          color:var(--brand); border:1px solid #dfe3ff; font-size:11px; font-weight:900 }
+
+  .btn{ background:var(--brand); color:#fff; border:none; padding:8px 12px;
+        border-radius:8px; font-weight:800; cursor:pointer }
+  .btn.alt{ background:#f0f2ff; color:var(--brand); border:1px solid #dfe3ff }
+  .controls{ display:flex; gap:8px; flex-wrap:wrap; margin:8px 0 10px }
+
+  /* ===== Tables / textarea ===== */
+  table{ width:100%; border-collapse:collapse }
+  th,td{ border:1px solid var(--grid); padding:10px 12px; text-align:center }
+  th{ background:var(--head); color:#0f132d; font-weight:900 }
+  textarea{ width:100%; min-height:190px; border:1px solid var(--grid); border-radius:8px;
+            padding:10px; font-family:Consolas,monospace; font-size:13px }
+
+  /* ===== Print rules: 현재 탭만 인쇄 ===== */
+  @page { size: A4 portrait; margin: 10mm; }
+  @media print{
+    body{ -webkit-print-color-adjust: exact; print-color-adjust: exact }
+    .tabs, .controls, .sub{ display:none !important }
+    .panel{ box-shadow:none }
+    .tabcontent{ display:none !important }
+    .tabcontent.active{ display:block !important }
+  }
+
+  /* ===== [1] Timetable scoped styles (prefix: tt-) ===== */
+  .tt-head{ border-bottom:2px solid var(--brand); padding-bottom:8px; margin-bottom:12px }
+  .tt-title{ margin:0; font-size:20px; font-weight:900; color:var(--brand) }
+  .tt-meta{ margin-top:4px; color:var(--muted); font-weight:700 }
+  .tt-note{ margin:8px 0 12px; padding:10px 12px; background:#fbfcff; border:1px solid #e9ecf6;
+            border-left:3px solid var(--brand); font-size:12px; color:#2d315a; font-weight:700 }
+  .tt-time{ width:110px; font-weight:900 }
+
+  /* ===== [2] Email preview box ===== */
+  .mail-preview{ background:#f4f6fa; padding:18px; border-radius:12px; border:1px solid var(--grid) }
+  .mail-canvas{ background:#fff; margin:0 auto; max-width:760px; border:1px solid #e3e6f0 }
+
+  /* ===== [3] CSV renderer ===== */
+  .note{ margin:8px 0 12px; padding:10px 12px; background:#fbfcff; border:1px solid #e9ecf6;
+         border-left:3px solid var(--brand); font-size:12px; color:#2d315a; font-weight:700 }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>교육운영 A~Z — HTML CODE 데모</h1>
+  <p class="sub">메일·협업툴·인쇄까지 한 번 만든 HTML로 일관되게. 보안/호환 유지 + 보는 맛.</p>
+
+  <div class="tabs" role="tablist" aria-label="데모 탭">
+    <button class="tab active" data-tab="tt" role="tab" aria-selected="true">시간표 (포스터/인쇄)</button>
+    <button class="tab" data-tab="mail" role="tab" aria-selected="false">안내메일 (Outlook-safe)</button>
+    <button class="tab" data-tab="csv" role="tab" aria-selected="false">CSV → 표 (자동화)</button>
+  </div>
+
+  <!-- ========== TAB: Timetable ========== -->
+  <section id="tab-tt" class="tabcontent active" role="tabpanel" aria-labelledby="시간표">
+    <div class="panel">
+      <div class="tt-head">
+        <h2 class="tt-title">LG Hacking Competition 2025 본선 대회 시간표</h2>
+        <div class="tt-meta">
+          장소: 마곡사이언스파크 ISC <b>6층 비전홀</b>
+          <span class="badge">Print A4</span>
+          <span class="badge">Outlook-safe 동일</span>
+        </div>
+      </div>
+      <div class="tt-note">※ <b>11:30까지 착석 완료</b> · 네트워크 세팅 · 팀 전략회의</div>
+      <table>
+        <thead><tr><th class="tt-time">시간</th><th>월</th><th>화</th><th>비고</th></tr></thead>
+        <tbody>
+          <tr><td>09:00</td><td>SW교육</td><td>임베디드</td><td>-</td></tr>
+          <tr><td>10:00</td><td>SW교육</td><td>HR(전사)</td><td>-</td></tr>
+          <tr><td>11:30</td><td colspan="3">자리배치 확인 · 슬리퍼/티셔츠 착용 · Q&amp;A Webex</td></tr>
+          <tr><td>12:00–17:00</td><td colspan="3"><b>본선 대회 진행</b> (16:30부터 대시보드 Freeze)</td></tr>
+          <tr><td>17:10–17:30</td><td colspan="3">시상식 · 기념촬영</td></tr>
+        </tbody>
+      </table>
+      <div class="controls">
+        <button class="btn" onclick="window.print()">현재 탭 인쇄</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== TAB: Mail ========== -->
+  <section id="tab-mail" class="tabcontent" role="tabpanel" aria-labelledby="안내메일">
+    <div class="panel">
+      <h3>미리보기</h3>
+      <div class="mail-preview">
+        <div id="mailCanvas" class="mail-canvas"><!-- email HTML inject here --></div>
+      </div>
+      <div class="controls">
+        <button class="btn" id="btnPreview">미리보기 갱신</button>
+        <button class="btn alt" id="btnCopy">HTML 복사</button>
+        <button class="btn" id="btnDownloadMail">원문 HTML 다운로드</button>
+      </div>
+      <h3>원문 HTML</h3>
+      <textarea id="mailSource" aria-label="안내메일 원문 HTML"></textarea>
+    </div>
+  </section>
+
+  <!-- ========== TAB: CSV ========== -->
+  <section id="tab-csv" class="tabcontent" role="tabpanel" aria-labelledby="CSV">
+    <div class="panel">
+      <h3>CSV → 표 자동 변환</h3>
+      <div class="note">CSV 붙여넣기/업로드 → <b>구분자 자동감지</b> → <b>그룹/팀별 페이지 분할</b> → <b>A4 인쇄</b> / <b>HTML 저장</b></div>
+      <div class="row">
+        <div>
+          <div class="controls">
+            <input type="file" id="csvFile" accept=".csv" />
+            <button class="btn alt" id="loadSample">샘플 불러오기</button>
+          </div>
+          <textarea id="csvInput" placeholder="CSV를 붙여넣거나 파일을 선택하세요"></textarea>
+        </div>
+        <div>
+          <div class="controls">
+            <label>구분자
+              <select id="delimiterSelect">
+                <option value="auto">자동감지(권장)</option>
+                <option value=",">쉼표 ,</option>
+                <option value=";">세미콜론 ;</option>
+                <option value="\t">탭 \\t</option>
+              </select>
+            </label>
+            <label>그룹 컬럼
+              <select id="groupCol"></select>
+            </label>
+            <label><input type="checkbox" id="pageBreakChk" /> 팀별 페이지 분할</label>
+          </div>
+          <div class="controls">
+            <button class="btn" id="renderCsv">표 렌더링</button>
+            <button class="btn alt" id="downloadHtml">표 HTML 저장</button>
+            <button class="btn alt" id="runTests">테스트 실행</button>
+            <span id="testResults" style="font-weight:800;color:var(--brand)"></span>
+          </div>
+          <div class="panel" style="margin-top:10px">
+            <h3>미리보기 / 인쇄 영역</h3>
+            <div id="csvOut"></div>
+          </div>
+        </div>
+      </div>
+      <div class="controls">
+        <button class="btn" onclick="window.print()">현재 탭 인쇄</button>
+      </div>
+    </div>
+  </section>
+</div>
+
+<script>
+/* ================= Tabs ================= */
+document.querySelectorAll('.tab').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    document.querySelectorAll('.tab').forEach(b=>b.classList.remove('active'));
+    document.querySelectorAll('.tabcontent').forEach(c=>c.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('tab-'+btn.dataset.tab).classList.add('active');
+  });
+});
+
+/* ================= [2] Mail ================= */
+const emailHTML =
+`<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="x-apple-disable-message-reformatting" />
+  <meta name="format-detection" content="telephone=no,date=no,address=no,email=no,url=no" />
+  <title>[안내] LG Hacking Competition 2025 본선 교육 참가 (9/23)</title>
+  <!--[if mso]><style> body,table,td,a,span,div { font-family:"Malgun Gothic", Arial, sans-serif !important } </style><![endif]-->
+</head>
+<body style="margin:0;padding:0;background:#f4f6fa;font-family:'Malgun Gothic',Arial,sans-serif;color:#101321;font-size:10.5pt;line-height:1.65;mso-line-height-rule:exactly;word-break:keep-all;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#F4F6FA;">
+    <tr><td style="padding:40px 14px;">
+      <table role="presentation" width="760" align="center" cellpadding="0" cellspacing="0" border="0"
+             style="width:760px;margin:0 auto;background:#ffffff;border:1px solid #e3e6f0;mso-table-lspace:0pt;mso-table-rspace:0pt;">
+        <tr><td style="padding:28px 36px 14px 36px;">
+          <div style="font-size:18pt;font-weight:bold;line-height:1.35;text-align:center;">LG Hacking Competition 2025 본선 교육 참가 안내</div>
+        </td></tr>
+        <tr><td style="height:1px;background:#eef1f8;font-size:0;line-height:0;">&nbsp;</td></tr>
+        <tr><td style="padding:18px 36px 8px 36px;">
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr>
+            <td style="width:2px;background:#1E2260;">&nbsp;</td>
+            <td style="padding:0 12px;font-size:12pt;font-weight:bold;color:#1e2260;">개요</td>
+          </tr></table>
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"
+                 style="margin-top:12px;border:1px solid #E6E9F4;background:#FBFCFF;">
+            <tr><td style="padding:18px;">
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;">
+                <tr><td width="120" style="color:#6B7280;padding:6px 0;">대회명</td><td style="padding:6px 0;font-weight:bold;">LG Hacking Competition 2025 Finals</td></tr>
+                <tr><td width="120" style="color:#6B7280;padding:6px 0;">일정</td><td style="padding:6px 0;">2025년 9월 23일(화) 11:30–17:30</td></tr>
+                <tr><td width="120" style="color:#6B7280;padding:6px 0;vertical-align:top;">장소</td>
+                    <td style="padding:6px 0;">마곡사이언스파크 ISC 6층 비전홀
+                      <span style="display:inline-block;margin-left:8px;background:#fdeaea;border:1px solid #f19999;height:16px;line-height:16px;padding:0 8px;font-size:10pt;color:#b91c1c;font-weight:bold;">ID 카드 지참 필수</span>
+                    </td></tr>
+                <tr><td width="120" style="color:#6B7280;padding:6px 0;">입실</td><td style="padding:6px 0;"><b>11:30까지 착석 완료</b> (권장 도착 11:20)</td></tr>
+                <tr><td width="120" style="color:#6B7280;padding:6px 0;">문의</td><td style="padding:6px 0;">운영팀 (mijin1.kim@lgepartner.com / 010-7477-9698)</td></tr>
+              </table>
+            </td></tr>
+          </table>
+        </td></tr>
+        <tr><td style="padding:18px 36px 30px 36px; text-align:center;">
+          <!--[if mso]>
+            <v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" arcsize="6%" stroke="f" fillcolor="#1E2260"
+              style="height:36px;v-text-anchor:middle;width:240px;">
+              <center style="color:#ffffff;font-family:'Malgun Gothic',Arial,sans-serif;font-size:11pt;font-weight:bold;">
+                안내문 전체 보기
+              </center>
+            </v:roundrect>
+          <![endif]-->
+          <!--[if !mso]><!-- -->
+          <a href="https://example.com" target="_blank"
+             style="display:inline-block;background:#1E2260;color:#fff;text-decoration:none;font-weight:bold;
+                    font-size:11pt;line-height:36px;height:36px;min-width:240px;text-align:center;border-radius:6px;">
+            안내문 전체 보기
+          </a>
+          <!--<![endif]-->
+        </td></tr>
+        <tr><td style="height:4px;background:#1E2260;font-size:0;line-height:0;">&nbsp;</td></tr>
+        <tr><td style="padding:12px 36px 28px 36px;text-align:center;color:#6b7280;font-weight:bold;font-size:10pt;">
+          LG Hacking Competition 2025
+        </td></tr>
+      </table>
+    </td></tr>
+  </table>
+</body>
+</html>`;
+
+const mailSource = document.getElementById('mailSource');
+const mailCanvas = document.getElementById('mailCanvas');
+mailSource.value = emailHTML;
+
+function renderMailPreview(){
+  // 미리보기에 'body' 내부의 메인 컨테이너만 추출해 주입
+  const tmp = document.createElement('html');
+  tmp.innerHTML = emailHTML;
+  const container = tmp.querySelector('table[role="presentation"][width="760"]')?.parentElement?.parentElement;
+  mailCanvas.innerHTML = '';
+  if(container){ mailCanvas.appendChild(container.cloneNode(true)); }
+}
+renderMailPreview();
+
+document.getElementById('btnPreview').onclick = ()=>{
+  // 사용자가 수정했을 수 있으니 textarea 기준으로 다시 렌더
+  const src = mailSource.value;
+  const tmp = document.createElement('html'); tmp.innerHTML = src;
+  const container = tmp.querySelector('table[role="presentation"][width="760"]')?.parentElement?.parentElement;
+  mailCanvas.innerHTML = '';
+  if(container){ mailCanvas.appendChild(container.cloneNode(true)); }
+};
+
+document.getElementById('btnCopy').onclick = async ()=>{
+  await navigator.clipboard.writeText(mailSource.value);
+  alert('안내메일 HTML이 클립보드에 복사되었습니다.');
+};
+
+document.getElementById('btnDownloadMail').onclick = ()=>{
+  const blob=new Blob([mailSource.value],{type:'text/html;charset=utf-8'});
+  const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='email_outlook_safe.html';
+  a.click(); setTimeout(()=>URL.revokeObjectURL(a.href),800);
+};
+
+/* ================= [3] CSV Renderer ================= */
+function detectDelimiter(text){
+  const first = (text.split(/\r?\n/)[0]||'');
+  const cand=[',',';','\t']; let best=',',max=-1;
+  for(const d of cand){
+    const re=new RegExp(d==='\\t' ? '\t' : '\\'+d,'g');
+    const c=(first.match(re)||[]).length; if(c>max){ max=c; best=d; }
+  } return best;
+}
+
+function parseCSV(text, delimiter){
+  if(!text) return [];
+  const d = (delimiter && delimiter!=='auto') ? delimiter : detectDelimiter(text);
+  const rows=[]; let row=[], field=''; let q=false;
+  for(let i=0;i<text.length;i++){
+    const c=text[i];
+    if(c=='"'){
+      if(q && text[i+1]=='"'){ field+='"'; i++; }
+      else { q=!q; }
+      continue;
+    }
+    if(!q && c===d){ row.push(field); field=''; continue; }
+    if(!q && (c==='\n'||c==='\r')){
+      if(c==='\r' && text[i+1]==='\n') i++;
+      row.push(field); rows.push(row); row=[]; field=''; continue;
+    }
+    field+=c;
+  }
+  if(field.length>0 || row.length){ row.push(field); rows.push(row); }
+  while(rows.length && rows[rows.length-1].every(v=>v==='')) rows.pop();
+  return rows;
+}
+function esc(s){return String(s).replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[m]))}
+
+const csvInput=document.getElementById('csvInput');
+const csvFile =document.getElementById('csvFile');
+const delimSel=document.getElementById('delimiterSelect');
+const groupSel=document.getElementById('groupCol');
+const pageBreakChk=document.getElementById('pageBreakChk');
+const out=document.getElementById('csvOut');
+
+const sampleData =
+`팀,이름,티셔츠,슬리퍼
+@dmin,배성호,-,-
+@dmin,이경식,L,270
+@dmin,장원영,XL,270
+BWB,고창석,XL,275~280
+BWB,김다진,M,245~250
+BWB,이천호,XL,265
+Purple,남동훈,XL,255~260
+Purple,송명욱,XXXL,275~280
+Purple,황예진,S,230~235
+Blue,강정민,XXL→XL,270
+Blue,김성환,XL→L,275~280`;
+
+document.getElementById('loadSample').onclick = ()=> csvInput.value = sampleData;
+
+csvFile.onchange = e=>{
+  const f=e.target.files[0]; if(!f) return;
+  const r=new FileReader(); r.onload=(ev)=> csvInput.value=ev.target.result; r.readAsText(f);
+};
+
+function renderTable(rows, groupIndex=0, pageBreak=false){
+  if(!rows.length){ out.innerHTML='<div class="note">데이터가 없습니다.</div>'; return; }
+  const [head,...data]=rows;
+  groupSel.innerHTML=head.map((h,i)=>`<option value="${i}">${i}: ${esc(h)}</option>`).join('');
+  if(!groupSel.value) groupSel.value=String(groupIndex);
+
+  const groups={};
+  data.forEach(r=>{ const key=(r[groupIndex]||'').trim(); (groups[key]||(groups[key]=[])).push(r); });
+
+  let html='';
+  for(const g of Object.keys(groups)){
+    const items=groups[g];
+    html += g ? `<h4 style="margin:12px 0"><span class="badge">${esc(g)}</span></h4>` : '';
+    html += '<table><thead><tr>'+head.map(h=>`<th>${esc(h)}</th>`).join('')+'</tr></thead><tbody>';
+    items.forEach(r=>{ html+='<tr>'+r.map(c=>`<td>${esc(c)}`).join('')+'</td></tr>'; });
+    html += '</tbody></table>';
+    if(pageBreak) html += '<div style="page-break-after:always"></div>';
+  }
+  out.innerHTML = html;
+}
+
+document.getElementById('renderCsv').onclick=()=>{
+  const rows=parseCSV(csvInput.value,delimSel.value);
+  const idx=parseInt(groupSel.value||'0',10)||0;
+  renderTable(rows,idx,pageBreakChk.checked);
+};
+
+document.getElementById('downloadHtml').onclick=()=>{
+  const rows=parseCSV(csvInput.value,delimSel.value);
+  const idx=parseInt(groupSel.value||'0',10)||0;
+  renderTable(rows,idx,pageBreakChk.checked);
+  const inner=document.getElementById('csvOut').innerHTML;
+  const html='<!DOCTYPE html><html lang="ko"><head><meta charset="UTF-8"/><title>CSV Render</title>'+
+  '<style>@page{size:A4;margin:10mm}body{font-family:Malgun Gothic,Segoe UI,Arial,sans-serif}table{width:100%;border-collapse:collapse;margin:10px 0}th,td{border:1px solid #ddd;padding:6px 8px;text-align:center}th{background:#f6f7fb;font-weight:900}</style></head><body>'+
+  inner+'</body></html>';
+  const blob=new Blob([html],{type:'text/html;charset=utf-8'});
+  const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='table.html';
+  a.click(); setTimeout(()=>URL.revokeObjectURL(a.href),800);
+};
+
+/* Quick tests */
+document.getElementById('runTests').addEventListener('click',()=>{
+  const cases=[
+    {name:'쉼표 기본',csv:'a,b\nc,d',exp:[['a','b'],['c','d']]},
+    {name:'세미콜론',csv:'a;b\nc;d',delim:';',exp:[['a','b'],['c','d']]},
+    {name:'탭',csv:'a\tb\nc\td',delim:'\t',exp:[['a','b'],['c','d']]},
+    {name:'따옴표/쉼표/줄바꿈',csv:'이름,메모\n"홍, 길동","한 줄\n두 줄"',exp:[['이름','메모'],['홍, 길동','한 줄\n두 줄']]}
+  ];
+  let ok=0; for(const t of cases){
+    const got=parseCSV(t.csv,t.delim||'auto');
+    if(JSON.stringify(got)===JSON.stringify(t.exp)) ok++;
+  }
+  document.getElementById('testResults').textContent=`${ok}/${cases.length} 통과`;
+});
+</script>
+</body>
+</html>
